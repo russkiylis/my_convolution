@@ -2,6 +2,6 @@
 set -e		# Stop on errors
 
 # -v for variables in .sql file, -f for using a file
-psql -f create_database.sql
+psql -f drop_database.sql
 
-echo "Database successfully created"
+echo "Database successfully dropped"
