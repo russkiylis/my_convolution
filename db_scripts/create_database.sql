@@ -7,10 +7,10 @@ CREATE DATABASE russkiylisdb_df;
 -- Creating table df_conv
 CREATE TABLE IF NOT EXISTS df_conv (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	min_angle NUMERIC(6,3) NOT NULL DEFAULT 0 CHECK (min_angle >= 0 AND min_angle < 360),
-	max_angle NUMERIC(6,3) NOT NULL DEFAULT 360 CHECK (max_angle > 0 AND max_angle <= 360),
-	step NUMERIC(2,1) NOT NULL DEFAULT 0.1 CHECK (step IN (1.0, 0.5, 0.1)),
-	data REAL [] NOT NULL
+	min_angle SMALLINT  NOT NULL DEFAULT 0 CHECK (min_angle >= 0 AND min_angle < 360),
+	max_angle SMALLINT  NOT NULL DEFAULT 360 CHECK (max_angle > 0 AND max_angle <= 360),
+	step NUMERIC(2,1) NOT NULL DEFAULT 0.1 CHECK (step IN (1.0, 0.5, 0.25, 0.1)),
+	data REAL [] NOT NULL CHECK (ARRAY_LENGTH(data,1) = ((max_angle-min_angle)/step))
 );
 
 -- Creating table df_result
