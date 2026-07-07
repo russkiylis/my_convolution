@@ -45,6 +45,11 @@ Window {
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.margins: 5
+
+                onClicked: {
+                    helloWorldBackend.buttonClicked()
+                }
+
             }
 
             TextField {
@@ -57,6 +62,8 @@ Window {
                 anchors.margins: 5
 
                 readOnly: true
+
+                text: helloWorldBackend.helloWorldText
             }
         }
 
@@ -88,6 +95,8 @@ Window {
                 to: 100
 
                 editable: true
+
+                onValueModified: calculatorBackend.firstSpinboxActivated(value)
             }
 
             ComboBox {
@@ -99,6 +108,8 @@ Window {
                 anchors.margins: 5
 
                 model: ["+", "-", "*", "/"]
+
+                onActivated: calculatorBackend.comboboxActivated(currentIndex)
             }
 
             SpinBox {
@@ -113,6 +124,8 @@ Window {
                 to: 100
 
                 editable: true
+
+                onValueModified: calculatorBackend.secondSpinboxActivated(value)
             }
 
             TextField {
@@ -132,6 +145,8 @@ Window {
                 anchors.margins: 5
 
                 readOnly: true
+
+                text: calculatorBackend.result
             }
         }
 

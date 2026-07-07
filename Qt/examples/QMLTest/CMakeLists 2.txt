@@ -36,8 +36,6 @@ else()
     else()
         add_executable(QMLTest
           ${PROJECT_SOURCES}
-          helloworldbackend.h helloworldbackend.cpp
-          calculatorbackend.h calculatorbackend.cpp
         )
     endif()
 endif()

@@ -1,5 +1,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+
+#include "helloworldbackend.h"
+#include "calculatorbackend.h"
 
 int main(int argc, char *argv[])
 {
@@ -9,6 +13,13 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
+
+    HelloWorldBackend helloWorldBackend;
+    CalculatorBackend calculatorBackend;
+
+    engine.rootContext()->setContextProperty("helloWorldBackend", &helloWorldBackend);
+    engine.rootContext()->setContextProperty("calculatorBackend", &calculatorBackend);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(
         &engine,
