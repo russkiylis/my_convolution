@@ -16,48 +16,48 @@ DatabaseConnection::DatabaseConnection(QString const & connectionName,
     _port(5432),
     QObject{parent}
 {
-    qDebug() << "Создано новое подключение \"" << _connectionName << "\": pg://" << _userName << ":" << _password << "@" << _hostName << ":" << _port << "/" << dbName;
+    qDebug().noquote().nospace() << "Создано новое подключение \"" << _connectionName << "\": pg://" << _userName << ":" << _password << "@" << _hostName << ":" << _port << "/" << dbName;
 }
 
 void DatabaseConnection::setConnectionName(QString const & value) {
     if (_connectionName == value)
         return;
-    qDebug() << "Подключение \"" << _connectionName << "\": имя изменено на \"" << value << "\"";
+    qDebug().noquote().nospace() << "Подключение \"" << _connectionName << "\": имя изменено на \"" << value << "\"";
     _connectionName = value;
 }
 
 void DatabaseConnection::setHostName(QString const & value) {
     if (_hostName == value)
         return;
-    qDebug() << "Подключение \"" << _connectionName << "\": адрес хоста изменён на \"" << value << "\"";
+    qDebug().noquote().nospace() << "Подключение \"" << _connectionName << "\": адрес хоста изменён на \"" << value << "\"";
     _hostName = value;
 }
 
 void DatabaseConnection::setPort(int const & value) {
     if (_port == value)
         return;
-    qDebug() << "Подключение \"" << _connectionName << "\": порт изменён на \"" << value << "\"";
+    qDebug().noquote().nospace()) << "Подключение \"" << _connectionName << "\": порт изменён на \"" << value << "\"";
     _port = value;
 }
 
 void DatabaseConnection::setDbName(QString const & value) {
     if (_dbName == value)
         return;
-    qDebug() << "Подключение \"" << _connectionName << "\": имя БД изменено на \"" << value << "\"";
+    qDebug().noquote().nospace() << "Подключение \"" << _connectionName << "\": имя БД изменено на \"" << value << "\"";
     _dbName = value;
 }
 
 void DatabaseConnection::setUserName(QString const & value) {
     if (_userName == value)
         return;
-    qDebug() << "Подключение \"" << _connectionName << "\": имя пользователя изменено на \"" << value << "\"";
+    qDebug().noquote().nospace() << "Подключение \"" << _connectionName << "\": имя пользователя изменено на \"" << value << "\"";
     _userName = value;
 }
 
 void DatabaseConnection::setPassword(QString const & value) {
     if (_password == value)
         return;
-    qDebug() << "Подключение \"" << _connectionName << "\": пароль изменён на \"" << value << "\"";
+    qDebug().noquote().nospace() << "Подключение \"" << _connectionName << "\": пароль изменён на \"" << value << "\"";
     _password = value;
 }
 
