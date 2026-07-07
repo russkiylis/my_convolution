@@ -38,6 +38,7 @@ else()
           ${PROJECT_SOURCES}
           helloworldbackend.h helloworldbackend.cpp
           calculatorbackend.h calculatorbackend.cpp
+          converterbackend.h converterbackend.cpp
         )
     endif()
 endif()

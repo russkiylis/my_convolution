@@ -177,6 +177,12 @@ Window {
                 anchors.margins: 5
 
                 placeholderText: "100000000"
+                inputMethodHints: "ImhDigitsOnly"
+
+                text: converterBackend.freq
+                onTextChanged:
+                    converterBackend.onFreqChanged(text)
+
             }
 
             Text {
@@ -186,7 +192,7 @@ Window {
                 anchors.bottom: waveFrequencyField.top
                 anchors.bottomMargin: 5
 
-                text: "Частота, Гц"
+                text: "Частота, MГц"
             }
 
             TextField {
@@ -199,6 +205,11 @@ Window {
                 anchors.margins: 5
 
                 placeholderText: "0.01"
+                inputMethodHints: "ImhDigitsOnly"
+
+                text: converterBackend.period
+                onTextChanged:
+                    converterBackend.onPeriodChanged(text)
             }
 
             Text {
@@ -221,6 +232,11 @@ Window {
                 anchors.margins: 5
 
                 placeholderText: "3"
+                inputMethodHints: "ImhDigitsOnly"
+
+                text: converterBackend.wavelen
+                onTextChanged:
+                    converterBackend.onWavelenChanged(text)
             }
 
             Text {

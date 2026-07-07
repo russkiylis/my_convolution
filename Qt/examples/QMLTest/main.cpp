@@ -4,6 +4,7 @@
 
 #include "helloworldbackend.h"
 #include "calculatorbackend.h"
+#include "converterbackend.h"
 
 int main(int argc, char *argv[])
 {
@@ -16,9 +17,11 @@ int main(int argc, char *argv[])
 
     HelloWorldBackend helloWorldBackend;
     CalculatorBackend calculatorBackend;
+    ConverterBackend converterBackend;
 
     engine.rootContext()->setContextProperty("helloWorldBackend", &helloWorldBackend);
     engine.rootContext()->setContextProperty("calculatorBackend", &calculatorBackend);
+    engine.rootContext()->setContextProperty("converterBackend", &converterBackend);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(
