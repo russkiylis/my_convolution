@@ -1,8 +1,8 @@
 -- Creating database
-CREATE DATABASE russkiylisdb_df;
+CREATE DATABASE my_convolution;
 
 -- Switching to database
-\c russkiylisdb_df
+\c my_convolution
 
 -- Creating table df_conv
 CREATE TABLE IF NOT EXISTS df_conv (

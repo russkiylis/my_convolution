@@ -3,6 +3,7 @@
 #include <QQmlContext>  // setContextProperty
 
 #include "backend.h"
+#include "databaseconnection.h"
 
 // Точка входа в программу
 int main(int argc, char *argv[])
@@ -21,6 +22,8 @@ int main(int argc, char *argv[])
     // QML начнёт видеть Q_PROPERTY и Q_INVOKABLE
     Backend backend;
     engine.rootContext()->setContextProperty("backend", &backend);
+
+    DatabaseConnection db;
 
     // Создание адреса QML-файла
     const QUrl url(QStringLiteral("qrc:/main.qml"));

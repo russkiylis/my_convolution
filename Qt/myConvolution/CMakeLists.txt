@@ -37,6 +37,7 @@ else()
         add_executable(myConvolution
           ${PROJECT_SOURCES}
           backend.h backend.cpp
+          databaseconnection.h databaseconnection.cpp
         )
     endif()
 endif()
