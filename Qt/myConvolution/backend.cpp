@@ -8,4 +8,6 @@ Backend::Backend(QObject *parent)
 void Backend::onGenerationButtonClicked()
 {
     qDebug() << "Кнопка генерации нагрузки нажата.";
+
+    db.openConnection();
 }

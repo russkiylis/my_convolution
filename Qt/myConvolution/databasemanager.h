@@ -2,14 +2,17 @@
 
 #include <QObject>
 #include <QString>
+#include <QThread>
 
-// Класс для работы с подключением к БД
-class DatabaseConnection : public QObject
+// Класс для работы с БД
+// У него есть рабочий в другом потоке
+class DatabaseManager : public QObject
 {
     Q_OBJECT
+
 public:
     // Конструктор
-    explicit DatabaseConnection(QString const & connectionName = "myConvolution",
+    explicit DatabaseManager(QString const & connectionName = "myConvolution",
                                 QString const & hostName = "127.0.0.1",
                                 QString const & dbName = "my_convolution",
                                 QString const & userName = "russkiylis",
@@ -67,7 +70,7 @@ public:
     void setConnectOptions(QString const & value);
 
     // Открыть подключение
-    bool openConnection();
+    void openConnection();
 
 private:
     QString const _connectionName;
@@ -87,5 +90,13 @@ private:
 
     bool _valid = false;     // Если удалось создать подключения, то объект валиден
     bool _connected = false; // Если удалось подключиться
+
+    QThread workerThread;  // Поток где живёт рабочий класс
+
+public slots:
+    void handleConnected(bool const & result);
+
+signals:
+    void signalOpenConnection();
 
 };

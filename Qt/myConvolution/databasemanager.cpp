@@ -2,9 +2,10 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
 #include <QString>
-#include "databaseconnection.h"
+#include "databasemanager.h"
+#include "databaseworker.h"
 
-DatabaseConnection::DatabaseConnection(QString const & connectionName,
+DatabaseManager::DatabaseManager(QString const & connectionName,
                                        QString const & hostName,
                                        QString const & dbName,
                                        QString const & userName,
@@ -31,17 +32,28 @@ DatabaseConnection::DatabaseConnection(QString const & connectionName,
         qDebug().noquote().nospace() << "[!] Подключение с именем \""
                                      << _connectionName << "\" "
                                      << "уже существует. Объект подключения не валиден.";
-    } else {
-        QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", _connectionName); // Создали подключение к БД
-        _valid = true;
-        update();
-
-        qDebug().noquote().nospace() << "Создан объект подключения "
-                                     << _fullConnectionName;
+        return;
     }
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", _connectionName); // Создали подключение к БД
+    _valid = true;
+    update();
+
+    DatabaseWorker *worker = new DatabaseWorker(_connectionName);   // Создаём объект рабочего класса
+    worker->moveToThread(&workerThread);    // Переносим объект рабочего класса в другой поток
+
+    //Соединение сигналов и слотов
+    connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater); // Когда рабочий поток завершится, объект worker удалится
+    connect(this, &DatabaseManager::signalOpenConnection, worker, &DatabaseWorker::handleConnect); // Когда менеджер пошлёт сигнал, вызвать функцию подключения в рабочем классе
+    connect(worker, &DatabaseWorker::signalConnected, this, &DatabaseManager::handleConnected);  // Когда рабочий послал сигнал о результате подключения, тут вызовется соответствующий метод
+    workerThread.start();
+
+    qDebug().noquote().nospace() << "Создан объект подключения "
+                                 << _fullConnectionName;
+
 }
 
-void DatabaseConnection::setHostName(QString const & value) {
+void DatabaseManager::setHostName(QString const & value) {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -62,7 +74,7 @@ void DatabaseConnection::setHostName(QString const & value) {
     update();
 }
 
-void DatabaseConnection::setPort(int const & value) {
+void DatabaseManager::setPort(int const & value) {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -83,7 +95,7 @@ void DatabaseConnection::setPort(int const & value) {
     update();
 }
 
-void DatabaseConnection::setDbName(QString const & value) {
+void DatabaseManager::setDbName(QString const & value) {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -104,7 +116,7 @@ void DatabaseConnection::setDbName(QString const & value) {
     update();
 }
 
-void DatabaseConnection::setUserName(QString const & value) {
+void DatabaseManager::setUserName(QString const & value) {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -125,7 +137,7 @@ void DatabaseConnection::setUserName(QString const & value) {
     update();
 }
 
-void DatabaseConnection::setPassword(QString const & value) {
+void DatabaseManager::setPassword(QString const & value) {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -146,7 +158,7 @@ void DatabaseConnection::setPassword(QString const & value) {
     update();
 }
 
-void DatabaseConnection::setConnectOptions(QString const & value) {
+void DatabaseManager::setConnectOptions(QString const & value) {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -167,7 +179,7 @@ void DatabaseConnection::setConnectOptions(QString const & value) {
     update();
 }
 
-void DatabaseConnection::setFullConnectionName() {
+void DatabaseManager::setFullConnectionName() {
     _fullConnectionName = "\"" + _connectionName
                           + "\": pg://" + _userName
                           + ":" + _password
@@ -176,7 +188,7 @@ void DatabaseConnection::setFullConnectionName() {
                           + "/" + _dbName;
 }
 
-void DatabaseConnection::update() {
+void DatabaseManager::update() {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -204,33 +216,39 @@ void DatabaseConnection::update() {
                                  << ": параметры подключения изменены.";
 }
 
-bool DatabaseConnection::openConnection() {
+void DatabaseManager::handleConnected(const bool &result)
+{
+    _connected = result;
+}
+
+void DatabaseManager::openConnection() {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
                                      << ": объект подключения не валиден."
                                      << "Невозможно открыть соединение.";
-        return false;
+        return;
     }
 
     if (!_connected) {
-        QSqlDatabase db = QSqlDatabase::database(_connectionName);
-        _connected = db.open();    // Попытка наладить физическое соединение
-        if (!_connected) {
-            qDebug().noquote().nospace() << "[!] "
-                                         << _fullConnectionName
-                                         << ": не удалось подключиться к БД: "
-                                         << db.lastError().text();
-        } else {
-            qDebug().noquote().nospace() << _fullConnectionName
-                                         << ": установлено подключение к БД!";
-        }
-        return _connected;
+        // QSqlDatabase db = QSqlDatabase::database(_connectionName);
+        // _connected = db.open();    // Попытка наладить физическое соединение
+        // if (!_connected) {
+        //     qDebug().noquote().nospace() << "[!] "
+        //                                  << _fullConnectionName
+        //                                  << ": не удалось подключиться к БД: "
+        //                                  << db.lastError().text();
+        // } else {
+        //     qDebug().noquote().nospace() << _fullConnectionName
+        //                                  << ": установлено подключение к БД!";
+        // }
+        // return _connected;
+        qDebug() << "Запускаю сигнал...";
+        emit signalOpenConnection();
 
     } else {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
                                      << ": подключение уже установлено.";
-        return false;
     }
 }

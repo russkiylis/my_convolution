@@ -1,11 +1,13 @@
 #pragma once
 
 #include <QObject>
+#include "databasemanager.h"
 
 // Класс, подключаемый к QML и отвечающий за логику работы интерфейса
 class Backend : public QObject
 {
     Q_OBJECT
+    DatabaseManager db;      // Менеджер базы данных
 
 public:
     // Конструктор класса
