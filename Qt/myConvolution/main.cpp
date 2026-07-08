@@ -23,7 +23,10 @@ int main(int argc, char *argv[])
     Backend backend;
     engine.rootContext()->setContextProperty("backend", &backend);
 
-    DatabaseConnection db;
+    DatabaseConnection db("hi", "1.3.3.7");
+    DatabaseConnection db2;
+    db.openConnection();
+    db2.openConnection();
 
     // Создание адреса QML-файла
     const QUrl url(QStringLiteral("qrc:/main.qml"));
