@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <QThread>
+#include "databaseworker.h"
 
 // Класс для работы с БД
 // У него есть рабочий в другом потоке
@@ -20,6 +21,9 @@ public:
                                 int const & port = 5432,
                                 QString const & connectOptions = "connect_timeout = 3",
                                 QObject * parent = nullptr);
+
+    // Деструктор
+    ~DatabaseManager();
 
     // Имя подключения (не путать с именем БД)
     QString const connectionName() {return _connectionName;}
@@ -85,18 +89,22 @@ private:
     // Задание полного имени подключения
     void setFullConnectionName();
 
-    // Задание новых параметров подключения
-    void update();
+    // // Задание новых параметров подключения
+    // void update();
 
     bool _valid = false;     // Если удалось создать подключения, то объект валиден
     bool _connected = false; // Если удалось подключиться
+    bool _busy = false; // Если рабочий поток занят
 
-    QThread workerThread;  // Поток где живёт рабочий класс
+    QThread workerThread;  // Поток, где живёт рабочий класс
 
 public slots:
-    void handleConnected(bool const & result);
+    void slotManagerUpdate(bool connected, bool valid, bool busy);
 
 signals:
+    void signalInitialize();
     void signalOpenConnection();
+    void signalManagerUpdate();
+    void signalConfigUpdate(const DatabaseConfiguration & new_config);
 
 };

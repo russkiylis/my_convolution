@@ -1,15 +1,19 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>  // setContextProperty
+#include <QDebug>
+#include <QSqlDatabase>
 
 #include "backend.h"
 
 // Точка входа в программу
 int main(int argc, char *argv[])
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif
+
+    qDebug() << "Версия Qt:" << QT_VERSION_STR;
+    qDebug() << "Пути:" << QCoreApplication::libraryPaths();
+    qDebug() << "Драйвера:" << QSqlDatabase::drivers();
 
     // Создание объекта приложения
     QGuiApplication app(argc, argv);

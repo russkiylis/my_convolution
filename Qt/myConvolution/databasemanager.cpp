@@ -1,6 +1,5 @@
 #include <QDebug>
 #include <QtSql/QSqlDatabase>
-#include <QtSql/QSqlError>
 #include <QString>
 #include "databasemanager.h"
 #include "databaseworker.h"
@@ -28,36 +27,38 @@ DatabaseManager::DatabaseManager(QString const & connectionName,
                             + "/" + _dbName),
     QObject{parent}
 {
-    if (QSqlDatabase::database(_connectionName).isValid()) {
-        qDebug().noquote().nospace() << "[!] Подключение с именем \""
-                                     << _connectionName << "\" "
-                                     << "уже существует. Объект подключения не валиден.";
-        return;
-    }
+    const auto dbConfig = DatabaseConfiguration(connectionName, hostName, dbName, userName, password, port,
+                                                           connectOptions);
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", _connectionName); // Создали подключение к БД
-    _valid = true;
-    update();
-
-    DatabaseWorker *worker = new DatabaseWorker(_connectionName);   // Создаём объект рабочего класса
+    DatabaseWorker *worker = new DatabaseWorker(dbConfig);   // Создаём объект рабочего класса
     worker->moveToThread(&workerThread);    // Переносим объект рабочего класса в другой поток
 
     //Соединение сигналов и слотов
     connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater); // Когда рабочий поток завершится, объект worker удалится
-    connect(this, &DatabaseManager::signalOpenConnection, worker, &DatabaseWorker::handleConnect); // Когда менеджер пошлёт сигнал, вызвать функцию подключения в рабочем классе
-    connect(worker, &DatabaseWorker::signalConnected, this, &DatabaseManager::handleConnected);  // Когда рабочий послал сигнал о результате подключения, тут вызовется соответствующий метод
+    connect(this, &DatabaseManager::signalConfigUpdate, worker, &DatabaseWorker::slotConfigUpdate);
+    connect(this, &DatabaseManager::signalOpenConnection, worker, &DatabaseWorker::slotOpenConnection);
+    connect(this, &DatabaseManager::signalManagerUpdate, worker, &DatabaseWorker::slotManagerUpdate);
+    connect(this, &DatabaseManager::signalInitialize, worker, &DatabaseWorker::slotInitialize);
+    connect(worker, &DatabaseWorker::signalManagerUpdate, this, &DatabaseManager::slotManagerUpdate);
     workerThread.start();
 
-    qDebug().noquote().nospace() << "Создан объект подключения "
-                                 << _fullConnectionName;
+    // Проинициализируем рабочий объект
+    emit signalInitialize();
 
 }
 
+DatabaseManager::~DatabaseManager() {
+    // Адекватная остановка рабочего потока при уничтожении управляющего объекта
+    workerThread.quit();
+    workerThread.wait();
+}
+
 void DatabaseManager::setHostName(QString const & value) {
+    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
-                                     << ": объект подключения не валиден."
+                                     << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
@@ -71,14 +72,20 @@ void DatabaseManager::setHostName(QString const & value) {
     if (_hostName == value)
         return;
     _hostName = value;
-    update();
+    setFullConnectionName();
+
+    // Создаём новый конфиг и посылаем его в рабочий класс
+    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
+                                                           _connectOptions);
+    emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setPort(int const & value) {
+    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
-                                     << ": объект подключения не валиден."
+                                     << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
@@ -92,14 +99,20 @@ void DatabaseManager::setPort(int const & value) {
     if (_port == value)
         return;
     _port = value;
-    update();
+    setFullConnectionName();
+
+    // Создаём новый конфиг и посылаем его в рабочий класс
+    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
+                                                           _connectOptions);
+    emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setDbName(QString const & value) {
+    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
-                                     << ": объект подключения не валиден."
+                                     << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
@@ -113,14 +126,20 @@ void DatabaseManager::setDbName(QString const & value) {
     if (_dbName == value)
         return;
     _dbName = value;
-    update();
+    setFullConnectionName();
+
+    // Создаём новый конфиг и посылаем его в рабочий класс
+    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
+                                                           _connectOptions);
+    emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setUserName(QString const & value) {
+    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
-                                     << ": объект подключения не валиден."
+                                     << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
@@ -134,14 +153,20 @@ void DatabaseManager::setUserName(QString const & value) {
     if (_userName == value)
         return;
     _userName = value;
-    update();
+    setFullConnectionName();
+
+    // Создаём новый конфиг и посылаем его в рабочий класс
+    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
+                                                           _connectOptions);
+    emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setPassword(QString const & value) {
+    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
-                                     << ": объект подключения не валиден."
+                                     << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
@@ -155,14 +180,20 @@ void DatabaseManager::setPassword(QString const & value) {
     if (_password == value)
         return;
     _password = value;
-    update();
+    setFullConnectionName();
+
+    // Создаём новый конфиг и посылаем его в рабочий класс
+    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
+                                                           _connectOptions);
+    emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setConnectOptions(QString const & value) {
+    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
-                                     << ": объект подключения не валиден."
+                                     << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
@@ -176,7 +207,12 @@ void DatabaseManager::setConnectOptions(QString const & value) {
     if (_connectOptions == value)
         return;
     _connectOptions = value;
-    update();
+    setFullConnectionName();
+
+    // Создаём новый конфиг и посылаем его в рабочий класс
+    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
+                                                           _connectOptions);
+    emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setFullConnectionName() {
@@ -188,67 +224,50 @@ void DatabaseManager::setFullConnectionName() {
                           + "/" + _dbName;
 }
 
-void DatabaseManager::update() {
-    if (!_valid) {
-        qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
-                                     << ": объект подключения не валиден."
-                                     << "Невозможно изменить параметры подключения.";
-        return;
-    }
-    if (_connected) {
-        qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
-                                     << ": невозможно изменить параметры "
-                                        "открытого соединения.";
-        return;
-    }
-
-    QSqlDatabase db = QSqlDatabase::database(_connectionName);
-    db.setHostName(_hostName);
-    db.setPort(_port);
-    db.setDatabaseName(_dbName);
-    db.setUserName(_userName);
-    db.setPassword(_password);
-    db.setConnectOptions(_connectOptions);
-    setFullConnectionName();
-    qDebug().noquote().nospace() << _fullConnectionName
-                                 << ": параметры подключения изменены.";
-}
-
-void DatabaseManager::handleConnected(const bool &result)
-{
-    _connected = result;
-}
+// void DatabaseManager::update() {
+//     // TODO: Всё в поток нахер
+//     if (!_valid) {
+//         qDebug().noquote().nospace() << "[!] "
+//                                      << _fullConnectionName
+//                                      << ": объект подключения не валиден."
+//                                      << "Невозможно изменить параметры подключения.";
+//         return;
+//     }
+//     if (_connected) {
+//         qDebug().noquote().nospace() << "[!] "
+//                                      << _fullConnectionName
+//                                      << ": невозможно изменить параметры "
+//                                         "открытого соединения.";
+//         return;
+//     }
+//
+//     QSqlDatabase db = QSqlDatabase::database(_connectionName);
+//     db.setHostName(_hostName);
+//     db.setPort(_port);
+//     db.setDatabaseName(_dbName);
+//     db.setUserName(_userName);
+//     db.setPassword(_password);
+//     db.setConnectOptions(_connectOptions);
+//     setFullConnectionName();
+//     qDebug().noquote().nospace() << _fullConnectionName
+//                                  << ": параметры подключения изменены.";
+// }
 
 void DatabaseManager::openConnection() {
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
-                                     << ": объект подключения не валиден."
+                                     << ": объект подключения не валиден. "
                                      << "Невозможно открыть соединение.";
         return;
     }
 
-    if (!_connected) {
-        // QSqlDatabase db = QSqlDatabase::database(_connectionName);
-        // _connected = db.open();    // Попытка наладить физическое соединение
-        // if (!_connected) {
-        //     qDebug().noquote().nospace() << "[!] "
-        //                                  << _fullConnectionName
-        //                                  << ": не удалось подключиться к БД: "
-        //                                  << db.lastError().text();
-        // } else {
-        //     qDebug().noquote().nospace() << _fullConnectionName
-        //                                  << ": установлено подключение к БД!";
-        // }
-        // return _connected;
-        qDebug() << "Запускаю сигнал...";
-        emit signalOpenConnection();
+    // Посылаем в рабочий поток команду установить соединение
+    emit signalOpenConnection();
+}
 
-    } else {
-        qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
-                                     << ": подключение уже установлено.";
-    }
+void DatabaseManager::slotManagerUpdate(bool connected, bool valid, bool busy) {
+    _connected = connected;
+    _valid = valid;
+    _busy = busy;
 }
