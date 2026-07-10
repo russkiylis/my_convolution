@@ -86,24 +86,26 @@ DatabaseWorker::DatabaseWorker(const DatabaseConfiguration &database_configurati
     : QObject{parent},
     _config(database_configuration)
 {
-
 }
 
 void DatabaseWorker::slotManagerUpdate()
 {
-    emit signalManagerUpdate(_connected, _valid, _busy);
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
 void DatabaseWorker::slotInitialize()
 {
     _busy = true;
-    emit signalManagerUpdate(_connected, _valid, _busy);
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
     // Проверка на существование подключения с таким же именем
     if (QSqlDatabase::contains(_config.connectionName)) {
-        qDebug().noquote().nospace() << "[!] Подключение с именем \""
-                                     << _config.connectionName << "\" "
-                                     << "уже существует. Объект подключения не валиден.";
+        _lastError = "[!] Подключение с именем \""
+                    +_config.connectionName + "\" "
+                    +"уже существует. Объект подключения не валиден.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
 
@@ -112,31 +114,34 @@ void DatabaseWorker::slotInitialize()
 
     qDebug().noquote().nospace() << "Создан объект подключения \""
                                  << _config.connectionName << "\"";
+    _lastError = "Ошибок нет.";
+    update();
 
     _busy = false;
-    emit signalManagerUpdate(_connected, _valid, _busy);
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
 void DatabaseWorker::slotOpenConnection()
 {
     _busy = true;
-    emit signalManagerUpdate(_connected, _valid, _busy);
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
     if (!_valid) {
-        qDebug().noquote().nospace() << "[!] "
-                                     << _config.fullConnectionName
-                                     << ": объект подключения не валиден. "
-                                     << "Невозможно открыть соединение.";
+        _lastError = "[!] Подключение с именем \""
+                    +_config.connectionName + "\" "
+                    +"уже существует. Объект подключения не валиден.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
         return;
     }
     if (_connected) {
-        qDebug().noquote().nospace() << "[!] "
-                 << _config.fullConnectionName
-                 << ": Соединение не открыто: "
-                 << "попытка повторного открытия соединения!";
-
+        _lastError = "[!] "
+                 + _config.fullConnectionName
+                 + ": Соединение не открыто: "
+                 + "попытка повторного открытия соединения!";
+        qDebug().noquote().nospace() << _lastError;
         _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy);
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
 
@@ -147,34 +152,38 @@ void DatabaseWorker::slotOpenConnection()
     if (_connected) {
         qDebug().noquote().nospace() << _config.fullConnectionName
                                      << ": Соединение открыто!";
+        _lastError = "Ошибок нет.";
     } else {
-        qDebug().noquote().nospace() << "[!] "
-                         << _config.fullConnectionName
-                         << ": Соединение не открыто: "
-                         << db.lastError().text();
+        _lastError = "[!] "
+                    + _config.fullConnectionName
+                    + ": Соединение не открыто: "
+                    + db.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
     }
 
     _busy = false;
-    emit signalManagerUpdate(_connected, _valid, _busy);
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
 void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
 {
     _busy = true;
-    emit signalManagerUpdate(_connected, _valid, _busy);
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
     if (!_valid) {
-        qDebug().noquote().nospace() << "[!] "
-                                     << _config.fullConnectionName
-                                     << ": объект подключения не валиден. "
-                                     << "Невозможно изменить параметры подключения.";
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно изменить параметры подключения.";
+        qDebug().noquote().nospace() << _lastError;
         return;
     }
     if (_connected) {
-        qDebug().noquote().nospace() << "[!] "
-                                     << _config.fullConnectionName
-                                     << ": невозможно изменить параметры "
-                                        "открытого соединения.";
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно изменить параметры "
+                     + "открытого соединения.";
+        qDebug().noquote().nospace() << _lastError;
         return;
     }
 
@@ -182,7 +191,8 @@ void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
     update();   // Обновляем подключения QSql
 
     _busy = false;
-    emit signalManagerUpdate(_connected, _valid, _busy);
+    _lastError = "Ошибок нет.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
 

@@ -51,6 +51,7 @@ class DatabaseWorker : public QObject
     bool _connected = false;
     bool _valid = false;
     bool _busy = false;
+    QString _lastError = "Ошибок нет.";
 
     // Обновление параметров базы данных QSqlDatabase
     void update();
@@ -79,6 +80,6 @@ public slots:
 signals:
 
     // Отправка сигнала об обновлении полей менеджера
-    void signalManagerUpdate(bool connected, bool valid, bool busy);
+    void signalManagerUpdate(bool connected, bool valid, bool busy, QString lastError);
 };
 

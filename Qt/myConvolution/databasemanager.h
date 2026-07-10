@@ -5,6 +5,8 @@
 #include <QThread>
 #include "databaseworker.h"
 
+class Backend;
+
 // Класс для работы с БД
 // У него есть рабочий в другом потоке
 class DatabaseManager : public QObject
@@ -13,7 +15,8 @@ class DatabaseManager : public QObject
 
 public:
     // Конструктор
-    explicit DatabaseManager(QString const & connectionName = "myConvolution",
+    explicit DatabaseManager(Backend *backend,
+                                QString const & connectionName = "myConvolution",
                                 QString const & hostName = "127.0.0.1",
                                 QString const & dbName = "my_convolution",
                                 QString const & userName = "russkiylis",
@@ -52,8 +55,14 @@ public:
     // Валиден ли объект
     bool valid() {return _valid;}
 
+    // Занято ли подключение к БД
+    bool busy() {return _busy;}
+
     // Установлено ли подключение к БД
     bool connected() {return _connected;}
+
+    // Последняя ошибка БД
+    QString lastError() {return _lastError;}
 
     // Задать адрес хоста
     void setHostName(QString const & value);
@@ -77,6 +86,7 @@ public:
     void openConnection();
 
 private:
+    Backend *_backend;
     QString const _connectionName;
     QString _hostName;
     int _port;
@@ -95,11 +105,12 @@ private:
     bool _valid = false;     // Если удалось создать подключения, то объект валиден
     bool _connected = false; // Если удалось подключиться
     bool _busy = false; // Если рабочий поток занят
+    QString _lastError = "Ошибок нет."; // Последняя ошибка
 
     QThread workerThread;  // Поток, где живёт рабочий класс
 
 public slots:
-    void slotManagerUpdate(bool connected, bool valid, bool busy);
+    void slotManagerUpdate(bool connected, bool valid, bool busy, QString lastError);
 
 signals:
     void signalInitialize();

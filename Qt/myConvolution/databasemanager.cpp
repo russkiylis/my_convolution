@@ -3,8 +3,10 @@
 #include <QString>
 #include "databasemanager.h"
 #include "databaseworker.h"
+#include "backend.h"
 
-DatabaseManager::DatabaseManager(QString const & connectionName,
+DatabaseManager::DatabaseManager(Backend *backend,
+                                       QString const & connectionName,
                                        QString const & hostName,
                                        QString const & dbName,
                                        QString const & userName,
@@ -12,7 +14,8 @@ DatabaseManager::DatabaseManager(QString const & connectionName,
                                        int const & port,
                                        QString const & connectOptions,
                                        QObject * parent)
-    :_connectionName(connectionName),
+    :_backend(backend),
+    _connectionName(connectionName),
     _hostName(hostName),
     _dbName(dbName),
     _userName(userName),
@@ -255,19 +258,33 @@ void DatabaseManager::setFullConnectionName() {
 
 void DatabaseManager::openConnection() {
     if (!_valid) {
-        qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
-                                     << ": объект подключения не валиден. "
-                                     << "Невозможно открыть соединение.";
-        return;
+        QString errorText = "[!] "
+                            + _fullConnectionName
+                            + ": объект подключения не валиден. "
+                            + "Невозможно открыть соединение.";
+        qDebug().noquote().nospace()  << errorText;
     }
 
     // Посылаем в рабочий поток команду установить соединение
     emit signalOpenConnection();
 }
 
-void DatabaseManager::slotManagerUpdate(bool connected, bool valid, bool busy) {
+void DatabaseManager::slotManagerUpdate(bool connected, bool valid, bool busy, QString lastError) {
     _connected = connected;
     _valid = valid;
     _busy = busy;
+    _lastError = lastError;
+
+    int dbStatus = 0;
+    if (!_valid || !_connected) {
+        dbStatus = 0;
+    } else if (busy) {
+        dbStatus = 1;
+    } else {
+        dbStatus = 2;
+    }
+
+    //TODO: мяу
+    _backend->setLastError(_lastError);
+    _backend->setDbStatus(dbStatus);
 }

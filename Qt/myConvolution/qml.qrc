@@ -1,5 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>ConnectTab.qml</file>
+        <file>GenTab.qml</file>
+        <file>SaveTab.qml</file>
+        <file>VisualizeTab.qml</file>
     </qresource>
 </RCC>

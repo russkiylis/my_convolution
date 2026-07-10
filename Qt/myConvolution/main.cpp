@@ -5,6 +5,7 @@
 #include <QSqlDatabase>
 
 #include "backend.h"
+#include "databasemanager.h"
 
 // Точка входа в программу
 int main(int argc, char *argv[])

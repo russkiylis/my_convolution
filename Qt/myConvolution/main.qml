@@ -1,11 +1,37 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls 2.15 // Button
+import QtQuick.Layouts 1.15
+
+// Классные цвета
+// #FFFDFA
+// #FFEACA
+// #FFD79A
+// #FFC36A
+// #FFB03A
+// #FF9D0A
+// #D98200
+// #A96600
+// #794900
+// #492C00
+// #1A0F00
 
 // Основное окно программы
 Window {
+    id: main
+
+    // Блок с переменными
+    property string backgroundColor: "#FFFCFA"
+    property string activeColor: "#FFEACA"
+    property string borderColor: "#FFD79A"
+    property string textColorInactive: "#FFB03A"
+    property string textColor: "#1A0F00"
+    property string textColorFieldInactive: "#B1B0AF"
+
     width: 640
     height: 480
+    minimumWidth: 640
+    minimumHeight: 480
     visible: true
     title: "My Convolution"
 
@@ -15,23 +41,122 @@ Window {
         // Блок размещения
         anchors.fill: parent
         anchors.margins: 20
+        anchors.bottomMargin: 40
+        anchors.topMargin: bar.height + 20
 
         // Блок внешнего вида
-        color: "#F0F0F0"
-        border.color: "black"
+        color: backgroundColor
+        border.color: main.borderColor
 
-        // Кнопка запуска генерации нагрузки
-        Button {
+        // Табы сверху окошка (переключаемся между вкладками)
+        TabBar {
+            // TODO: Настроить цвета так чтобы кнопки реагировали на наведение и зажатие
+            id: bar
+            width: 500
+            anchors.bottom: parent.top
+            anchors.bottomMargin: -1
 
-            // Блок размещения
-            anchors.centerIn: parent
+            TabButton {
+                id: tabButtonConnect
+                text: "Соединение"
 
-            // Блок внешнего вида
-            text: "Сгенерировать нагрузку"
+                // Внешний вид кнопки
+                contentItem: Text {
+                    text: tabButtonConnect.text
+                    font: tabButtonConnect.font
+                    color: tabButtonConnect.checked ? main.textColor : main.textColorInactive
+                    horizontalAlignment: Text.AlignHCenter
+                }
+                background: Rectangle {
+                    color: tabButtonConnect.checked ? main.activeColor : main.backgroundColor
+                    border.color: main.borderColor
+                }
+            }
+            TabButton {
+                id: tabButtonGen
+                text: "Нагрузка"
 
-            // Блок логики
-            onClicked: backend.onGenerationButtonClicked() // QML видит Q_INVOKABLE метод подключённого класса
+                // Внешний вид кнопки
+                contentItem: Text {
+                    text: tabButtonGen.text
+                    font: tabButtonGen.font
+                    color: tabButtonGen.checked ? main.textColor : main.textColorInactive
+                    horizontalAlignment: Text.AlignHCenter
+                }
+                background: Rectangle {
+                    color: tabButtonGen.checked ? main.activeColor : main.backgroundColor
+                    border.color: main.borderColor
+                }
+            }
+            TabButton {
+                id: tabButtonSave
+                text: "Сохранение"
+
+                // Внешний вид кнопки
+                contentItem: Text {
+                    text: tabButtonSave.text
+                    font: tabButtonSave.font
+                    color: tabButtonSave.checked ? main.textColor : main.textColorInactive
+                    horizontalAlignment: Text.AlignHCenter
+                }
+                background: Rectangle {
+                    color: tabButtonSave.checked ? main.activeColor : main.backgroundColor
+                    border.color: main.borderColor
+                }
+            }
+            TabButton {
+                id: tabButtonVisualize
+                text: "Отображение"
+
+                // Внешний вид кнопки
+                contentItem: Text {
+                    text: tabButtonVisualize.text
+                    font: tabButtonVisualize.font
+                    color: tabButtonVisualize.checked ? main.textColor : main.textColorInactive
+                    horizontalAlignment: Text.AlignHCenter
+                }
+                background: Rectangle {
+                    color: tabButtonVisualize.checked ? main.activeColor : main.backgroundColor
+                    border.color: main.borderColor
+                }
+            }
+        }
+
+        // В одном окошке у нас будет разный интерфейс, в зависимости от выбранной вкладки
+        StackLayout {
+            anchors.fill: parent
+            currentIndex: bar.currentIndex
+            ConnectTab {
+                id: connectTab
+            }
+            GenTab {
+                id: genTab
+            }
+            SaveTab {
+                id: saveTab
+            }
+            VisualizeTab {
+                id: visualizeTab
+            }
+        }
+
+        // Текст в нижнем правом углу. Показывает статус базы данных
+        Label {
+            padding: 10
+            text: {
+                if (backend.dbStatus === 0) return "Соединение с БД отсутствует";
+                else if (backend.dbStatus === 1) return "БД готова";
+                else return "БД занята";
+            }
+
+            color: {
+                if (backend.dbStatus === 0) return "red";
+                else if (backend.dbStatus === 1) return "green";
+                else return "yellow";
+            }
+
+            anchors.top: parent.bottom
+            anchors.right: parent.right
         }
     }
-
 }
