@@ -26,43 +26,79 @@ public:
                                 QObject * parent = nullptr);
 
     // Деструктор
-    ~DatabaseManager();
+    ~DatabaseManager() override;
 
     // Имя подключения (не путать с именем БД)
-    QString const connectionName() {return _connectionName;}
+    QString connectionName() const
+    {
+        return _connectionName;
+    }
 
     // Адрес хоста
-    QString const hostName() {return _hostName;}
+    QString hostName() const
+    {
+        return _hostName;
+    }
 
     // Порт
-    int const port() {return _port;}
+    int port() const
+    {
+        return _port;
+    }
 
     // Имя БД
-    QString const dbName() {return _dbName;}
+    QString dbName() const
+    {
+        return _dbName;
+    }
 
     // Имя пользователя
-    QString const userName() {return _userName;}
+    QString userName() const
+    {
+        return _userName;
+    }
 
     // Пароль
-    QString const password() {return _password;}
+    QString password() const
+    {
+        return _password;
+    }
 
     // Полное имя подключения
-    QString const fullConnectionName() {return _fullConnectionName;}
+    QString fullConnectionName() const
+    {
+        return _fullConnectionName;
+    }
 
     // Настройки подключения
-    QString const connectOptions() {return _connectOptions;}
+    QString connectOptions() const
+    {
+        return _connectOptions;
+    }
 
     // Валиден ли объект
-    bool valid() {return _valid;}
+    bool valid() const
+    {
+        return _valid;
+    }
 
     // Занято ли подключение к БД
-    bool busy() {return _busy;}
+    bool busy() const
+    {
+        return _busy;
+    }
 
     // Установлено ли подключение к БД
-    bool connected() {return _connected;}
+    bool connected() const
+    {
+        return _connected;
+    }
 
     // Последняя ошибка БД
-    QString lastError() {return _lastError;}
+    QString lastError() const
+    {
+        return _lastError;
+    }
 
     // Задать адрес хоста
     void setHostName(QString const & value);
@@ -113,7 +149,7 @@ private:
     QThread workerThread;  // Поток, где живёт рабочий класс
 
 public slots:
-    void slotManagerUpdate(bool connected, bool valid, bool busy, QString lastError);
+    void slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError);
 
 signals:
     void signalInitialize();

@@ -3,8 +3,9 @@
 #include <QSqlError>
 #include "databaseworker.h"
 
-DatabaseConfiguration::DatabaseConfiguration(const DatabaseConfiguration &other): hostName(other.hostName),
-    connectionName(other.connectionName),
+DatabaseConfiguration::DatabaseConfiguration(const DatabaseConfiguration &other)
+    : connectionName(other.connectionName),
+    hostName(other.hostName),
     port(other.port),
     dbName(other.dbName),
     userName(other.userName),
@@ -30,17 +31,17 @@ DatabaseConfiguration::DatabaseConfiguration(QString const &connectionName, QStr
                                              QString const &dbName, QString const &userName, QString const &password, int const &port,
                                              QString const &connectOptions) :    connectionName(connectionName),
                                                                                  hostName(hostName),
+                                                                                 port(port),
                                                                                  dbName(dbName),
                                                                                  userName(userName),
                                                                                  password(password),
-                                                                                 port(port),
-                                                                                 connectOptions(connectOptions),
-                                                                                fullConnectionName("\"" + connectionName
-                                                                                                        + "\": pg://" + userName
-                                                                                                        + ":" + password
-                                                                                                        + "@" + hostName
-                                                                                                        + ":" + QString::number(port)
-                                                                                                        + "/" + dbName)
+                                                                                 fullConnectionName("\"" + connectionName
+                                                                                     + "\": pg://" + userName
+                                                                                     + ":" + password
+                                                                                     + "@" + hostName
+                                                                                     + ":" + QString::number(port)
+                                                                                     + "/" + dbName),
+                                                                                connectOptions(connectOptions)
 {
 }
 

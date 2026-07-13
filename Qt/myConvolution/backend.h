@@ -1,8 +1,6 @@
 #pragma once
 
-#include <QObject>
 #include <qqml.h>
-
 #include "databasemanager.h"
 
 // Класс, подключаемый к QML и отвечающий за логику работы интерфейса

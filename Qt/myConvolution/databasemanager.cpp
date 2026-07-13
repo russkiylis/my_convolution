@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <QtSql/QSqlDatabase>
 #include <QString>
 #include "databasemanager.h"
 #include "databaseworker.h"
@@ -14,21 +13,21 @@ DatabaseManager::DatabaseManager(Backend *backend,
                                        int const & port,
                                        QString const & connectOptions,
                                        QObject * parent)
-    :_backend(backend),
+    :QObject{parent},
+    _backend(backend),
     _connectionName(connectionName),
     _hostName(hostName),
+    _port(5432),
     _dbName(dbName),
     _userName(userName),
     _password(password),
-    _port(5432),
-    _connectOptions(connectOptions),
     _fullConnectionName("\"" + _connectionName
-                            + "\": pg://" + _userName
-                            + ":" + _password
-                            + "@" + _hostName
-                            + ":" + QString::number(_port)
-                            + "/" + _dbName),
-    QObject{parent}
+        + "\": pg://" + _userName
+        + ":" + _password
+        + "@" + _hostName
+        + ":" + QString::number(_port)
+        + "/" + _dbName),
+    _connectOptions(connectOptions)
 {
     const auto dbConfig = DatabaseConfiguration(connectionName, hostName, dbName, userName, password, port,
                                                            connectOptions);
@@ -52,7 +51,7 @@ DatabaseManager::DatabaseManager(Backend *backend,
 }
 
 DatabaseManager::~DatabaseManager() {
-    // Адекватная остановка рабочего потока при уничтожении управляющего объекта
+    // Адекватная остановка рабочего потока при уничтожении управляющего рабочим объекта
     workerThread.quit();
     workerThread.wait();
 }
@@ -231,7 +230,7 @@ void DatabaseManager::openConnection() {
         qDebug().noquote().nospace()  << errorText;
     }
 
-    // Посылаем в рабочий поток команду установить соединение
+    // В рабочий поток посылаем команду установить соединение
     emit signalOpenConnection();
 }
 
@@ -244,11 +243,11 @@ void DatabaseManager::closeConnection() {
         qDebug().noquote().nospace()  << errorText;
     }
 
-    // Посылаем в рабочий поток команду закрыть соединение
+    // В рабочий поток посылаем команду закрыть соединение
     emit signalCloseConnection();
 }
 
-void DatabaseManager::slotManagerUpdate(bool connected, bool valid, bool busy, QString lastError) {
+void DatabaseManager::slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError) {
     _connected = connected;
     _valid = valid;
     _busy = busy;
