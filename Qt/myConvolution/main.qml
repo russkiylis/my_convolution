@@ -27,6 +27,7 @@ Window {
     property string textColorInactive: "#FFB03A"
     property string textColor: "#1A0F00"
     property string textColorFieldInactive: "#B1B0AF"
+    property string pressColor: "#FFF3E2"
 
     width: 640
     height: 480
@@ -50,7 +51,6 @@ Window {
 
         // Табы сверху окошка (переключаемся между вкладками)
         TabBar {
-            // TODO: Настроить цвета так чтобы кнопки реагировали на наведение и зажатие
             id: bar
             width: 500
             anchors.bottom: parent.top
@@ -68,7 +68,11 @@ Window {
                     horizontalAlignment: Text.AlignHCenter
                 }
                 background: Rectangle {
-                    color: tabButtonConnect.checked ? main.activeColor : main.backgroundColor
+                    color: {
+                        if (tabButtonConnect.pressed) return main.pressColor
+                        if (tabButtonConnect.checked) return main.activeColor
+                        return main.backgroundColor
+                    }
                     border.color: main.borderColor
                 }
             }
@@ -84,7 +88,11 @@ Window {
                     horizontalAlignment: Text.AlignHCenter
                 }
                 background: Rectangle {
-                    color: tabButtonGen.checked ? main.activeColor : main.backgroundColor
+                    color: {
+                        if (tabButtonGen.pressed) return main.pressColor
+                        if (tabButtonGen.checked) return main.activeColor
+                        return main.backgroundColor
+                    }
                     border.color: main.borderColor
                 }
             }
@@ -100,7 +108,11 @@ Window {
                     horizontalAlignment: Text.AlignHCenter
                 }
                 background: Rectangle {
-                    color: tabButtonSave.checked ? main.activeColor : main.backgroundColor
+                    color: {
+                        if (tabButtonSave.pressed) return main.pressColor
+                        if (tabButtonSave.checked) return main.activeColor
+                        return main.backgroundColor
+                    }
                     border.color: main.borderColor
                 }
             }
@@ -116,7 +128,11 @@ Window {
                     horizontalAlignment: Text.AlignHCenter
                 }
                 background: Rectangle {
-                    color: tabButtonVisualize.checked ? main.activeColor : main.backgroundColor
+                    color: {
+                        if (tabButtonVisualize.pressed) return main.pressColor
+                        if (tabButtonVisualize.checked) return main.activeColor
+                        return main.backgroundColor
+                    }
                     border.color: main.borderColor
                 }
             }
@@ -151,7 +167,7 @@ Window {
 
             color: {
                 if (backend.dbStatus === 0) return "red";
-                else if (backend.dbStatus === 1) return "yellow";
+                else if (backend.dbStatus === 1) return "#FF9900";
                 else return "green";
             }
 

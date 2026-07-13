@@ -88,27 +88,34 @@ Backend::Backend(QObject *parent)
 void Backend::onDbConnectionButtonClicked(QString hostName, QString port, QString userName, QString password,
                                           QString databaseName, QString connectOptions)
 {
+    // FIXME: Если попытаться подключиться к неправильной базке, а затем к правильной, то перед тем как подключиться к правильной, программа попробует подключиться к неправильной
     qDebug() << "Кнопка подключения нажата.";
 
-    if (hostName == "")
-        hostName = "127.0.0.1";
-    if (port == "")
-        port = "5432";
-    if (userName == "")
-        userName = "russkiylis";
-    if (password == "")
-        password = "1337";
-    if (databaseName == "")
-        databaseName = "my_convolution";
-    if (connectOptions == "")
-        connectOptions = "connect_timeout = 3";
+    if (_dbStatus != 2) {
+        // Если не БД не подключена, то подключаем
+        if (hostName == "")
+            hostName = "127.0.0.1";
+        if (port == "")
+            port = "5432";
+        if (userName == "")
+            userName = "russkiylis";
+        if (password == "")
+            password = "1337";
+        if (databaseName == "")
+            databaseName = "my_convolution";
+        if (connectOptions == "")
+            connectOptions = "connect_timeout = 3";
 
-    _db.setHostName(hostName);
-    _db.setPort(port.toInt());
-    _db.setUserName(userName);
-    _db.setPassword(password);
-    _db.setDbName(databaseName);
-    _db.setConnectOptions(connectOptions);
+        _db.setHostName(hostName);
+        _db.setPort(port.toInt());
+        _db.setUserName(userName);
+        _db.setPassword(password);
+        _db.setDbName(databaseName);
+        _db.setConnectOptions(connectOptions);
 
-    _db.openConnection();
+        _db.openConnection();
+    } else {
+        // Если БД подключена, то отключаем
+        _db.closeConnection();
+    }
 }

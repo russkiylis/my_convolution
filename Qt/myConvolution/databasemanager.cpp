@@ -40,6 +40,7 @@ DatabaseManager::DatabaseManager(Backend *backend,
     connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater); // Когда рабочий поток завершится, объект worker удалится
     connect(this, &DatabaseManager::signalConfigUpdate, worker, &DatabaseWorker::slotConfigUpdate);
     connect(this, &DatabaseManager::signalOpenConnection, worker, &DatabaseWorker::slotOpenConnection);
+    connect(this, &DatabaseManager::signalCloseConnection, worker, &DatabaseWorker::slotCloseConnection);
     connect(this, &DatabaseManager::signalManagerUpdate, worker, &DatabaseWorker::slotManagerUpdate);
     connect(this, &DatabaseManager::signalInitialize, worker, &DatabaseWorker::slotInitialize);
     connect(worker, &DatabaseWorker::signalManagerUpdate, this, &DatabaseManager::slotManagerUpdate);
@@ -232,6 +233,19 @@ void DatabaseManager::openConnection() {
 
     // Посылаем в рабочий поток команду установить соединение
     emit signalOpenConnection();
+}
+
+void DatabaseManager::closeConnection() {
+    if (!_valid) {
+        QString errorText = "[!] "
+                            + _fullConnectionName
+                            + ": объект подключения не валиден. "
+                            + "Невозможно закрыть соединение.";
+        qDebug().noquote().nospace()  << errorText;
+    }
+
+    // Посылаем в рабочий поток команду закрыть соединение
+    emit signalCloseConnection();
 }
 
 void DatabaseManager::slotManagerUpdate(bool connected, bool valid, bool busy, QString lastError) {

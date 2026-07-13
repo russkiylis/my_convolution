@@ -130,7 +130,11 @@ Item {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
 
-        // TODO: Сделать так чтобы кнопка висла при подключении и потом менялась на "Отключиться"
+        enabled: {
+            return backend.dbStatus !== 1;
+
+        }
+
         text: "Подключиться к базе данных"
         onClicked: backend.onDbConnectionButtonClicked(
             dbHostName.text,

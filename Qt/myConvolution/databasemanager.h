@@ -85,6 +85,9 @@ public:
     // Открыть подключение
     void openConnection();
 
+    // Закрыть подключение
+    void closeConnection();
+
 private:
     Backend *_backend;
     QString const _connectionName;
@@ -115,6 +118,7 @@ public slots:
 signals:
     void signalInitialize();
     void signalOpenConnection();
+    void signalCloseConnection();
     void signalManagerUpdate();
     void signalConfigUpdate(const DatabaseConfiguration & new_config);
 

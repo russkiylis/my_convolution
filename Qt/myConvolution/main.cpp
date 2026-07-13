@@ -19,15 +19,17 @@ int main(int argc, char *argv[])
     // Создание объекта приложения
     QGuiApplication app(argc, argv);
 
+    // Создаём объект класса backend
+    Backend backend;
+
     // Регистрация типа DatabaseConfiguration для передачи через сигналы/слоты
     qRegisterMetaType<DatabaseConfiguration>("DatabaseConfiguration");
 
     // Создание QML-движка
     QQmlApplicationEngine engine;
 
-    // Создаём объект класса backend и подключаем его в QML-движок.
+    // Подключаем backend в QML-движок.
     // QML начнёт видеть Q_PROPERTY и Q_INVOKABLE
-    Backend backend;
     engine.rootContext()->setContextProperty("backend", &backend);
 
     // Создание адреса QML-файла

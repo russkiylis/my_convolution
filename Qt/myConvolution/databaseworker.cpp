@@ -127,9 +127,7 @@ void DatabaseWorker::slotOpenConnection()
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
     if (!_valid) {
-        _lastError = "[!] Подключение с именем \""
-                    +_config.connectionName + "\" "
-                    +"уже существует. Объект подключения не валиден.";
+        _lastError = "[!] Объект подключения не валиден. Невозможно открыть соединение.";
         qDebug().noquote().nospace() << _lastError;
         _busy = false;
         return;
@@ -160,6 +158,40 @@ void DatabaseWorker::slotOpenConnection()
                     + db.lastError().text();
         qDebug().noquote().nospace() << _lastError;
     }
+
+    _busy = false;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+}
+
+void DatabaseWorker::slotCloseConnection() {
+    _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    if (!_valid) {
+        _lastError = "[!] Объект подключения не валиден. Невозможно закрыть соединение.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                 + _config.fullConnectionName
+                 + ": Соединение не закрыто: "
+                 + "попытка закрытия закрытого соединения!";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.close();    // Попытка закрыть физическое соединение
+    _connected = false;
+    qDebug().noquote().nospace() << _config.fullConnectionName
+                                 << ": Соединение закрыто!";
+    _lastError = "Ошибок нет.";
 
     _busy = false;
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);

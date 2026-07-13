@@ -75,6 +75,9 @@ public slots:
     // Подключение к базе данных
     void slotOpenConnection();
 
+    // Отключение от базы данных
+    void slotCloseConnection();
+
     // Обновление конфигурации подключения
     void slotConfigUpdate(const DatabaseConfiguration & new_config);
 
