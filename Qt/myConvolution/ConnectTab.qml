@@ -126,6 +126,7 @@ Item {
 
     Button {
         id: dbConnectionButton
+        width: 125
         anchors.right: dbParamsField.right
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
@@ -135,7 +136,10 @@ Item {
 
         }
 
-        text: "Подключиться к базе данных"
+        text: {
+            if (backend.dbStatus === 2) return "Отключиться"
+            return "Подключиться"
+        }
         onClicked: backend.onDbConnectionButtonClicked(
             dbHostName.text,
             dbPort.text,
