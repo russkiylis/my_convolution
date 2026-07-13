@@ -34,6 +34,7 @@ Item {
 
                 placeholderText: "127.0.0.1"
                 placeholderTextColor: main.textColorFieldInactive
+                text: backend.hostName
 
                 Label {
                     anchors.bottom: parent.top
@@ -48,6 +49,7 @@ Item {
 
                 placeholderText: "5432"
                 placeholderTextColor: main.textColorFieldInactive
+                text: backend.port
 
                 Label {
                     anchors.bottom: parent.top
@@ -62,6 +64,7 @@ Item {
 
                 placeholderText: "russkiylis"
                 placeholderTextColor: main.textColorFieldInactive
+                text: backend.userName
 
                 Label {
                     anchors.bottom: parent.top
@@ -79,6 +82,7 @@ Item {
                 echoMode: TextInput.Password
                 passwordCharacter: "*"
                 passwordMaskDelay: 1000
+                text: backend.password
 
                 Label {
                     anchors.bottom: parent.top
@@ -93,6 +97,7 @@ Item {
 
                 placeholderText: "my_convolution"
                 placeholderTextColor: main.textColorFieldInactive
+                text: backend.databaseName
 
                 Label {
                     anchors.bottom: parent.top
@@ -107,6 +112,7 @@ Item {
 
                 placeholderText: "connect_timeout = 3"
                 placeholderTextColor: main.textColorFieldInactive
+                text: backend.connectOptions
 
                 Label {
                     anchors.bottom: parent.top
@@ -126,7 +132,14 @@ Item {
 
         // TODO: Сделать так чтобы кнопка висла при подключении и потом менялась на "Отключиться"
         text: "Подключиться к базе данных"
-        onClicked: backend.onDbConnectionButtonClicked() // QML видит Q_INVOKABLE метод подключённого класса
+        onClicked: backend.onDbConnectionButtonClicked(
+            dbHostName.text,
+            dbPort.text,
+            dbUsername.text,
+            dbPassword.text,
+            dbName.text,
+            dbConnectOptions.text
+        ) // QML видит Q_INVOKABLE метод подключённого класса
     }
 
     TextEdit {

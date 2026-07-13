@@ -42,6 +42,8 @@ struct DatabaseConfiguration {
     QString connectOptions;
 };
 
+Q_DECLARE_METATYPE(DatabaseConfiguration)
+
 class DatabaseWorker : public QObject
 {
     Q_OBJECT

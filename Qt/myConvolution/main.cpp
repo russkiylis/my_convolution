@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
     // Создание объекта приложения
     QGuiApplication app(argc, argv);
 
+    // Регистрация типа DatabaseConfiguration для передачи через сигналы/слоты
+    qRegisterMetaType<DatabaseConfiguration>("DatabaseConfiguration");
+
     // Создание QML-движка
     QQmlApplicationEngine engine;
 
