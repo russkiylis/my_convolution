@@ -145,14 +145,14 @@ Window {
             padding: 10
             text: {
                 if (backend.dbStatus === 0) return "Соединение с БД отсутствует";
-                else if (backend.dbStatus === 1) return "БД готова";
-                else return "БД занята";
+                else if (backend.dbStatus === 1) return "БД занята";
+                else return "БД готова";
             }
 
             color: {
                 if (backend.dbStatus === 0) return "red";
-                else if (backend.dbStatus === 1) return "green";
-                else return "yellow";
+                else if (backend.dbStatus === 1) return "yellow";
+                else return "green";
             }
 
             anchors.top: parent.bottom

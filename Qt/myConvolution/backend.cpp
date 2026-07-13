@@ -13,7 +13,7 @@ QString Backend::lastError()
 void Backend::setDbStatus(int const &dbStatus) {
     if (_dbStatus == dbStatus)
         return;
-    _dbStatus = static_cast<int>(dbStatus);
+    _dbStatus = dbStatus;
 
     emit dbStatusChanged(dbStatus);
 }

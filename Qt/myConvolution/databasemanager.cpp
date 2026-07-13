@@ -241,15 +241,14 @@ void DatabaseManager::slotManagerUpdate(bool connected, bool valid, bool busy, Q
     _lastError = lastError;
 
     int dbStatus = 0;
-    if (!_valid || !_connected) {
-        dbStatus = 0;
-    } else if (busy) {
+    if (busy) {
         dbStatus = 1;
+    } else if (!_valid || !_connected) {
+        dbStatus = 0;
     } else {
         dbStatus = 2;
     }
 
-    //TODO: мяу
     _backend->setLastError(_lastError);
     _backend->setDbStatus(dbStatus);
 }
