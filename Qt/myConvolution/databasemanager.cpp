@@ -57,7 +57,6 @@ DatabaseManager::~DatabaseManager() {
 }
 
 void DatabaseManager::setHostName(QString const & value) {
-    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -84,7 +83,6 @@ void DatabaseManager::setHostName(QString const & value) {
 }
 
 void DatabaseManager::setPort(int const & value) {
-    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -111,7 +109,6 @@ void DatabaseManager::setPort(int const & value) {
 }
 
 void DatabaseManager::setDbName(QString const & value) {
-    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -138,7 +135,6 @@ void DatabaseManager::setDbName(QString const & value) {
 }
 
 void DatabaseManager::setUserName(QString const & value) {
-    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -165,7 +161,6 @@ void DatabaseManager::setUserName(QString const & value) {
 }
 
 void DatabaseManager::setPassword(QString const & value) {
-    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -192,7 +187,6 @@ void DatabaseManager::setPassword(QString const & value) {
 }
 
 void DatabaseManager::setConnectOptions(QString const & value) {
-    // TODO: Всё в поток нахер
     if (!_valid) {
         qDebug().noquote().nospace() << "[!] "
                                      << _fullConnectionName
@@ -226,35 +220,6 @@ void DatabaseManager::setFullConnectionName() {
                           + ":" + QString::number(_port)
                           + "/" + _dbName;
 }
-
-// void DatabaseManager::update() {
-//     // TODO: Всё в поток нахер
-//     if (!_valid) {
-//         qDebug().noquote().nospace() << "[!] "
-//                                      << _fullConnectionName
-//                                      << ": объект подключения не валиден."
-//                                      << "Невозможно изменить параметры подключения.";
-//         return;
-//     }
-//     if (_connected) {
-//         qDebug().noquote().nospace() << "[!] "
-//                                      << _fullConnectionName
-//                                      << ": невозможно изменить параметры "
-//                                         "открытого соединения.";
-//         return;
-//     }
-//
-//     QSqlDatabase db = QSqlDatabase::database(_connectionName);
-//     db.setHostName(_hostName);
-//     db.setPort(_port);
-//     db.setDatabaseName(_dbName);
-//     db.setUserName(_userName);
-//     db.setPassword(_password);
-//     db.setConnectOptions(_connectOptions);
-//     setFullConnectionName();
-//     qDebug().noquote().nospace() << _fullConnectionName
-//                                  << ": параметры подключения изменены.";
-// }
 
 void DatabaseManager::openConnection() {
     if (!_valid) {
