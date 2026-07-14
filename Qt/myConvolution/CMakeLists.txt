@@ -33,6 +33,7 @@ set(PROJECT_SOURCES
 
 add_executable(myConvolution
     ${PROJECT_SOURCES}
+    peak.h peak.cpp
 )
 
 target_link_libraries(myConvolution
