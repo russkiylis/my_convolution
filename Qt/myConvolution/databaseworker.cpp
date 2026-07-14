@@ -3,16 +3,7 @@
 #include <QSqlError>
 #include "databaseworker.h"
 
-DatabaseConfiguration::DatabaseConfiguration(const DatabaseConfiguration &other)
-    : connectionName(other.connectionName),
-    hostName(other.hostName),
-    port(other.port),
-    dbName(other.dbName),
-    userName(other.userName),
-    password(other.password),
-    fullConnectionName(other.fullConnectionName),
-    connectOptions(other.connectOptions) {
-}
+DatabaseConfiguration::DatabaseConfiguration(const DatabaseConfiguration &other) = default;
 
 DatabaseConfiguration & DatabaseConfiguration::operator=(const DatabaseConfiguration &other) {
     if (this == &other)

@@ -32,7 +32,7 @@ DatabaseManager::DatabaseManager(Backend *backend,
     const auto dbConfig = DatabaseConfiguration(connectionName, hostName, dbName, userName, password, port,
                                                            connectOptions);
 
-    DatabaseWorker *worker = new DatabaseWorker(dbConfig);   // Создаём объект рабочего класса
+    auto *worker = new DatabaseWorker(dbConfig);   // Создаём объект рабочего класса
     worker->moveToThread(&workerThread);    // Переносим объект рабочего класса в другой поток
 
     //Соединение сигналов и слотов

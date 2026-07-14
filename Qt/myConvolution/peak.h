@@ -17,7 +17,8 @@ public:
     };
     Q_ENUM(PeakType)
 
-    explicit AbstractPeak(QObject *parent = nullptr);
+    explicit AbstractPeak(double const &center = 180.0, double const &amplitude = 1.0, QObject *parent = nullptr);
+    ~AbstractPeak() override = default;
 
     // Получить тип пика
     [[nodiscard]] virtual PeakType type() const = 0;
@@ -38,15 +39,20 @@ public:
     void setAmplitude(const double &amplitude);
 
 private:
-    double _center = 180.0;     // Координата пика (в градусах)
-    double _amplitude = 1.0;    // Амплитуда пика (в у.е.)
+    double _center;     // Координата пика (в градусах)
+    double _amplitude;    // Амплитуда пика (в у.е.)
 };
 
 // Класс гауссовского пика функции правдоподобия
 class GaussPeak final: public AbstractPeak
 {
 public:
-    explicit GaussPeak(QObject *parent = nullptr);
+    explicit GaussPeak(
+        double const &center = 180.0,
+        double const &amplitude = 1.0,
+        double const &sigma = 10.0,
+        QObject *parent = nullptr
+        );
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;
@@ -61,14 +67,19 @@ public:
     void setSigma(double const &sigma);
 
 private:
-    double _sigma = 10.0;   // Среднеквадратическое отклонение (СКО)
+    double _sigma;   // Среднеквадратическое отклонение (СКО)
 };
 
 // Класс треугольного пика функции правдоподобия
 class TrianglePeak final: public AbstractPeak
 {
 public:
-    explicit TrianglePeak(QObject *parent = nullptr);
+    explicit TrianglePeak(
+        double const &center = 180.0,
+        double const &amplitude = 1.0,
+        double const &halfWidth = 10.0,
+        QObject *parent = nullptr
+        );
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;
@@ -83,14 +94,19 @@ public:
     void setHalfWidth(double const &halfWidth);
 
 private:
-    double _halfWidth = 10.0;   // Половина ширины
+    double _halfWidth;   // Половина ширины
 };
 
 // Клас прямоугольного пика функции правдоподобия
 class RectanglePeak final: public AbstractPeak
 {
 public:
-    explicit RectanglePeak(QObject *parent = nullptr);
+    explicit RectanglePeak(
+    double const &center = 180.0,
+    double const &amplitude = 1.0,
+    double const &halfWidth = 10.0,
+    QObject *parent = nullptr
+    );
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;
@@ -105,5 +121,5 @@ public:
     void setHalfWidth(double const &halfWidth);
 
 private:
-    double _halfWidth = 10.0;
+    double _halfWidth;
 };

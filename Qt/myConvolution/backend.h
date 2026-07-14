@@ -8,10 +8,10 @@ class Backend : public QObject
 {
 public:
     // Получить статус базы данных
-    int dbStatus() const;
+    [[nodiscard]] int dbStatus() const;
 
     // Получить последнюю ошибку
-    QString lastError();
+    [[nodiscard]] QString lastError() const;
 
 private:
     Q_OBJECT
@@ -39,32 +39,32 @@ private:
 
 public:
     // Поле "имя хоста"
-    QString hostName() const;
+    [[nodiscard]] QString hostName() const;
 
     void setHostName(const QString &host_name);
 
     // Поле "порт"
-    QString port() const;
+    [[nodiscard]] QString port() const;
 
     void setPort(const QString &port);
 
     // Поле "имя пользователя"
-    QString userName() const;
+    [[nodiscard]] QString userName() const;
 
     void setUserName(const QString &user_name);
 
     // Поле "пароль"
-    QString password() const;
+    [[nodiscard]] QString password() const;
 
     void setPassword(const QString &password);
 
     // Поле "имя БД"
-    QString databaseName() const;
+    [[nodiscard]] QString databaseName() const;
 
     void setDatabaseName(const QString &database_name);
 
     // Поле "настройки подключения"
-    QString connectOptions() const;
+    [[nodiscard]] QString connectOptions() const;
 
     void setConnectOptions(const QString &connect_options);
 

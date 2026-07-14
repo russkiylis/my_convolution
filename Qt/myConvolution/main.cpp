@@ -50,5 +50,5 @@ int main(int argc, char *argv[])
     engine.load(url);
 
     // Непосредственно запуск приложения. Работа, пока пользователь не закроет сам
-    return app.exec();
+    return QGuiApplication::exec();
 }

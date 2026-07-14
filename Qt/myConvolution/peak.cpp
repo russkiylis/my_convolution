@@ -1,7 +1,9 @@
 #include "peak.h"
 
-AbstractPeak::AbstractPeak(QObject *parent)
-    : QObject{parent}
+AbstractPeak::AbstractPeak(double const &center, double const &amplitude, QObject *parent)
+    : QObject{parent},
+    _center(center),
+    _amplitude(amplitude)
 {
 }
 
@@ -25,7 +27,9 @@ void AbstractPeak::setAmplitude(const double &amplitude)
     _amplitude = amplitude;
 }
 
-GaussPeak::GaussPeak(QObject *parent)
+GaussPeak::GaussPeak(double const &center, double const &amplitude, double const &sigma, QObject *parent) :
+    AbstractPeak(center, amplitude, parent),
+    _sigma(sigma)
 {
 }
 
@@ -50,7 +54,9 @@ void GaussPeak::setSigma(double const &sigma)
     _sigma = sigma;
 }
 
-TrianglePeak::TrianglePeak(QObject *parent)
+TrianglePeak::TrianglePeak(double const &center, double const &amplitude, double const &halfWidth, QObject *parent) :
+    AbstractPeak(center, amplitude, parent),
+    _halfWidth(halfWidth)
 {
 }
 
@@ -71,7 +77,9 @@ void TrianglePeak::setHalfWidth(double const &halfWidth) {
     _halfWidth = halfWidth;
 }
 
-RectanglePeak::RectanglePeak(QObject *parent)
+RectanglePeak::RectanglePeak(double const &center, double const &amplitude, double const &halfWidth, QObject *parent) :
+    AbstractPeak(center, amplitude, parent),
+    _halfWidth(halfWidth)
 {
 }
 

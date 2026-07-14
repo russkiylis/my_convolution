@@ -29,11 +29,13 @@ set(PROJECT_SOURCES
 
     databaseworker.h
     databaseworker.cpp
+
+    peak.h peak.cpp
+    noise.h noise.cpp
 )
 
 add_executable(myConvolution
     ${PROJECT_SOURCES}
-    peak.h peak.cpp
 )
 
 target_link_libraries(myConvolution

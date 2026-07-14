@@ -29,73 +29,73 @@ public:
     ~DatabaseManager() override;
 
     // Имя подключения (не путать с именем БД)
-    QString connectionName() const
+    [[nodiscard]] QString connectionName() const
     {
         return _connectionName;
     }
 
     // Адрес хоста
-    QString hostName() const
+    [[nodiscard]] QString hostName() const
     {
         return _hostName;
     }
 
     // Порт
-    int port() const
+    [[nodiscard]] int port() const
     {
         return _port;
     }
 
     // Имя БД
-    QString dbName() const
+    [[nodiscard]] QString dbName() const
     {
         return _dbName;
     }
 
     // Имя пользователя
-    QString userName() const
+    [[nodiscard]] QString userName() const
     {
         return _userName;
     }
 
     // Пароль
-    QString password() const
+    [[nodiscard]] QString password() const
     {
         return _password;
     }
 
     // Полное имя подключения
-    QString fullConnectionName() const
+    [[nodiscard]] QString fullConnectionName() const
     {
         return _fullConnectionName;
     }
 
     // Настройки подключения
-    QString connectOptions() const
+    [[nodiscard]] QString connectOptions() const
     {
         return _connectOptions;
     }
 
     // Валиден ли объект
-    bool valid() const
+    [[nodiscard]] bool valid() const
     {
         return _valid;
     }
 
     // Занято ли подключение к БД
-    bool busy() const
+    [[nodiscard]] bool busy() const
     {
         return _busy;
     }
 
     // Установлено ли подключение к БД
-    bool connected() const
+    [[nodiscard]] bool connected() const
     {
         return _connected;
     }
 
     // Последняя ошибка БД
-    QString lastError() const
+    [[nodiscard]] QString lastError() const
     {
         return _lastError;
     }

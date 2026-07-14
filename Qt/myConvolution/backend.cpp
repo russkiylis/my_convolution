@@ -5,7 +5,7 @@ int Backend::dbStatus() const {
     return _dbStatus;
 }
 
-QString Backend::lastError()
+QString Backend::lastError() const
 {
     return _db.lastError();
 }
