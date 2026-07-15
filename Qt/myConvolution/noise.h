@@ -23,6 +23,11 @@ public:
         explicit NoiseConfig();
 
         [[nodiscard]] virtual NoiseType noiseType() const = 0;
+
+        [[nodiscard]] virtual std::unique_ptr<NoiseConfig> clone() const = 0;
+
+        virtual std::unique_ptr<AbstractNoise> createNoise() const = 0;
+
         virtual ~NoiseConfig() = default;
 
         unsigned int seed;  // Семечко для генерации
@@ -30,6 +35,7 @@ public:
 
     // Конструктор с указанием семечка
     explicit AbstractNoise(unsigned int const &seed, QObject *parent = nullptr);
+    explicit AbstractNoise(NoiseConfig const &config, QObject *parent = nullptr);
 
     // Конструктор со случайным семечком
     explicit AbstractNoise(QObject *parent = nullptr);
@@ -67,6 +73,11 @@ public:
         explicit NormalNoiseConfig(double const &mean, double const &sigma, unsigned int const &seed);
         explicit NormalNoiseConfig(double const &mean, double const &sigma);
 
+        // Клонирование объекта с умным указателем
+        [[nodiscard]] std::unique_ptr<NoiseConfig> clone() const override;
+
+        std::unique_ptr<AbstractNoise> createNoise() const override;
+
         [[nodiscard]] NoiseType noiseType() const override;
 
         double mean;    // Математическое ожидание
@@ -79,6 +90,8 @@ public:
 
     // Конструктор со случайным семечком
     explicit NormalNoise(double const &mean, double const &sigma, QObject *parent = nullptr);
+
+    explicit NormalNoise(NormalNoiseConfig const &config, QObject *parent = nullptr);
 
     // Получить тип шума
     [[nodiscard]] NoiseType type() const override;
@@ -115,6 +128,11 @@ public:
 
         [[nodiscard]] NoiseType noiseType() const override;
 
+        std::unique_ptr<AbstractNoise> createNoise() const override;
+
+        // Клонирование объекта с умным указателем
+        [[nodiscard]] std::unique_ptr<NoiseConfig> clone() const override;
+
         double min;    // Минимальное значение
         double max;   // Максимальное значение
     };
@@ -124,6 +142,8 @@ public:
 
     // Конструктор со случайным семечком
     explicit UniformNoise(double const &min, double const &max, QObject *parent = nullptr);
+
+    explicit UniformNoise(UniformNoiseConfig const &config, QObject *parent = nullptr);
 
     // Получить тип шума
     [[nodiscard]] NoiseType type() const override;

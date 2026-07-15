@@ -17,6 +17,13 @@ AbstractNoise::AbstractNoise(unsigned int const &seed, QObject *parent)
     _rng(seed)
 {}
 
+AbstractNoise::AbstractNoise(NoiseConfig const &config, QObject *parent)  :
+    QObject{parent},
+    _seed(config.seed),
+    _rng(config.seed)
+{
+}
+
 AbstractNoise::AbstractNoise(QObject *parent)
     : QObject{parent},
       _seed(std::random_device{}()),
@@ -54,6 +61,14 @@ NormalNoise::NormalNoiseConfig::NormalNoiseConfig(double const &mean, double con
 {
 }
 
+std::unique_ptr<AbstractNoise::NoiseConfig> NormalNoise::NormalNoiseConfig::clone() const {
+    return std::make_unique<NormalNoiseConfig>(*this);
+}
+
+std::unique_ptr<AbstractNoise> NormalNoise::NormalNoiseConfig::createNoise() const {
+    return std::make_unique<NormalNoise>(*this);
+}
+
 AbstractNoise::NoiseType NormalNoise::NormalNoiseConfig::noiseType() const {
     return NoiseType::Normal;
 }
@@ -69,6 +84,13 @@ NormalNoise::NormalNoise(double const &mean, double const &sigma, QObject *paren
     AbstractNoise(parent),
     _mean(mean),
     _sigma(sigma)
+{
+}
+
+NormalNoise::NormalNoise(NormalNoiseConfig const &config, QObject *parent) :
+    AbstractNoise(config.seed, parent),
+    _mean(config.mean),
+    _sigma(config.sigma)
 {
 }
 
@@ -117,6 +139,14 @@ AbstractNoise::NoiseType UniformNoise::UniformNoiseConfig::noiseType() const {
     return NoiseType::Uniform;
 }
 
+std::unique_ptr<AbstractNoise> UniformNoise::UniformNoiseConfig::createNoise() const {
+    return std::make_unique<UniformNoise>(*this);
+}
+
+std::unique_ptr<AbstractNoise::NoiseConfig> UniformNoise::UniformNoiseConfig::clone() const {
+    return std::make_unique<UniformNoiseConfig>(*this);
+}
+
 UniformNoise::UniformNoise(double const &min, double const &max, unsigned int const &seed, QObject *parent) :
     AbstractNoise(seed, parent),
     _min(min),
@@ -128,6 +158,13 @@ UniformNoise::UniformNoise(double const &min, double const &max, QObject *parent
     AbstractNoise(parent),
     _min(min),
     _max(max)
+{
+}
+
+UniformNoise::UniformNoise(UniformNoiseConfig const &config, QObject *parent) :
+    AbstractNoise(config.seed, parent),
+    _min(config.min),
+    _max(config.max)
 {
 }
 

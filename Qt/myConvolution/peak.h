@@ -22,6 +22,11 @@ public:
         explicit PeakConfig(double const &center, double const &amplitude);
 
         virtual PeakType type() const = 0;
+
+        virtual std::unique_ptr<PeakConfig> clone() const = 0;
+
+        virtual std::unique_ptr<AbstractPeak> createPeak() const = 0;
+
         virtual ~PeakConfig() = default;
 
         double center;
@@ -29,6 +34,7 @@ public:
     };
 
     explicit AbstractPeak(double const &center = 180.0, double const &amplitude = 1.0, QObject *parent = nullptr);
+    explicit AbstractPeak(PeakConfig const &config, QObject *parent = nullptr);
     ~AbstractPeak() override = default;
 
     // Получить тип пика
@@ -58,9 +64,13 @@ protected:
 class GaussPeak final: public AbstractPeak
 {
 public:
-    struct GaussPeakConfig final: public AbstractPeak
+    struct GaussPeakConfig final: public PeakConfig
     {
         explicit GaussPeakConfig(double const &center, double const &amplitude, double const &sigma);
+
+        std::unique_ptr<PeakConfig> clone() const override;
+
+        std::unique_ptr<AbstractPeak> createPeak() const override;
 
         PeakType type() const override;
 
@@ -73,6 +83,7 @@ public:
         double const &sigma = 10.0,
         QObject *parent = nullptr
         );
+    explicit GaussPeak(GaussPeakConfig const &config, QObject *parent = nullptr);
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;
@@ -94,11 +105,15 @@ private:
 class TrianglePeak final: public AbstractPeak
 {
 public:
-    struct TrianglePeakConfig final: public AbstractPeak
+    struct TrianglePeakConfig final: public PeakConfig
     {
         explicit TrianglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
 
+        std::unique_ptr<AbstractPeak> createPeak() const override;
+
         PeakType type() const override;
+
+        std::unique_ptr<PeakConfig> clone() const override;
 
         double halfWidth;   // Половина ширины
     };
@@ -110,6 +125,7 @@ public:
         double const &halfWidth = 10.0,
         QObject *parent = nullptr
         );
+    explicit TrianglePeak(TrianglePeakConfig const &config, QObject *parent = nullptr);
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;
@@ -131,11 +147,15 @@ private:
 class RectanglePeak final: public AbstractPeak
 {
 public:
-    struct RectanglePeakConfig final: public AbstractPeak
+    struct RectanglePeakConfig final: public PeakConfig
     {
         explicit RectanglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
 
+        std::unique_ptr<AbstractPeak> createPeak() const override;
+
         PeakType type() const override;
+
+        std::unique_ptr<PeakConfig> clone() const override;
 
         double halfWidth;   // Половина ширины
     };
@@ -147,6 +167,7 @@ public:
     double const &halfWidth = 10.0,
     QObject *parent = nullptr
     );
+    explicit RectanglePeak(RectanglePeakConfig const &config, QObject *parent = nullptr);
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;

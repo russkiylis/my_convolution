@@ -14,6 +14,13 @@ AbstractPeak::AbstractPeak(double const &center, double const &amplitude, QObjec
 {
 }
 
+AbstractPeak::AbstractPeak(PeakConfig const &config, QObject *parent) :
+    QObject{parent},
+    _center(config.center),
+    _amplitude(config.amplitude)
+{
+}
+
 double AbstractPeak::center() const
 {
     return _center;
@@ -35,9 +42,17 @@ void AbstractPeak::setAmplitude(const double &amplitude)
 }
 
 GaussPeak::GaussPeakConfig::GaussPeakConfig(double const &center, double const &amplitude, double const &sigma) :
-    AbstractPeak(center, amplitude),
+    PeakConfig(center, amplitude),
     sigma(sigma)
 {
+}
+
+std::unique_ptr<AbstractPeak::PeakConfig> GaussPeak::GaussPeakConfig::clone() const {
+    return std::make_unique<GaussPeakConfig>(*this);
+}
+
+std::unique_ptr<AbstractPeak> GaussPeak::GaussPeakConfig::createPeak() const {
+    return std::make_unique<GaussPeak>(*this);
 }
 
 AbstractPeak::PeakType GaussPeak::GaussPeakConfig::type() const {
@@ -47,6 +62,12 @@ AbstractPeak::PeakType GaussPeak::GaussPeakConfig::type() const {
 GaussPeak::GaussPeak(double const &center, double const &amplitude, double const &sigma, QObject *parent) :
     AbstractPeak(center, amplitude, parent),
     _sigma(sigma)
+{
+}
+
+GaussPeak::GaussPeak(GaussPeakConfig const &config, QObject *parent) :
+    AbstractPeak(config.center, config.amplitude),
+    _sigma(config.sigma)
 {
 }
 
@@ -82,18 +103,32 @@ TrianglePeak::TrianglePeakConfig::TrianglePeakConfig(
     double const &amplitude,
     double const &halfWidth
     ) :
-    AbstractPeak(center, amplitude),
+    PeakConfig(center, amplitude),
     halfWidth(halfWidth)
 {
+}
+
+std::unique_ptr<AbstractPeak> TrianglePeak::TrianglePeakConfig::createPeak() const {
+    return std::make_unique<TrianglePeak>(*this);
 }
 
 AbstractPeak::PeakType TrianglePeak::TrianglePeakConfig::type() const {
     return PeakType::Triangle;
 }
 
+std::unique_ptr<AbstractPeak::PeakConfig> TrianglePeak::TrianglePeakConfig::clone() const {
+    return std::make_unique<TrianglePeakConfig>(*this);
+}
+
 TrianglePeak::TrianglePeak(double const &center, double const &amplitude, double const &halfWidth, QObject *parent) :
     AbstractPeak(center, amplitude, parent),
     _halfWidth(halfWidth)
+{
+}
+
+TrianglePeak::TrianglePeak(TrianglePeakConfig const &config, QObject *parent) :
+AbstractPeak(config.center, config.amplitude, parent),
+_halfWidth(config.halfWidth)
 {
 }
 
@@ -128,18 +163,32 @@ RectanglePeak::RectanglePeakConfig::RectanglePeakConfig(
     double const &amplitude,
     double const &halfWidth
     ) :
-    AbstractPeak(center, amplitude),
+    PeakConfig(center, amplitude),
     halfWidth(halfWidth)
 {
+}
+
+std::unique_ptr<AbstractPeak> RectanglePeak::RectanglePeakConfig::createPeak() const {
+    return std::make_unique<RectanglePeak>(*this);
 }
 
 AbstractPeak::PeakType RectanglePeak::RectanglePeakConfig::type() const {
     return PeakType::Rectangle;
 }
 
+std::unique_ptr<AbstractPeak::PeakConfig> RectanglePeak::RectanglePeakConfig::clone() const {
+    return std::make_unique<RectanglePeakConfig>(*this);
+}
+
 RectanglePeak::RectanglePeak(double const &center, double const &amplitude, double const &halfWidth, QObject *parent) :
     AbstractPeak(center, amplitude, parent),
     _halfWidth(halfWidth)
+{
+}
+
+RectanglePeak::RectanglePeak(RectanglePeakConfig const &config, QObject *parent) :
+    AbstractPeak(config.center, config.amplitude, parent),
+    _halfWidth(config.halfWidth)
 {
 }
 
