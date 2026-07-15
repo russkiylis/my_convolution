@@ -36,6 +36,7 @@ set(PROJECT_SOURCES
 
 add_executable(myConvolution
     ${PROJECT_SOURCES}
+    loadgenerator.h loadgenerator.cpp
 )
 
 target_link_libraries(myConvolution

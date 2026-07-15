@@ -1,6 +1,16 @@
 #include "noise.h"
 #include <random>
 
+AbstractNoise::NoiseConfig::NoiseConfig(unsigned int const &seed) :
+    seed(seed)
+{
+}
+
+AbstractNoise::NoiseConfig::NoiseConfig() :
+    seed(std::random_device{}())
+{
+}
+
 AbstractNoise::AbstractNoise(unsigned int const &seed, QObject *parent)
     : QObject{parent},
     _seed(seed),
@@ -22,12 +32,30 @@ void AbstractNoise::setSeed(unsigned int const &seed) {
     _seed = seed;
 }
 
-std::mt19937 AbstractNoise::rng() const {
+std::mt19937 &AbstractNoise::rng()
+{
     return _rng;
 }
 
 void AbstractNoise::setRng(const std::mt19937 &rng) {
     _rng = rng;
+}
+
+NormalNoise::NormalNoiseConfig::NormalNoiseConfig(double const &mean, double const &sigma, unsigned int const &seed) :
+    NoiseConfig(seed),
+    mean(mean),
+    sigma(sigma)
+{
+}
+
+NormalNoise::NormalNoiseConfig::NormalNoiseConfig(double const &mean, double const &sigma) :
+    mean(mean),
+    sigma(sigma)
+{
+}
+
+AbstractNoise::NoiseType NormalNoise::NormalNoiseConfig::noiseType() const {
+    return NoiseType::Normal;
 }
 
 NormalNoise::NormalNoise(double const &mean, double const &sigma, unsigned int const &seed, QObject *parent) :
@@ -48,9 +76,12 @@ AbstractNoise::NoiseType NormalNoise::type() const {
     return NoiseType::Normal;
 }
 
-double NormalNoise::next() const {
-    // TODO: Реализовать генерацию нормального шума
-    return 0;
+double NormalNoise::next()
+{
+    // Чтобы не писать долгую строчку
+    using genParam = std::normal_distribution<double>::param_type;
+
+    return _distribution(_rng, genParam(_mean, _sigma));
 }
 
 double NormalNoise::mean() const {
@@ -67,6 +98,23 @@ double NormalNoise::sigma() const {
 
 void NormalNoise::setSigma(double const &sigma) {
     _sigma = sigma;
+}
+
+UniformNoise::UniformNoiseConfig::UniformNoiseConfig(double const &min, double const &max, unsigned int const &seed)
+    : NoiseConfig(seed),
+    min(min),
+    max(max)
+{
+}
+
+UniformNoise::UniformNoiseConfig::UniformNoiseConfig(double const &min, double const &max) :
+    min(min),
+    max(max)
+{
+}
+
+AbstractNoise::NoiseType UniformNoise::UniformNoiseConfig::noiseType() const {
+    return NoiseType::Uniform;
 }
 
 UniformNoise::UniformNoise(double const &min, double const &max, unsigned int const &seed, QObject *parent) :
@@ -87,9 +135,12 @@ AbstractNoise::NoiseType UniformNoise::type() const {
     return NoiseType::Uniform;
 }
 
-double UniformNoise::next() const {
-    // TODO: Реализовать генерацию равномерного шума
-    return 0;
+double UniformNoise::next()
+{
+    // Чтобы не писать долгую строчку
+    using genParam = std::uniform_real_distribution<double>::param_type;
+
+    return _distribution(_rng, genParam(_min, _max));
 }
 
 double UniformNoise::min() const {

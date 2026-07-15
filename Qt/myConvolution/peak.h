@@ -17,6 +17,17 @@ public:
     };
     Q_ENUM(PeakType)
 
+    struct PeakConfig
+    {
+        explicit PeakConfig(double const &center, double const &amplitude);
+
+        virtual PeakType type() const = 0;
+        virtual ~PeakConfig() = default;
+
+        double center;
+        double amplitude;
+    };
+
     explicit AbstractPeak(double const &center = 180.0, double const &amplitude = 1.0, QObject *parent = nullptr);
     ~AbstractPeak() override = default;
 
@@ -38,7 +49,7 @@ public:
     // Задать амплитуду
     void setAmplitude(const double &amplitude);
 
-private:
+protected:
     double _center;     // Координата пика (в градусах)
     double _amplitude;    // Амплитуда пика (в у.е.)
 };
@@ -47,6 +58,15 @@ private:
 class GaussPeak final: public AbstractPeak
 {
 public:
+    struct GaussPeakConfig final: public AbstractPeak
+    {
+        explicit GaussPeakConfig(double const &center, double const &amplitude, double const &sigma);
+
+        PeakType type() const override;
+
+        double sigma;   // СКО
+    };
+
     explicit GaussPeak(
         double const &center = 180.0,
         double const &amplitude = 1.0,
@@ -74,6 +94,16 @@ private:
 class TrianglePeak final: public AbstractPeak
 {
 public:
+    struct TrianglePeakConfig final: public AbstractPeak
+    {
+        explicit TrianglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
+
+        PeakType type() const override;
+
+        double halfWidth;   // Половина ширины
+    };
+
+
     explicit TrianglePeak(
         double const &center = 180.0,
         double const &amplitude = 1.0,
@@ -101,6 +131,16 @@ private:
 class RectanglePeak final: public AbstractPeak
 {
 public:
+    struct RectanglePeakConfig final: public AbstractPeak
+    {
+        explicit RectanglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
+
+        PeakType type() const override;
+
+        double halfWidth;   // Половина ширины
+    };
+
+
     explicit RectanglePeak(
     double const &center = 180.0,
     double const &amplitude = 1.0,
