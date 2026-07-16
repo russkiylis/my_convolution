@@ -15,6 +15,7 @@ find_package(Qt5 5.15 REQUIRED COMPONENTS
     Quick
     Qml
     Sql
+    Positioning
 )
 
 set(PROJECT_SOURCES
@@ -46,6 +47,7 @@ target_link_libraries(myConvolution
         Qt5::Quick
         Qt5::Qml
         Qt5::Sql
+        Qt5::Positioning
 )
 
 set_target_properties(myConvolution PROPERTIES
