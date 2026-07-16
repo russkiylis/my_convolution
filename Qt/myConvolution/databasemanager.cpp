@@ -4,7 +4,7 @@
 #include "databaseworker.h"
 #include "backend.h"
 
-DatabaseManager::DatabaseManager(Backend *backend,
+DatabaseManager::DatabaseManager(ConnectionBackend *backend,
                                        QString const & connectionName,
                                        QString const & hostName,
                                        QString const & dbName,

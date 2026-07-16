@@ -160,14 +160,14 @@ Window {
         Label {
             padding: 10
             text: {
-                if (backend.dbStatus === 0) return "Соединение с БД отсутствует";
-                else if (backend.dbStatus === 1) return "БД занята";
+                if (connectionBackend.dbStatus === 0) return "Соединение с БД отсутствует";
+                else if (connectionBackend.dbStatus === 1) return "БД занята";
                 else return "БД готова";
             }
 
             color: {
-                if (backend.dbStatus === 0) return "red";
-                else if (backend.dbStatus === 1) return "#FF9900";
+                if (connectionBackend.dbStatus === 0) return "red";
+                else if (connectionBackend.dbStatus === 1) return "#FF9900";
                 else return "green";
             }
 

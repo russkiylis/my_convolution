@@ -4,7 +4,7 @@
 #include "databasemanager.h"
 
 // Класс, подключаемый к QML и отвечающий за логику работы интерфейса
-class Backend : public QObject
+class ConnectionBackend : public QObject
 {
 public:
     // Получить статус базы данных
@@ -69,7 +69,7 @@ public:
     void setConnectOptions(const QString &connect_options);
 
     // Конструктор класса
-    explicit Backend(QObject *parent = nullptr);
+    explicit ConnectionBackend(QObject *parent = nullptr);
 
     // Задать статус базы данных
     void setDbStatus(int const &dbStatus);

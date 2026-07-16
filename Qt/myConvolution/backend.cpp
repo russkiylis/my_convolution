@@ -1,70 +1,70 @@
 #include "backend.h"
 #include <QDebug>   // для работы с консолью
 
-int Backend::dbStatus() const {
+int ConnectionBackend::dbStatus() const {
     return _dbStatus;
 }
 
-QString Backend::lastError() const
+QString ConnectionBackend::lastError() const
 {
     return _db.lastError();
 }
 
-QString Backend::hostName() const {
+QString ConnectionBackend::hostName() const {
     return _hostName;
 }
 
-void Backend::setHostName(const QString &host_name) {
+void ConnectionBackend::setHostName(const QString &host_name) {
     _hostName = host_name;
     emit hostNameChanged(_hostName);
 }
 
-QString Backend::port() const {
+QString ConnectionBackend::port() const {
     return _port;
 }
 
-void Backend::setPort(const QString &port) {
+void ConnectionBackend::setPort(const QString &port) {
     _port = port;
     emit portChanged(_port);
 }
 
-QString Backend::userName() const {
+QString ConnectionBackend::userName() const {
     return _userName;
 }
 
-void Backend::setUserName(const QString &user_name) {
+void ConnectionBackend::setUserName(const QString &user_name) {
     _userName = user_name;
     emit userNameChanged(_userName);
 }
 
-QString Backend::password() const {
+QString ConnectionBackend::password() const {
     return _password;
 }
 
-void Backend::setPassword(const QString &password) {
+void ConnectionBackend::setPassword(const QString &password) {
     _password = password;
     emit passwordChanged(_password);
 }
 
-QString Backend::databaseName() const {
+QString ConnectionBackend::databaseName() const {
     return _databaseName;
 }
 
-void Backend::setDatabaseName(const QString &database_name) {
+void ConnectionBackend::setDatabaseName(const QString &database_name) {
     _databaseName = database_name;
     emit databaseNameChanged(_databaseName);
 }
 
-QString Backend::connectOptions() const {
+QString ConnectionBackend::connectOptions() const {
     return _connectOptions;
 }
 
-void Backend::setConnectOptions(const QString &connect_options) {
+void ConnectionBackend::setConnectOptions(const QString &connect_options) {
     _connectOptions = connect_options;
     emit connectOptionsChanged(_connectOptions);
 }
 
-void Backend::setDbStatus(int const &dbStatus) {
+void ConnectionBackend::setDbStatus(int const &dbStatus) {
     if (_dbStatus == dbStatus)
         return;
     _dbStatus = dbStatus;
@@ -72,7 +72,7 @@ void Backend::setDbStatus(int const &dbStatus) {
     emit dbStatusChanged(dbStatus);
 }
 
-void Backend::setLastError(QString const &lastError) {
+void ConnectionBackend::setLastError(QString const &lastError) {
     if (_lastError == lastError)
         return;
     _lastError = lastError;
@@ -80,12 +80,12 @@ void Backend::setLastError(QString const &lastError) {
     emit lastErrorChanged(_lastError);
 }
 
-Backend::Backend(QObject *parent)
+ConnectionBackend::ConnectionBackend(QObject *parent)
     : QObject{parent},
     _db(this)
 {}
 
-void Backend::onDbConnectionButtonClicked(QString hostName, QString port, QString userName, QString password,
+void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString port, QString userName, QString password,
                                           QString databaseName, QString connectOptions)
 {
     // FIXME: Если попытаться подключиться к неправильной базке, а затем к правильной, то перед тем как подключиться к правильной, программа попробует подключиться к неправильной

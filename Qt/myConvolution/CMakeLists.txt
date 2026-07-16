@@ -33,11 +33,13 @@ set(PROJECT_SOURCES
 
     peak.h peak.cpp
     noise.h noise.cpp
+
+    loadgenerator.h loadgenerator.cpp
+    generatorbackend.h generatorbackend.cpp
 )
 
 add_executable(myConvolution
     ${PROJECT_SOURCES}
-    loadgenerator.h loadgenerator.cpp
 )
 
 target_link_libraries(myConvolution

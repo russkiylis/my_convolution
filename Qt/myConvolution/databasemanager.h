@@ -5,7 +5,7 @@
 #include <QThread>
 #include "databaseworker.h"
 
-class Backend;
+class ConnectionBackend;
 
 // Класс для работы с БД
 // У него есть рабочий в другом потоке
@@ -15,7 +15,7 @@ class DatabaseManager : public QObject
 
 public:
     // Конструктор
-    explicit DatabaseManager(Backend *backend,
+    explicit DatabaseManager(ConnectionBackend *backend,
                                 QString const & connectionName = "myConvolution",
                                 QString const & hostName = "127.0.0.1",
                                 QString const & dbName = "my_convolution",
@@ -125,7 +125,7 @@ public:
     void closeConnection();
 
 private:
-    Backend *_backend;
+    ConnectionBackend *_backend;
     QString const _connectionName;
     QString _hostName;
     int _port;

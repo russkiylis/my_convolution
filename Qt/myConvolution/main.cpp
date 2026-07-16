@@ -5,7 +5,9 @@
 #include <QSqlDatabase>
 
 #include "backend.h"
+#include "generatorbackend.h"
 #include "databasemanager.h"
+#include "loadgenerator.h"
 
 // Точка входа в программу
 int main(int argc, char *argv[])
@@ -19,18 +21,24 @@ int main(int argc, char *argv[])
     // Создание объекта приложения
     QGuiApplication app(argc, argv);
 
-    // Создаём объект класса backend
-    Backend backend;
+    // Создаём объект классов backendа
+    ConnectionBackend connectionBackend;
+    GeneratorBackend generatorBackend;
 
     // Регистрация типа DatabaseConfiguration для передачи через сигналы/слоты
     qRegisterMetaType<DatabaseConfiguration>("DatabaseConfiguration");
+    qRegisterMetaType<LoadGenerator::PostConfig>("LoadGenerator::PostConfig");
+    qRegisterMetaType<LoadGenerator::PostConfig>("PostConfig");
+    qRegisterMetaType<LoadGenerator::DataPackage>("LoadGenerator::DataPackage");
+    qRegisterMetaType<LoadGenerator::DataPackage>("DataPackage");
 
     // Создание QML-движка
     QQmlApplicationEngine engine;
 
-    // Подключаем backend в QML-движок.
+    // Подключаем backendы в QML-движок.
     // QML начнёт видеть Q_PROPERTY и Q_INVOKABLE
-    engine.rootContext()->setContextProperty("backend", &backend);
+    engine.rootContext()->setContextProperty("connectionBackend", &connectionBackend);
+    engine.rootContext()->setContextProperty("generatorBackend", &generatorBackend);
 
     // Создание адреса QML-файла
     const QUrl url(QStringLiteral("qrc:/main.qml"));

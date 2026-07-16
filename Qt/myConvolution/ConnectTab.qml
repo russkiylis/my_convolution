@@ -34,7 +34,7 @@ Item {
 
                 placeholderText: "127.0.0.1"
                 placeholderTextColor: main.textColorFieldInactive
-                text: backend.hostName
+                text: connectionBackend.hostName
 
                 Label {
                     anchors.bottom: parent.top
@@ -49,7 +49,7 @@ Item {
 
                 placeholderText: "5432"
                 placeholderTextColor: main.textColorFieldInactive
-                text: backend.port
+                text: connectionBackend.port
 
                 Label {
                     anchors.bottom: parent.top
@@ -64,7 +64,7 @@ Item {
 
                 placeholderText: "russkiylis"
                 placeholderTextColor: main.textColorFieldInactive
-                text: backend.userName
+                text: connectionBackend.userName
 
                 Label {
                     anchors.bottom: parent.top
@@ -82,7 +82,7 @@ Item {
                 echoMode: TextInput.Password
                 passwordCharacter: "*"
                 passwordMaskDelay: 1000
-                text: backend.password
+                text: connectionBackend.password
 
                 Label {
                     anchors.bottom: parent.top
@@ -97,7 +97,7 @@ Item {
 
                 placeholderText: "my_convolution"
                 placeholderTextColor: main.textColorFieldInactive
-                text: backend.databaseName
+                text: connectionBackend.databaseName
 
                 Label {
                     anchors.bottom: parent.top
@@ -112,7 +112,7 @@ Item {
 
                 placeholderText: "connect_timeout = 3"
                 placeholderTextColor: main.textColorFieldInactive
-                text: backend.connectOptions
+                text: connectionBackend.connectOptions
 
                 Label {
                     anchors.bottom: parent.top
@@ -132,15 +132,15 @@ Item {
         anchors.bottomMargin: 20
 
         enabled: {
-            return backend.dbStatus !== 1;
+            return connectionBackend.dbStatus !== 1;
 
         }
 
         text: {
-            if (backend.dbStatus === 2) return "Отключиться"
+            if (connectionBackend.dbStatus === 2) return "Отключиться"
             return "Подключиться"
         }
-        onClicked: backend.onDbConnectionButtonClicked(
+        onClicked: connectionBackend.onDbConnectionButtonClicked(
             dbHostName.text,
             dbPort.text,
             dbUsername.text,
@@ -158,7 +158,7 @@ Item {
         anchors.left: dbParamsField.left
         anchors.topMargin: 10
 
-        text: backend.lastError
+        text: connectionBackend.lastError
 
         readOnly: true
         selectByMouse: true

@@ -1,11 +1,34 @@
 #include <random>
 #include <algorithm>
 #include <iterator>
+#include <QDebug>
+#include <QTimer>
 
 #include "loadgenerator.h"
 
-LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
+LoadGenerator::PostConfig::PostConfig() :
     enabled(false),
+    latitude(60),
+    longitude(30),
+    frequency(10000000),
+    level(10),
+    levelSigma(1),
+    minAngleH(0),
+    maxAngleH(360),
+    minAngleV(-45),
+    maxAngleV(35),
+    stepH(0.1),
+    stepV(0.1),
+    minPeriod(1),
+    maxPeriod(5)
+{
+    noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(10, 1);
+    peakConfigsH.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 10));
+    peakConfigsV.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 10));
+}
+
+LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
+    enabled(other.enabled),
     postName(other.postName),
     latitude(other.latitude),
     longitude(other.longitude),
@@ -14,10 +37,10 @@ LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
     levelSigma(other.levelSigma),
     minAngleH(other.minAngleH),
     maxAngleH(other.maxAngleH),
-    minAngleV(0),
-    maxAngleV(0),
+    minAngleV(other.minAngleV),
+    maxAngleV(other.maxAngleV),
     stepH(other.stepH),
-    stepV(0),
+    stepV(other.stepV),
     minPeriod(other.minPeriod),
     maxPeriod(other.maxPeriod),
     noiseConfig(other.noiseConfig->clone())
@@ -25,6 +48,9 @@ LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
     // Проходим по вектору умных указателей и копируем их
     for (const auto &peakConfig : other.peakConfigsV) {
         peakConfigsV.push_back(peakConfig->clone());
+    }
+    for (const auto &peakConfig : other.peakConfigsH) {
+        peakConfigsH.push_back(peakConfig->clone());
     }
 }
 
@@ -51,12 +77,16 @@ LoadGenerator::PostConfig & LoadGenerator::PostConfig::operator=(const PostConfi
     for (const auto & peakConfig : other.peakConfigsV) {
         peakConfigsV.push_back(peakConfig->clone());
     }
+    for (const auto & peakConfig : other.peakConfigsH) {
+        peakConfigsH.push_back(peakConfig->clone());
+    }
     return *this;
 }
 
-LoadGenerator::Post::Post(PostConfig const &config) :
+LoadGenerator::Post::Post(PostConfig const &config, LoadGenerator *loadGenerator) :
     _config(config),
-    _rng(std::random_device{}())
+    _rng(std::random_device{}()),
+    _loadGenerator(loadGenerator)
 {
     _noise = _config.noiseConfig->createNoise(); // В зависимости от типа конфига нам выдадут разные шумы
     for (const auto & peakConfig : _config.peakConfigsV) {
@@ -72,7 +102,7 @@ LoadGenerator::Post::Post(PostConfig const &config) :
     const auto stepCountH = static_cast<std::size_t>(
         std::floor(rangeH / _config.stepH)
     );
-    for (size_t i = 0; i <= stepCountH; ++i ) {
+    for (size_t i = 0; i < stepCountH; ++i ) {
         _degH.push_back(static_cast<double>(i) * _config.stepH + _config.minAngleH);
     }
 
@@ -82,7 +112,7 @@ LoadGenerator::Post::Post(PostConfig const &config) :
     const auto stepCountV = static_cast<std::size_t>(
         std::floor(rangeV / _config.stepV)
     );
-    for (size_t i = 0; i <= stepCountV; ++i ) {
+    for (size_t i = 0; i < stepCountV; ++i ) {
         _degV.push_back(static_cast<double>(i) * _config.stepV + _config.minAngleV);
     }
 
@@ -152,7 +182,7 @@ void LoadGenerator::Post::call(TimePoint const &now) {
 
             newNextGenTime();   // Генерируем время, через которое произойдёт новая генерация
 
-            emit signalSendData(_data);     // Отправляем сигнал
+            _loadGenerator->sendData(_data);     // Отправляем сигнал
         }
     }
 }
@@ -172,7 +202,8 @@ void LoadGenerator::Post::newNextGenTime()
 
 LoadGenerator::LoadGenerator(std::vector<PostConfig> const &postConfigs, QObject *parent) :
     QObject(parent),
-    _postConfigs(postConfigs)
+    _postConfigs(postConfigs),
+    _callingEnabled(false)
 {
     load();
 }
@@ -191,6 +222,54 @@ void LoadGenerator::setPostConfigs(const std::vector<PostConfig> &postConfigs)
 void LoadGenerator::load() {
     _posts.clear();
     for (const auto & postConfig : _postConfigs) {
-        _posts.emplace_back(postConfig);    // Закидываем в вектор Postы, инициализованные postConfigом
+        _posts.emplace_back(postConfig, this);    // Закидываем в вектор Postы, инициализованные postConfigом
+    }
+    qDebug() << "Настройки генератора нагрузки обновлены.";
+}
+
+void LoadGenerator::sendData(DataPackage const &package)
+{
+    emit signalSendData(package);
+}
+
+void LoadGenerator::slotPostCallToggle(const bool toggle) {
+    if (toggle) {   // Если мы хотим включить опрос постов
+        if (_callingEnabled) {
+            qDebug() << "[!] Попытка включить включенный опрос постов генератора!";
+            return;
+        }
+
+        Q_ASSERT(QThread::currentThread() == thread()); // Проверка на то что мы в потоке
+        if (_timer == nullptr)
+            _timer = new QTimer(this);  // Создаём таймер
+        _timer->setTimerType(Qt::TimerType::PreciseTimer);
+        _timer->setInterval(10);
+
+        // Подключаем таймер к слоту, который будет опрашивать посты
+        connect(_timer, &QTimer::timeout, this, &LoadGenerator::slotPostCall);
+
+        _timer->start();
+        _callingEnabled = true;
+        qDebug() << "Опрос постов генератора запущен.";
+        emit signalPostCallToggle(_callingEnabled);
+
+    } else {    // Если мы хотим выключить опрос постов
+        if (!_callingEnabled) {
+            qDebug() << "[!] Попытка выключить выключенный опрос постов генератора!";
+            return;
+        }
+
+        Q_ASSERT(QThread::currentThread() == thread()); // Проверка на то что мы в потоке
+        if (_timer != nullptr)
+            _timer->stop();     // Останавливаем таймер
+        _callingEnabled = false;
+        qDebug() << "Опрос постов генератора остановлен.";
+        emit signalPostCallToggle(_callingEnabled);
+    }
+}
+
+void LoadGenerator::slotPostCall() {
+    for (auto & post : _posts) {
+        post.call(std::chrono::steady_clock::now());
     }
 }
