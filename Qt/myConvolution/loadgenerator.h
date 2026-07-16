@@ -77,6 +77,7 @@ public:
         explicit Post(PostConfig const &config, LoadGenerator *loadGenerator);
 
         // Генерация сигнала (если пришло время) и отправка пакета данных
+        // TODO: Level не рандомен
         void call(TimePoint const &now);
 
     private:

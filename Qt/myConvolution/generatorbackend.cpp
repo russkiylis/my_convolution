@@ -1,5 +1,8 @@
 #include "generatorbackend.h"
 #include "loadGenerator.h"
+#include "noise.h"
+#include "peak.h"
+#include "peak.h"
 
 GeneratorBackend::GeneratorBackend(QObject *parent)
     : QObject{parent}
@@ -23,11 +26,14 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
         cfg.maxAngleV = 45;
         cfg.stepH = 0.1;
         cfg.stepV = 0.1;
-        cfg.minPeriod = 1;
-        cfg.maxPeriod = 5;
-        cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 0.1);
+        cfg.minPeriod = 0.1;   // FIXME: Оно округляет
+        cfg.maxPeriod = 0.1;
+        // cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 2);
+        cfg.noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10, 20);
         cfg.peakConfigsH.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 5));
         cfg.peakConfigsV.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 5));
+        cfg.peakConfigsV.push_back(std::make_unique<RectanglePeak::RectanglePeakConfig>(30, 50, 10));
+        cfg.peakConfigsV.push_back(std::make_unique<TrianglePeak::TrianglePeakConfig>(-30, 50, 10));
 
         std::vector<LoadGenerator::PostConfig> result;
         result.push_back(cfg);
