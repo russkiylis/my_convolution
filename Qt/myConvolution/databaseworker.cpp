@@ -1,6 +1,7 @@
 #include <QDebug>
 #include <QtSql/QSqlDatabase>
 #include <QSqlError>
+#include <utility>
 #include "databaseworker.h"
 
 DatabaseConfiguration::DatabaseConfiguration(const DatabaseConfiguration &other) = default;
@@ -20,7 +21,7 @@ DatabaseConfiguration & DatabaseConfiguration::operator=(const DatabaseConfigura
 
 DatabaseConfiguration::DatabaseConfiguration(QString const &connectionName, QString const &hostName,
                                              QString const &dbName, QString const &userName, QString const &password, int const &port,
-                                             QString const &connectOptions) :    connectionName(connectionName),
+                                             QString connectOptions) :    connectionName(connectionName),
                                                                                  hostName(hostName),
                                                                                  port(port),
                                                                                  dbName(dbName),
@@ -32,7 +33,7 @@ DatabaseConfiguration::DatabaseConfiguration(QString const &connectionName, QStr
                                                                                      + "@" + hostName
                                                                                      + ":" + QString::number(port)
                                                                                      + "/" + dbName),
-                                                                                connectOptions(connectOptions)
+                                                                                connectOptions(std::move(connectOptions))
 {
 }
 

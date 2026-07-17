@@ -2,7 +2,7 @@
 #include "loadGenerator.h"
 #include "noise.h"
 #include "peak.h"
-#include "peak.h"
+//#include <cstdio>
 
 GeneratorBackend::GeneratorBackend(QObject *parent)
     : QObject{parent}
@@ -26,21 +26,30 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
         cfg.maxAngleV = 45;
         cfg.stepH = 0.1;
         cfg.stepV = 0.1;
-        cfg.minPeriod = 0.1;   // FIXME: Оно округляет
-        cfg.maxPeriod = 0.1;
+        cfg.minPeriod = std::chrono::milliseconds(20);
+        cfg.maxPeriod = std::chrono::milliseconds(100);
+        cfg.postName = "Пост 1";
         // cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 2);
         cfg.noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10, 20);
         cfg.peakConfigsH.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 5));
         cfg.peakConfigsV.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 5));
-        cfg.peakConfigsV.push_back(std::make_unique<RectanglePeak::RectanglePeakConfig>(30, 50, 10));
-        cfg.peakConfigsV.push_back(std::make_unique<TrianglePeak::TrianglePeakConfig>(-30, 50, 10));
 
         std::vector<LoadGenerator::PostConfig> result;
         result.push_back(cfg);
+        cfg.peakConfigsV.push_back(std::make_unique<RectanglePeak::RectanglePeakConfig>(30, 50, 10));
+        cfg.postName = "Пост 2";
+        result.push_back(cfg);
+        cfg.peakConfigsV.push_back(std::make_unique<TrianglePeak::TrianglePeakConfig>(-30, 50, 10));
+        cfg.postName = "Пост 3";
+        result.push_back(cfg);
+        cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 3);
+        cfg.postName = "Пост 4";
+        result.push_back(cfg);
+
         return result;
     };
 
-    // Cоздаём генератор нагрузки и засовываем его в отдельный поток
+    // Создаём генератор нагрузки и засовываем его в отдельный поток
     auto *loadGenerator = new LoadGenerator(initialConfig());
     loadGenerator->moveToThread(&loadGeneratorThread);
 
@@ -61,8 +70,13 @@ GeneratorBackend::~GeneratorBackend() {
 }
 
 void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {
-    qDebug() << package.convH;
-    qDebug() << package.convV;
+    // freopen("log.txt", "a", stdout);
+    // freopen("log.txt", "a", stderr);
+    // qDebug().noquote().nospace()
+    // << "post=" << package.postName
+    // << "\tlevel=" << package.level
+    // << "\tconvV=" << package.timestamp
+    // << "\tconvV=" << package.convV;
 }
 
 void GeneratorBackend::slotPostCallToggle(bool toggle) {

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QObject>
-#include <QThread>
-
 #include "loadGenerator.h"
 
 class GeneratorBackend : public QObject
@@ -10,7 +7,7 @@ class GeneratorBackend : public QObject
     Q_OBJECT
 public:
     explicit GeneratorBackend(QObject *parent = nullptr);
-    ~GeneratorBackend();
+    ~GeneratorBackend() override;
 
 private:
     QThread loadGeneratorThread;

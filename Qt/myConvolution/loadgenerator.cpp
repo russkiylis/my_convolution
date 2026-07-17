@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <iterator>
 #include <QDebug>
-#include <QTimer>
 
 #include "loadgenerator.h"
 
@@ -19,8 +18,8 @@ LoadGenerator::PostConfig::PostConfig() :
     maxAngleV(35),
     stepH(0.1),
     stepV(0.1),
-    minPeriod(1),
-    maxPeriod(5)
+    minPeriod(1000),
+    maxPeriod(5000)
 {
     noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(10, 1);
     peakConfigsH.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 10));
@@ -84,10 +83,11 @@ LoadGenerator::PostConfig & LoadGenerator::PostConfig::operator=(const PostConfi
 }
 
 LoadGenerator::Post::Post(PostConfig const &config, LoadGenerator *loadGenerator) :
+    _loadGenerator(loadGenerator),
     _config(config),
-    _rng(std::random_device{}()),
-    _loadGenerator(loadGenerator)
+    _rng(std::random_device{}())
 {
+    _config.noiseConfig->seed = std::random_device{}();
     _noise = _config.noiseConfig->createNoise(); // В зависимости от типа конфига нам выдадут разные шумы
     for (const auto & peakConfig : _config.peakConfigsV) {
         _peaksV.push_back(peakConfig->createPeak()); // В зависимости от типа конфига нам выдадут разные пики
@@ -160,14 +160,14 @@ void LoadGenerator::Post::call(TimePoint const &now) {
             }
             _data.qualityV = maxValueV;   // Записываем это как качество IDK: Я не знаю как расчитать quality
             const auto maxIndexV = std::distance(_data.convV.begin(), maxItV);
-            _data.bearingV = _degH[maxIndexV];   // Записываем направление по максимуму
+            _data.bearingV = _degV[maxIndexV];   // Записываем направление по максимуму
 
             // Расчёт временной метки
             _data.timestamp = QDateTime::currentDateTimeUtc();
 
             // Далее копирование информации которую мы и так знаем
-
-            _data.level = _config.level;
+            std::normal_distribution<double> levelDistribution(_config.level, _config.levelSigma);
+            _data.level = levelDistribution(_rng);
             _data.frequency = _config.frequency;
             _data.coordinate.setLatitude(_config.latitude);
             _data.coordinate.setLongitude(_config.longitude);
@@ -190,7 +190,7 @@ void LoadGenerator::Post::call(TimePoint const &now) {
 void LoadGenerator::Post::newNextGenTime()
 {
     std::uniform_real_distribution<double> cooldownDistribution {
-        static_cast<double>(_config.minPeriod), static_cast<double>(_config.maxPeriod)
+        static_cast<double>(_config.minPeriod.count())/1000, static_cast<double>(_config.maxPeriod.count())/1000
     }; // Создаём закон равномерного распределения
     const double cooldownSeconds = cooldownDistribution(_rng);  // Генерируем кд в секундах
     const auto cooldownDuration = std::chrono::duration<double>(cooldownSeconds); // Кастим в duration
@@ -222,7 +222,7 @@ void LoadGenerator::setPostConfigs(const std::vector<PostConfig> &postConfigs)
 void LoadGenerator::load() {
     _posts.clear();
     for (const auto & postConfig : _postConfigs) {
-        _posts.emplace_back(postConfig, this);    // Закидываем в вектор Postы, инициализованные postConfigом
+        _posts.emplace_back(postConfig, this);    // Закидываем в вектор Posts, инициализованные postConfig
     }
     qDebug() << "Настройки генератора нагрузки обновлены.";
 }

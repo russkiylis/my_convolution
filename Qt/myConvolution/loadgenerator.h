@@ -2,7 +2,6 @@
 
 #include <QObject>
 #include <QString>
-#include <QDateTime>
 #include <QtPositioning>
 #include <vector>
 
@@ -31,8 +30,8 @@ public:
         int maxAngleV;               // Максимальный угол (вертикальный)
         double stepH;                // Шаг (горизонтальный)
         double stepV;                // Шаг (вертикальный)
-        unsigned int minPeriod;      // Минимальный период между отправками
-        unsigned int maxPeriod;      // Максимальный период между отправками
+        std::chrono::milliseconds minPeriod;      // Минимальный период между отправками
+        std::chrono::milliseconds maxPeriod;      // Максимальный период между отправками
 
         std::unique_ptr<AbstractNoise::NoiseConfig> noiseConfig;                // Шум
         std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> peakConfigsV;    // Пики по вертикали
@@ -77,7 +76,6 @@ public:
         explicit Post(PostConfig const &config, LoadGenerator *loadGenerator);
 
         // Генерация сигнала (если пришло время) и отправка пакета данных
-        // TODO: Level не рандомен
         void call(TimePoint const &now);
 
     private:

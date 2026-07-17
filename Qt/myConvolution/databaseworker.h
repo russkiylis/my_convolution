@@ -31,7 +31,7 @@ struct DatabaseConfiguration {
                                    QString const & userName = "russkiylis",
                                    QString const & password = "1337",
                                    int const & port = 5432,
-                                   QString const & connectOptions = "connect_timeout = 3");
+                                   QString connectOptions = "connect_timeout = 3");
     QString const connectionName;
     QString hostName;
     int port;
