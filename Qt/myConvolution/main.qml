@@ -158,6 +158,7 @@ Window {
 
         // Текст в нижнем правом углу. Показывает статус базы данных
         Label {
+            id: dbStatusLabel
             padding: 10
             text: {
                 if (connectionBackend.dbStatus === 0) return "Соединение с БД отсутствует";
@@ -173,6 +174,17 @@ Window {
 
             anchors.top: parent.bottom
             anchors.right: parent.right
+        }
+
+        // Текст в нижнем правом углу. Показывает статус генерации
+        Label {
+            id: generatorEnabledLabel
+            padding: 10
+            text: generatorBackend.generatorEnabled ? "Генератор нагрузки запущен" : "Генератор нагрузки остановлен"
+            color: generatorBackend.generatorEnabled ? "green" : "#FF9900"
+
+            anchors.right: dbStatusLabel.left
+            anchors.bottom: dbStatusLabel.bottom
         }
     }
 }

@@ -59,14 +59,30 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
     connect(loadGenerator, &LoadGenerator::signalPostCallToggle, this, &GeneratorBackend::slotPostCallToggle);  // Принимаем информацию о переключении опроса постов
     connect(this, &GeneratorBackend::signalPostCallToggle, loadGenerator, &LoadGenerator::slotPostCallToggle);  // Подаём указание переключить опрос постов
     loadGeneratorThread.start();
-
-    // Запускаем периодический опрос постов в генераторе
-    emit signalPostCallToggle(true);
 }
 
 GeneratorBackend::~GeneratorBackend() {
     loadGeneratorThread.quit();
     loadGeneratorThread.wait();
+}
+
+bool GeneratorBackend::generatorEnabled() const
+{
+    return _generatorEnabled;
+}
+
+void GeneratorBackend::setGeneratorEnabled(const bool generatorEnabled)
+{
+    _generatorEnabled = generatorEnabled;
+    emit generatorEnabledChanged(generatorEnabled);
+}
+
+void GeneratorBackend::onGeneratorEnabledButtonClicked() {
+    qDebug() << "Кнопка переключения генератора нагрузки нажата.";
+    setGeneratorEnabled(!_generatorEnabled);    // Переключаем статус генератора
+
+    // Запускаем (или останавливаем) периодический опрос постов в генераторе
+    emit signalPostCallToggle(_generatorEnabled);
 }
 
 void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {
@@ -79,6 +95,6 @@ void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {
     // << "\tconvV=" << package.convV;
 }
 
-void GeneratorBackend::slotPostCallToggle(bool toggle) {
-    // TODO: Сделать какой-нибудь красивенький индикатор
+void GeneratorBackend::slotPostCallToggle(const bool toggle) {
+    setGeneratorEnabled(toggle);
 }

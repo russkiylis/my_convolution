@@ -4,6 +4,7 @@ import QtQuick.Controls 2.15
 
 // Окошко с интерфейсом подключения к БД
 Item {
+
     Rectangle {
         id: dbParamsField
         width: parent.width - 40
