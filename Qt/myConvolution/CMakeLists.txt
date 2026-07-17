@@ -40,6 +40,7 @@ set(PROJECT_SOURCES
 
 add_executable(myConvolution
     ${PROJECT_SOURCES}
+    postlistmodel.h postlistmodel.cpp
 )
 
 target_link_libraries(myConvolution

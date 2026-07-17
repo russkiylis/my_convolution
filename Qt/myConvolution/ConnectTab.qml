@@ -8,9 +8,11 @@ Item {
     Rectangle {
         id: dbParamsField
         width: parent.width - 40
-        height: connectionGrid.height + 80
+        // height: connectionGrid.height + 80
+        height: parent.height - dbConnectionButton.height - 60
         border.color: main.borderColor
         color: main.backgroundColor
+        radius: 5
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -36,6 +38,8 @@ Item {
                 placeholderText: "127.0.0.1"
                 placeholderTextColor: main.textColorFieldInactive
                 text: connectionBackend.hostName
+                background: TextFieldBackground {}
+                selectByMouse: true
 
                 Label {
                     anchors.bottom: parent.top
@@ -51,6 +55,8 @@ Item {
                 placeholderText: "5432"
                 placeholderTextColor: main.textColorFieldInactive
                 text: connectionBackend.port
+                background: TextFieldBackground {}
+                selectByMouse: true
 
                 Label {
                     anchors.bottom: parent.top
@@ -66,6 +72,8 @@ Item {
                 placeholderText: "russkiylis"
                 placeholderTextColor: main.textColorFieldInactive
                 text: connectionBackend.userName
+                background: TextFieldBackground {}
+                selectByMouse: true
 
                 Label {
                     anchors.bottom: parent.top
@@ -84,12 +92,15 @@ Item {
                 passwordCharacter: "*"
                 passwordMaskDelay: 1000
                 text: connectionBackend.password
+                background: TextFieldBackground {}
+                selectByMouse: true
 
                 Label {
                     anchors.bottom: parent.top
                     anchors.bottomMargin: 5
                     text: "Пароль:"
                     color: main.textColor
+
                 }
             }
             TextField {
@@ -99,6 +110,8 @@ Item {
                 placeholderText: "my_convolution"
                 placeholderTextColor: main.textColorFieldInactive
                 text: connectionBackend.databaseName
+                background: TextFieldBackground {}
+                selectByMouse: true
 
                 Label {
                     anchors.bottom: parent.top
@@ -114,6 +127,8 @@ Item {
                 placeholderText: "connect_timeout = 3"
                 placeholderTextColor: main.textColorFieldInactive
                 text: connectionBackend.connectOptions
+                background: TextFieldBackground {}
+                selectByMouse: true
 
                 Label {
                     anchors.bottom: parent.top
@@ -134,8 +149,8 @@ Item {
 
         enabled: {
             return connectionBackend.dbStatus !== 1;
-
         }
+        background: ButtonBackground {}
 
         text: {
             if (connectionBackend.dbStatus === 2) return "Отключиться"

@@ -29,10 +29,15 @@ Window {
     property string textColorFieldInactive: "#B1B0AF"
     property string pressColor: "#FFF3E2"
 
-    width: 640
-    height: 480
-    minimumWidth: 640
-    minimumHeight: 480
+    property string borderColor2: "#CBCBCB"
+    property string backgroundColor2: "#F7F7F7"
+    property string pressColor2: "#EDEDED"
+    property string textColorInactive2: "#979797"
+
+    width: 1280
+    height: 720
+    minimumWidth: 1280
+    minimumHeight: 720
     visible: true
     title: "My Convolution"
 
@@ -44,6 +49,7 @@ Window {
         anchors.margins: 20
         anchors.bottomMargin: 40
         anchors.topMargin: bar.height + 20
+        radius: 5
 
         // Блок внешнего вида
         color: backgroundColor
@@ -54,7 +60,7 @@ Window {
             id: bar
             width: 500
             anchors.bottom: parent.top
-            anchors.bottomMargin: -1
+            anchors.bottomMargin: 5
 
             TabButton {
                 id: tabButtonConnect
@@ -74,6 +80,7 @@ Window {
                         return main.backgroundColor
                     }
                     border.color: main.borderColor
+                    radius: 5
                 }
             }
             TabButton {
@@ -94,6 +101,7 @@ Window {
                         return main.backgroundColor
                     }
                     border.color: main.borderColor
+                    radius: 5
                 }
             }
             TabButton {
@@ -114,6 +122,7 @@ Window {
                         return main.backgroundColor
                     }
                     border.color: main.borderColor
+                    radius: 5
                 }
             }
             TabButton {
@@ -134,6 +143,7 @@ Window {
                         return main.backgroundColor
                     }
                     border.color: main.borderColor
+                    radius: 5
                 }
             }
         }

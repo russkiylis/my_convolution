@@ -5,5 +5,7 @@
         <file>GenTab.qml</file>
         <file>SaveTab.qml</file>
         <file>VisualizeTab.qml</file>
+        <file>ButtonBackground.qml</file>
+        <file>TextFieldBackground.qml</file>
     </qresource>
 </RCC>

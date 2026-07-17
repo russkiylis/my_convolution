@@ -1,11 +1,12 @@
 #include "generatorbackend.h"
-#include "loadGenerator.h"
+#include "loadgenerator.h"
 #include "noise.h"
 #include "peak.h"
 //#include <cstdio>
 
 GeneratorBackend::GeneratorBackend(QObject *parent)
-    : QObject{parent}
+    : QObject{parent},
+    _postListModel(_cfg, this)
 {
     // Лямбда для создания начального конфига нагрузки
     auto initialConfig = []() -> std::vector<LoadGenerator::PostConfig>
@@ -43,14 +44,16 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
         cfg.postName = "Пост 3";
         result.push_back(cfg);
         cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 3);
-        cfg.postName = "Пост 4";
-        result.push_back(cfg);
-
+        for (int i = 4; i < 101; i++) {
+            cfg.postName = "Пост " + QString::number(i);
+            cfg.enabled = i % 2;
+            result.push_back(cfg);
+        }
         return result;
     };
-
+    _cfg = initialConfig();
     // Создаём генератор нагрузки и засовываем его в отдельный поток
-    auto *loadGenerator = new LoadGenerator(initialConfig());
+    auto *loadGenerator = new LoadGenerator(_cfg);
     loadGenerator->moveToThread(&loadGeneratorThread);
 
     //Соединение сигналов и слотов
@@ -75,6 +78,10 @@ void GeneratorBackend::setGeneratorEnabled(const bool generatorEnabled)
 {
     _generatorEnabled = generatorEnabled;
     emit generatorEnabledChanged(generatorEnabled);
+}
+
+PostListModel * GeneratorBackend::postListModel() {
+    return &_postListModel;
 }
 
 void GeneratorBackend::onGeneratorEnabledButtonClicked() {
