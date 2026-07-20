@@ -1,7 +1,9 @@
 #include "postlistmodel.h"
+#include "generatorbackend.h"
 
-PostListModel::PostListModel(std::vector<LoadGenerator::PostConfig> &config, QObject *parent) :
+PostListModel::PostListModel(GeneratorBackend *generatorBackend, std::vector<LoadGenerator::PostConfig> &config, QObject *parent) :
     QAbstractListModel {parent},
+    m_generatorBackend(generatorBackend),
     m_config(config)
 {}
 
@@ -41,4 +43,19 @@ QVariant PostListModel::data(const QModelIndex &index, int role) const {
             return {};
     }
 
+}
+
+int PostListModel::addPost() {
+
+    int newIndex = static_cast<int>(m_config.size());   // Получаем индекс нового поста
+    LoadGenerator::PostConfig newConfig;    // Начальный конфиг нового поста
+    newConfig.postName = QStringLiteral("Пост %1").arg(newIndex + 1);   // Начальное имя поста - его индекс
+    newConfig.enabled = true;
+
+    beginInsertRows(QModelIndex(), newIndex, newIndex);     // Начинаем вставлять
+    m_config.push_back(std::move(newConfig)); // Засовываем в m_config новый конфиг
+    m_generatorBackend->signalPostConfigUpdate(m_config);   // Подаём в loadgenerator сигнал обновить посты
+    endInsertRows();    // Заканчиваем вставлять
+
+    return newIndex;
 }

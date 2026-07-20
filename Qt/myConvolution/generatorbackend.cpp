@@ -6,7 +6,7 @@
 
 GeneratorBackend::GeneratorBackend(QObject *parent)
     : QObject{parent},
-    m_postListModel(m_cfg, this)
+    m_postListModel(this, m_cfg)
 {
     // Лямбда для создания начального конфига нагрузки
     auto initialConfig = []() -> std::vector<LoadGenerator::PostConfig>
@@ -27,11 +27,11 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
         cfg.maxAngleV = 45;
         cfg.stepH = 0.1;
         cfg.stepV = 0.1;
-        cfg.minPeriod = std::chrono::milliseconds(20);
-        cfg.maxPeriod = std::chrono::milliseconds(100);
+        cfg.minPeriod = std::chrono::milliseconds(1000);
+        cfg.maxPeriod = std::chrono::milliseconds(5000);
         cfg.postName = "Пост 1";
-        // cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 2);
-        cfg.noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10, 20);
+        cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 2);
+        // cfg.noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10, 20);
         cfg.peakConfigsH.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 5));
         cfg.peakConfigsV.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 5));
 
@@ -44,11 +44,11 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
         cfg.postName = "Пост 3";
         result.push_back(cfg);
         cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 3);
-        for (int i = 4; i < 101; i++) {
-            cfg.postName = "Пост " + QString::number(i);
-            cfg.enabled = i % 2;
-            result.push_back(cfg);
-        }
+        // for (int i = 4; i < 101; i++) {
+        //     cfg.postName = "Пост " + QString::number(i);
+        //     cfg.enabled = i % 2;
+        //     result.push_back(cfg);
+        // }
         return result;
     };
     m_cfg = initialConfig();
@@ -61,6 +61,7 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
     connect(loadGenerator, &LoadGenerator::signalSendData, this, &GeneratorBackend::slotSendData); // Принимаем пакет данных из генератора
     connect(loadGenerator, &LoadGenerator::signalPostCallToggle, this, &GeneratorBackend::slotPostCallToggle);  // Принимаем информацию о переключении опроса постов
     connect(this, &GeneratorBackend::signalPostCallToggle, loadGenerator, &LoadGenerator::slotPostCallToggle);  // Подаём указание переключить опрос постов
+    connect(this, &GeneratorBackend::signalPostConfigUpdate, loadGenerator, &LoadGenerator::slotPostConfigUpdate);
     m_loadGeneratorThread.start();
 }
 
@@ -92,14 +93,24 @@ void GeneratorBackend::onGeneratorEnabledButtonClicked() {
     emit signalPostCallToggle(m_generatorEnabled);
 }
 
+std::vector<LoadGenerator::PostConfig> GeneratorBackend::cfg() const
+{
+    return m_cfg;
+}
+
+void GeneratorBackend::setCfg(const std::vector<LoadGenerator::PostConfig> &cfg)
+{
+    m_cfg = cfg;
+}
+
 void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {
     // freopen("log.txt", "a", stdout);
     // freopen("log.txt", "a", stderr);
-    // qDebug().noquote().nospace()
-    // << "post=" << package.postName
-    // << "\tlevel=" << package.level
-    // << "\tconvV=" << package.timestamp
-    // << "\tconvV=" << package.convV;
+    qDebug().noquote().nospace()
+    << "post=" << package.postName
+    << "\tlevel=" << package.level
+    << "\tconvV=" << package.timestamp
+    << "\tconvV=" << package.convV;
 }
 
 void GeneratorBackend::slotPostCallToggle(const bool toggle) {

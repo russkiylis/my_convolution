@@ -27,6 +27,13 @@ Item {
             anchors.top: parent.bottom
             anchors.left: parent.left
             anchors.topMargin: 5
+
+            onClicked: {
+                let newIndex = generatorBackend.postListModel.addPost()
+                if (newIndex >= 0) {
+                    postListView.currentIndex = newIndex
+                }
+            }
         }
         Button {
             id: postDeleteButton
@@ -58,6 +65,11 @@ Item {
                 color: main.backgroundColor2
                 border.color: main.borderColor2
                 radius: 5
+                // highlighted: ListView.isCurrentItem
+                //
+                // onClicked: {
+                //     postListView.currentIndex = index
+                // }
 
                 Text {
                     anchors.top: parent.top

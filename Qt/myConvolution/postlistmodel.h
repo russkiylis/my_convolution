@@ -2,16 +2,20 @@
 
 #include <QAbstractListModel>
 #include <QObject>
+
 #include "loadgenerator.h"
+
+class GeneratorBackend;
 
 class PostListModel : public QAbstractListModel
 {
     Q_OBJECT
 
     std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
+    GeneratorBackend *m_generatorBackend;
 
 public:
-    explicit PostListModel(std::vector<LoadGenerator::PostConfig> &config, QObject *parent = nullptr);
+    explicit PostListModel(GeneratorBackend *generatorBackend, std::vector<LoadGenerator::PostConfig> &config, QObject *parent = nullptr);
 
     // Подсчёт строчек
     int rowCount(const QModelIndex &parent) const override;
@@ -21,6 +25,12 @@ public:
 
     // Передаём данные в зависимости от индекса
     QVariant data(const QModelIndex &index, int role) const override;
+
+    // Добавляем новый пост
+    Q_INVOKABLE int addPost();
+
+    // Удаляем пост
+    Q_INVOKABLE int removePost();
 
 private:
 

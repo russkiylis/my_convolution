@@ -29,6 +29,9 @@ int main(int argc, char *argv[])
     qRegisterMetaType<DatabaseConfiguration>("DatabaseConfiguration");
     qRegisterMetaType<LoadGenerator::PostConfig>("LoadGenerator::PostConfig");
     qRegisterMetaType<LoadGenerator::PostConfig>("PostConfig");
+    qRegisterMetaType<LoadGenerator::PostConfig>("PostConfig");
+    qRegisterMetaType<std::vector<LoadGenerator::PostConfig>>("std::vector<PostConfig>");
+    qRegisterMetaType<std::vector<LoadGenerator::PostConfig>>("std::vector<LoadGenerator::PostConfig>");
     qRegisterMetaType<LoadGenerator::DataPackage>("LoadGenerator::DataPackage");
     qRegisterMetaType<LoadGenerator::DataPackage>("DataPackage");
 

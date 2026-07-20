@@ -3,3 +3,5 @@
 *CMakeLists.txt.user*
 *CMakeLists.txt.user
 *.DS_Store
+**/html
+**/latex

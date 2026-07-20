@@ -268,6 +268,10 @@ void LoadGenerator::slotPostCallToggle(const bool toggle) {
     }
 }
 
+void LoadGenerator::slotPostConfigUpdate(std::vector<PostConfig> newConfig) {
+    setPostConfigs(newConfig);
+}
+
 void LoadGenerator::slotPostCall() {
     for (auto & post : m_posts) {
         post.call(std::chrono::steady_clock::now());

@@ -17,6 +17,9 @@ public:
     // Включён ли генератор
     [[nodiscard]] bool generatorEnabled() const;
 
+    std::vector<LoadGenerator::PostConfig> cfg() const;
+    void setCfg(const std::vector<LoadGenerator::PostConfig> &cfg);
+
     // Задать статус включения генератора
     void setGeneratorEnabled(bool generatorEnabled);
 
@@ -25,15 +28,16 @@ public:
     Q_INVOKABLE void onGeneratorEnabledButtonClicked();
 
 private:
+    std::vector<LoadGenerator::PostConfig> m_cfg;
     QThread m_loadGeneratorThread;    // Поток генератора
     PostListModel m_postListModel;   // Модель для подключения к списку постов
 
     bool m_generatorEnabled = false;     // Включён ли генератор
-    std::vector<LoadGenerator::PostConfig> m_cfg;
 
 signals:
     void signalPostCallToggle(bool toggle);
     void generatorEnabledChanged(bool generatorEnabled);
+    void signalPostConfigUpdate(std::vector<LoadGenerator::PostConfig> newConfig);
 
 public slots:
     void slotSendData(LoadGenerator::DataPackage const & package);

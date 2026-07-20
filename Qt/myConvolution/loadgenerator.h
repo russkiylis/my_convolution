@@ -119,6 +119,7 @@ private:
 
 public slots:
     void slotPostCallToggle(bool toggle);
+    void slotPostConfigUpdate(std::vector<PostConfig> newConfig);
 
 private slots:
     void slotPostCall();
