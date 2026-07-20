@@ -30,7 +30,7 @@ public:
     Q_INVOKABLE int addPost();
 
     // Удаляем пост
-    Q_INVOKABLE int removePost();
+    Q_INVOKABLE int removePost(int index);
 
 private:
 

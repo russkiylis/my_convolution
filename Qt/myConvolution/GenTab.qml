@@ -17,6 +17,15 @@ Item {
         anchors.topMargin: 20
         anchors.leftMargin: 20
 
+        Text {
+            visible: postListView.currentIndex < 0
+            color: main.textColorInactive
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.margins: 10
+            text: "Время добавить новый пост..."
+        }
+
         Button {
             id: postAddButton
             text: "+"
@@ -46,6 +55,11 @@ Item {
             anchors.left: postAddButton.right
             anchors.topMargin: 5
             anchors.leftMargin: 10
+
+            onClicked: {
+                let newIndex = generatorBackend.postListModel.removePost(postListView.currentIndex)
+                postListView.currentIndex = newIndex
+            }
         }
 
         ListView {
@@ -59,17 +73,15 @@ Item {
             model: generatorBackend.postListModel
 
             // 2. Делегат (шаблон отображения)
-            delegate: Rectangle {
+            delegate: ItemDelegate {
                 width: postListView.width
                 height: 60
-                color: main.backgroundColor2
-                border.color: main.borderColor2
-                radius: 5
-                // highlighted: ListView.isCurrentItem
-                //
-                // onClicked: {
-                //     postListView.currentIndex = index
-                // }
+                background: ListViewItemBackground {}
+                highlighted: ListView.isCurrentItem
+
+                onClicked: {
+                    postListView.currentIndex = index
+                }
 
                 Text {
                     anchors.top: parent.top

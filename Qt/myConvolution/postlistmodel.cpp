@@ -59,3 +59,30 @@ int PostListModel::addPost() {
 
     return newIndex;
 }
+
+int PostListModel::removePost(int index) {
+
+    int oldSize = static_cast<int>(m_config.size());
+    if (index < 0 || index >= oldSize) {
+        return -1;
+    }
+
+    beginRemoveRows(QModelIndex(), index, index);
+    m_config.erase(m_config.begin() + index);
+    m_generatorBackend->signalPostConfigUpdate(m_config);
+    endRemoveRows();
+
+    int newSize = static_cast<int>(m_config.size());
+
+    // Список стал пустым, значит выбранного элемента больше нет
+    if (newSize == 0) {
+        return -1;
+    }
+    // Если удалили последний элемент
+    if (index >= newSize) {
+        return newSize - 1;
+    }
+    // Если удалили из середины, то индекс менять не нужно
+    return index;
+
+}
