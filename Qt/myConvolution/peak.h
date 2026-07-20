@@ -3,10 +3,8 @@
 #include <QObject>
 
 // Абстрактный класс пика функции правдоподобия
-class AbstractPeak : public QObject
+class AbstractPeak
 {
-    Q_OBJECT
-
 public:
     // Тип пика
     enum class PeakType
@@ -15,7 +13,6 @@ public:
         Triangle,
         Rectangle
     };
-    Q_ENUM(PeakType)
 
     struct PeakConfig
     {
@@ -33,9 +30,9 @@ public:
         double amplitude;
     };
 
-    explicit AbstractPeak(double const &center = 180.0, double const &amplitude = 1.0, QObject *parent = nullptr);
-    explicit AbstractPeak(PeakConfig const &config, QObject *parent = nullptr);
-    ~AbstractPeak() override = default;
+    explicit AbstractPeak(double const &center = 180.0, double const &amplitude = 1.0);
+    explicit AbstractPeak(PeakConfig const &config);
+    virtual ~AbstractPeak() = default;
 
     // Получить тип пика
     [[nodiscard]] virtual PeakType type() const = 0;
@@ -80,10 +77,9 @@ public:
     explicit GaussPeak(
         double const &center = 180.0,
         double const &amplitude = 1.0,
-        double const &sigma = 10.0,
-        QObject *parent = nullptr
+        double const &sigma = 10.0
         );
-    explicit GaussPeak(GaussPeakConfig const &config, QObject *parent = nullptr);
+    explicit GaussPeak(GaussPeakConfig const &config);
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;
@@ -122,10 +118,9 @@ public:
     explicit TrianglePeak(
         double const &center = 180.0,
         double const &amplitude = 1.0,
-        double const &halfWidth = 10.0,
-        QObject *parent = nullptr
+        double const &halfWidth = 10.0
         );
-    explicit TrianglePeak(TrianglePeakConfig const &config, QObject *parent = nullptr);
+    explicit TrianglePeak(TrianglePeakConfig const &config);
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;
@@ -164,10 +159,9 @@ public:
     explicit RectanglePeak(
     double const &center = 180.0,
     double const &amplitude = 1.0,
-    double const &halfWidth = 10.0,
-    QObject *parent = nullptr
+    double const &halfWidth = 10.0
     );
-    explicit RectanglePeak(RectanglePeakConfig const &config, QObject *parent = nullptr);
+    explicit RectanglePeak(RectanglePeakConfig const &config);
 
     // Получить тип пика
     [[nodiscard]] PeakType type() const override;

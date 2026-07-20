@@ -11,21 +11,20 @@ AbstractNoise::NoiseConfig::NoiseConfig() :
 {
 }
 
-AbstractNoise::AbstractNoise(unsigned int const &seed, QObject *parent)
-    : QObject{parent},
+AbstractNoise::AbstractNoise(unsigned int const &seed)
+    :
     _seed(seed),
     _rng(seed)
 {}
 
-AbstractNoise::AbstractNoise(NoiseConfig const &config, QObject *parent)  :
-    QObject{parent},
+AbstractNoise::AbstractNoise(NoiseConfig const &config)  :
     _seed(config.seed),
     _rng(config.seed)
 {
 }
 
-AbstractNoise::AbstractNoise(QObject *parent)
-    : QObject{parent},
+AbstractNoise::AbstractNoise()
+    :
       _seed(std::random_device{}()),
       _rng(_seed)
 {
@@ -73,22 +72,22 @@ AbstractNoise::NoiseType NormalNoise::NormalNoiseConfig::noiseType() const {
     return NoiseType::Normal;
 }
 
-NormalNoise::NormalNoise(double const &mean, double const &sigma, unsigned int const &seed, QObject *parent) :
-    AbstractNoise(seed, parent),
+NormalNoise::NormalNoise(double const &mean, double const &sigma, unsigned int const &seed) :
+    AbstractNoise(seed),
     _mean(mean),
     _sigma(sigma)
 {
 }
 
-NormalNoise::NormalNoise(double const &mean, double const &sigma, QObject *parent) :
-    AbstractNoise(parent),
+NormalNoise::NormalNoise(double const &mean, double const &sigma) :
+    AbstractNoise(),
     _mean(mean),
     _sigma(sigma)
 {
 }
 
-NormalNoise::NormalNoise(NormalNoiseConfig const &config, QObject *parent) :
-    AbstractNoise(config.seed, parent),
+NormalNoise::NormalNoise(NormalNoiseConfig const &config) :
+    AbstractNoise(config.seed),
     _mean(config.mean),
     _sigma(config.sigma)
 {
@@ -147,22 +146,22 @@ std::unique_ptr<AbstractNoise::NoiseConfig> UniformNoise::UniformNoiseConfig::cl
     return std::make_unique<UniformNoiseConfig>(*this);
 }
 
-UniformNoise::UniformNoise(double const &min, double const &max, unsigned int const &seed, QObject *parent) :
-    AbstractNoise(seed, parent),
+UniformNoise::UniformNoise(double const &min, double const &max, unsigned int const &seed) :
+    AbstractNoise(seed),
     _min(min),
     _max(max)
 {
 }
 
-UniformNoise::UniformNoise(double const &min, double const &max, QObject *parent) :
-    AbstractNoise(parent),
+UniformNoise::UniformNoise(double const &min, double const &max) :
+    AbstractNoise(),
     _min(min),
     _max(max)
 {
 }
 
-UniformNoise::UniformNoise(UniformNoiseConfig const &config, QObject *parent) :
-    AbstractNoise(config.seed, parent),
+UniformNoise::UniformNoise(UniformNoiseConfig const &config) :
+    AbstractNoise(config.seed),
     _min(config.min),
     _max(config.max)
 {
