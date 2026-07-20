@@ -1,6 +1,29 @@
 #include "postlistmodel.h"
 #include "generatorbackend.h"
 
+int PostListModel::postIndex() const
+{
+    qDebug() << m_postIndex;
+    return m_postIndex;
+}
+
+void PostListModel::setPostIndex(int postIndex)
+{
+    qDebug() << postIndex;
+    m_postIndex = postIndex;
+    postUpdate();
+}
+
+QString PostListModel::currentPostName() const {
+    return m_config[m_postIndex].postName;
+}
+
+void PostListModel::setCurrentPostName(const QString &currentPostName) {
+    qDebug() << currentPostName;
+    m_config[m_postIndex].postName = currentPostName;
+    emit currentPostNameChanged(currentPostName);
+}
+
 PostListModel::PostListModel(GeneratorBackend *generatorBackend, std::vector<LoadGenerator::PostConfig> &config, QObject *parent) :
     QAbstractListModel {parent},
     m_generatorBackend(generatorBackend),
@@ -57,6 +80,7 @@ int PostListModel::addPost() {
     m_generatorBackend->signalPostConfigUpdate(m_config);   // Подаём в loadgenerator сигнал обновить посты
     endInsertRows();    // Заканчиваем вставлять
 
+    setPostIndex(newIndex);
     return newIndex;
 }
 
@@ -76,13 +100,25 @@ int PostListModel::removePost(int index) {
 
     // Список стал пустым, значит выбранного элемента больше нет
     if (newSize == 0) {
-        return -1;
+        int i = -1;
+        setPostIndex(i);
+        return i;
     }
     // Если удалили последний элемент
     if (index >= newSize) {
-        return newSize - 1;
+        int i = newSize - 1;
+        setPostIndex(i);
+        return i;
     }
     // Если удалили из середины, то индекс менять не нужно
+    setPostIndex(index);
     return index;
 
+}
+
+void PostListModel::postUpdate() {
+    beginResetModel();
+    m_generatorBackend->signalPostConfigUpdate(m_config);   // Подаём в loadgenerator сигнал обновить посты
+    emit currentPostNameChanged(currentPostName());
+    endResetModel();
 }

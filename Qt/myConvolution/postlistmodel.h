@@ -10,11 +10,25 @@ class GeneratorBackend;
 class PostListModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(int postIndex READ postIndex WRITE setPostIndex NOTIFY postIndexChanged)
+    Q_PROPERTY(QString currentPostName READ currentPostName WRITE setCurrentPostName NOTIFY currentPostNameChanged)
 
     std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
     GeneratorBackend *m_generatorBackend;
 
+    int m_postIndex = 0;    // Индекс выбранного поста
+
 public:
+    // Прочитать индекс поста
+    int postIndex() const;
+
+    // Установить индекс поста
+    Q_INVOKABLE void setPostIndex(int postIndex);
+
+    QString currentPostName() const;
+
+    void setCurrentPostName(const QString &currentPostName);
+
     explicit PostListModel(GeneratorBackend *generatorBackend, std::vector<LoadGenerator::PostConfig> &config, QObject *parent = nullptr);
 
     // Подсчёт строчек
@@ -32,6 +46,8 @@ public:
     // Удаляем пост
     Q_INVOKABLE int removePost(int index);
 
+    Q_INVOKABLE void postUpdate();
+
 private:
 
     // Роли для данных
@@ -42,4 +58,8 @@ private:
         MinPeriodRole = Qt::UserRole + 3,
         MaxPeriodRole = Qt::UserRole + 4
     };
+
+signals:
+    int postIndexChanged(int newPostIndex);
+    QString currentPostNameChanged(QString newCurrentPostName);
 };

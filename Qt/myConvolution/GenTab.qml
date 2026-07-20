@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
 Item {
 
@@ -41,6 +42,7 @@ Item {
                 let newIndex = generatorBackend.postListModel.addPost()
                 if (newIndex >= 0) {
                     postListView.currentIndex = newIndex
+                    generatorBackend.postListModel.postUpdate()
                 }
             }
         }
@@ -59,6 +61,7 @@ Item {
             onClicked: {
                 let newIndex = generatorBackend.postListModel.removePost(postListView.currentIndex)
                 postListView.currentIndex = newIndex
+                generatorBackend.postListModel.postUpdate()
             }
         }
 
@@ -81,6 +84,8 @@ Item {
 
                 onClicked: {
                     postListView.currentIndex = index
+                    generatorBackend.postListModel.postUpdate()
+                    generatorBackend.postListModel.setPostIndex(index)
                 }
 
                 Text {
@@ -131,6 +136,215 @@ Item {
         anchors.topMargin: 20
         anchors.leftMargin: 10
         anchors.rightMargin: 20
+
+        ScrollView {
+            id: postEditScrollView
+            anchors.fill: parent
+            anchors.margins: 5
+            anchors.leftMargin: 10
+            anchors.rightMargin: 10
+            clip: true
+            contentWidth: availableWidth
+
+            ColumnLayout {
+                width: postEditScrollView.availableWidth
+                spacing: 40
+
+                Switch {
+                    id: postEnabledButton
+                    text: "Пост активен"
+                }
+
+                TextField {
+                    id: postNameTextField
+                    background: TextFieldBackground {}
+                    placeholderText: "Мой пост"
+                    text: generatorBackend.postListModel.currentPostName
+
+                    onEditingFinished: {
+                        generatorBackend.postListModel.currentPostName = text
+                    }
+
+                    Label {
+                        text: "Имя поста"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+                }
+
+                TextField {
+                    id: latitudeTextField
+                    background: TextFieldBackground {}
+                    placeholderText: "60"
+
+                    Label {
+                        text: "Широта (град.)"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+
+                    TextField {
+                        id: longitudeTextField
+                        background: TextFieldBackground {}
+                        placeholderText: "30"
+                        anchors.left: parent.right
+                        anchors.leftMargin: 20
+                        Label {
+                            text: "Долгота (град.)"
+                            anchors.bottom: parent.top
+                            anchors.bottomMargin: 5
+                        }
+                    }
+                }
+
+                TextField {
+                    id: frequencyTextField
+                    background: TextFieldBackground {}
+                    placeholderText: "100000000"
+
+                    Label {
+                        text: "Частота (Гц)"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+                }
+
+                TextField {
+                    id: levelTextField
+                    background: TextFieldBackground {}
+                    placeholderText: "10"
+
+                    Label {
+                        text: "Уровень (дБ)"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+
+                    TextField {
+                        id: levelSigmaTextField
+                        background: TextFieldBackground {}
+                        placeholderText: "5"
+                        anchors.left: parent.right
+                        anchors.leftMargin: 20
+                        Label {
+                            text: "СКО уровня"
+                            anchors.bottom: parent.top
+                            anchors.bottomMargin: 5
+                        }
+                    }
+                }
+
+                TextField {
+                    id: minAngleHTextField
+                    background: TextFieldBackground {}
+                    placeholderText: "10"
+                    Label {
+                        text: "Мин. гор. угол (град.)"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+
+                    TextField {
+                        id: maxAngleHTextField
+                        background: TextFieldBackground {}
+                        placeholderText: "5"
+                        anchors.left: parent.right
+                        anchors.leftMargin: 20
+                        Label {
+                            text: "Макс. гор. угол (град.)"
+                            anchors.bottom: parent.top
+                            anchors.bottomMargin: 5
+                        }
+
+                        ComboBox {
+                            id: stepHComboBox
+                            background: TextFieldBackground {}
+                            // placeholderText: "5"
+                            anchors.left: parent.right
+                            anchors.leftMargin: 20
+                            Label {
+                                text: "Шаг гор. угла (град.)"
+                                anchors.bottom: parent.top
+                                anchors.bottomMargin: 5
+                            }
+                        }
+                    }
+                }
+
+                TextField {
+                    id: minAngleVTextField
+                    background: TextFieldBackground {}
+                    placeholderText: "10"
+                    Label {
+                        text: "Мин. верт. угол (град.)"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+
+                    TextField {
+                        id: maxAngleVTextField
+                        background: TextFieldBackground {}
+                        placeholderText: "5"
+                        anchors.left: parent.right
+                        anchors.leftMargin: 20
+                        Label {
+                            text: "Макс. верт. угол (град.)"
+                            anchors.bottom: parent.top
+                            anchors.bottomMargin: 5
+                        }
+
+                        ComboBox {
+                            id: stepVComboBox
+                            background: TextFieldBackground {}
+                            // placeholderText: "5"
+                            anchors.left: parent.right
+                            anchors.leftMargin: 20
+                            Label {
+                                text: "Шаг верт. угла (град.)"
+                                anchors.bottom: parent.top
+                                anchors.bottomMargin: 5
+                            }
+                        }
+                    }
+                }
+
+                TextField {
+                    id: minPeriodField
+                    background: TextFieldBackground {}
+                    placeholderText: "10"
+
+                    Label {
+                        text: "Мин. период генерации (мс)"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+
+                    TextField {
+                        id: maxPeriodTextField
+                        background: TextFieldBackground {}
+                        placeholderText: "5"
+                        anchors.left: parent.right
+                        anchors.leftMargin: 20
+                        Label {
+                            text: "Макс. период генерации (мс)"
+                            anchors.bottom: parent.top
+                            anchors.bottomMargin: 5
+                        }
+                    }
+                }
+
+                ComboBox {
+                    id: noiseTypeComboBox
+                    background: TextFieldBackground {}
+                    // placeholderText: "5"
+                    Label {
+                        text: "Тип шума"
+                        anchors.bottom: parent.top
+                        anchors.bottomMargin: 5
+                    }
+                }
+            }
+        }
     }
 
     Button {
@@ -144,6 +358,20 @@ Item {
         text : generatorBackend.generatorEnabled ? "Остановить генератор нагрузки" : "Запустить генератор нагрузки"
 
         onClicked: generatorBackend.onGeneratorEnabledButtonClicked()
+    }
+
+    Button {
+        id: postConfigSaveButton
+        width: 100
+        anchors.right: generationToggleButton.left
+        anchors.rightMargin: 20
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        background: ButtonBackground {}
+
+        text : "Сохранить"
+
+        onClicked: generatorBackend.postListModel.postUpdate()
     }
 
 }
