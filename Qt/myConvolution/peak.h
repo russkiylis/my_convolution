@@ -53,8 +53,8 @@ public:
     void setAmplitude(const double &amplitude);
 
 protected:
-    double _center;     // Координата пика (в градусах)
-    double _amplitude;    // Амплитуда пика (в у.е.)
+    double m_center;     // Координата пика (в градусах)
+    double m_amplitude;    // Амплитуда пика (в у.е.)
 };
 
 // Класс гауссовского пика функции правдоподобия
@@ -94,7 +94,7 @@ public:
     void setSigma(double const &sigma);
 
 private:
-    double _sigma;   // Среднеквадратическое отклонение (СКО)
+    double m_sigma;   // Среднеквадратическое отклонение (СКО)
 };
 
 // Класс треугольного пика функции правдоподобия
@@ -135,7 +135,7 @@ public:
     void setHalfWidth(double const &halfWidth);
 
 private:
-    double _halfWidth;   // Половина ширины
+    double m_halfWidth;   // Половина ширины
 };
 
 // Клас прямоугольного пика функции правдоподобия
@@ -176,5 +176,5 @@ public:
     void setHalfWidth(double const &halfWidth);
 
 private:
-    double _halfWidth;
+    double m_halfWidth;
 };

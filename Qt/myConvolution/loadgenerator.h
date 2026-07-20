@@ -79,20 +79,20 @@ public:
         void call(TimePoint const &now);
 
     private:
-        LoadGenerator *_loadGenerator;
-        PostConfig _config;
-        DataPackage _data;
+        LoadGenerator *m_loadGenerator;
+        PostConfig m_config;
+        DataPackage m_data;
 
-        std::mt19937 _rng;       // Движок случайной генерации
-        TimePoint _nextGenTime;     // Следующее время генерации
+        std::mt19937 m_rng;       // Движок случайной генерации
+        TimePoint m_nextGenTime;     // Следующее время генерации
         void newNextGenTime();  // Создать следующее время генерации
 
-        std::vector<double> _degH;  // Углы по горизонтали
-        std::vector<double> _degV;  // Углы по вертикали
+        std::vector<double> m_degH;  // Углы по горизонтали
+        std::vector<double> m_degV;  // Углы по вертикали
 
-        std::unique_ptr<AbstractNoise> _noise;              // Шум (мы не знаем что это за шум)
-        std::vector<std::unique_ptr<AbstractPeak>> _peaksV; // Вектор пиков по вертикали (мы не знаем что это за пики)
-        std::vector<std::unique_ptr<AbstractPeak>> _peaksH; // Вектор пиков по горизонтали
+        std::unique_ptr<AbstractNoise> m_noise;              // Шум (мы не знаем что это за шум)
+        std::vector<std::unique_ptr<AbstractPeak>> m_peaksV; // Вектор пиков по вертикали (мы не знаем что это за пики)
+        std::vector<std::unique_ptr<AbstractPeak>> m_peaksH; // Вектор пиков по горизонтали
     };
 
     // Конструктор, когда нет пиков
@@ -112,10 +112,10 @@ private:
     // Отправить пакет данных (емитнуть сигнал)
     void sendData(DataPackage const & package);
 
-    std::vector<PostConfig> _postConfigs;   // Набор конфигов постов
-    std::vector<Post> _posts;               // Набор постов
-    bool _callingEnabled;                   // Включён ли опрос постов
-    QTimer *_timer = nullptr;                         // Таймер, по которому опрашиваются посты
+    std::vector<PostConfig> m_postConfigs;   // Набор конфигов постов
+    std::vector<Post> m_posts;               // Набор постов
+    bool m_callingEnabled;                   // Включён ли опрос постов
+    QTimer *m_timer = nullptr;                         // Таймер, по которому опрашиваются посты
 
 public slots:
     void slotPostCallToggle(bool toggle);

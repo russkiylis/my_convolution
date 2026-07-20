@@ -9,35 +9,35 @@ AbstractPeak::PeakConfig::PeakConfig(double const &center, double const &amplitu
 
 AbstractPeak::AbstractPeak(double const &center, double const &amplitude)
     :
-    _center(center),
-    _amplitude(amplitude)
+    m_center(center),
+    m_amplitude(amplitude)
 {
 }
 
 AbstractPeak::AbstractPeak(PeakConfig const &config) :
-    _center(config.center),
-    _amplitude(config.amplitude)
+    m_center(config.center),
+    m_amplitude(config.amplitude)
 {
 }
 
 double AbstractPeak::center() const
 {
-    return _center;
+    return m_center;
 }
 
 void AbstractPeak::setCenter(const double &center)
 {
-    _center = center;
+    m_center = center;
 }
 
 double AbstractPeak::amplitude() const
 {
-    return _amplitude;
+    return m_amplitude;
 }
 
 void AbstractPeak::setAmplitude(const double &amplitude)
 {
-    _amplitude = amplitude;
+    m_amplitude = amplitude;
 }
 
 GaussPeak::GaussPeakConfig::GaussPeakConfig(double const &center, double const &amplitude, double const &sigma) :
@@ -60,13 +60,13 @@ AbstractPeak::PeakType GaussPeak::GaussPeakConfig::type() const {
 
 GaussPeak::GaussPeak(double const &center, double const &amplitude, double const &sigma) :
     AbstractPeak(center, amplitude),
-    _sigma(sigma)
+    m_sigma(sigma)
 {
 }
 
 GaussPeak::GaussPeak(GaussPeakConfig const &config) :
     AbstractPeak(config.center, config.amplitude),
-    _sigma(config.sigma)
+    m_sigma(config.sigma)
 {
 }
 
@@ -77,24 +77,24 @@ AbstractPeak::PeakType GaussPeak::type() const
 
 double GaussPeak::valueAt(double const &deg) const
 {
-    if (_sigma == 0) {
-        if (deg == _center)
-            return _amplitude;
+    if (m_sigma == 0) {
+        if (deg == m_center)
+            return m_amplitude;
         return 0;
     }
 
-    double const exponent = std::exp(-0.5 * std::pow((deg - _center) / _sigma, 2));
-    return _amplitude * exponent;
+    double const exponent = std::exp(-0.5 * std::pow((deg - m_center) / m_sigma, 2));
+    return m_amplitude * exponent;
 }
 
 double GaussPeak::sigma() const
 {
-    return _sigma;
+    return m_sigma;
 }
 
 void GaussPeak::setSigma(double const &sigma)
 {
-    _sigma = sigma;
+    m_sigma = sigma;
 }
 
 TrianglePeak::TrianglePeakConfig::TrianglePeakConfig(
@@ -121,13 +121,13 @@ std::unique_ptr<AbstractPeak::PeakConfig> TrianglePeak::TrianglePeakConfig::clon
 
 TrianglePeak::TrianglePeak(double const &center, double const &amplitude, double const &halfWidth) :
     AbstractPeak(center, amplitude),
-    _halfWidth(halfWidth)
+    m_halfWidth(halfWidth)
 {
 }
 
 TrianglePeak::TrianglePeak(TrianglePeakConfig const &config) :
 AbstractPeak(config.center, config.amplitude),
-_halfWidth(config.halfWidth)
+m_halfWidth(config.halfWidth)
 {
 }
 
@@ -136,25 +136,25 @@ AbstractPeak::PeakType TrianglePeak::type() const {
 }
 
 double TrianglePeak::valueAt(double const &deg) const {
-    if (_halfWidth == 0) {
-        if (deg == _center)
-            return _amplitude;
+    if (m_halfWidth == 0) {
+        if (deg == m_center)
+            return m_amplitude;
         return 0;
     }
 
-    double distance = std::abs(_center - deg);
-    if (distance > _halfWidth) {
+    double distance = std::abs(m_center - deg);
+    if (distance > m_halfWidth) {
         return 0;
     }
-    return _amplitude * (1 - (distance / _halfWidth));
+    return m_amplitude * (1 - (distance / m_halfWidth));
 }
 
 double TrianglePeak::halfWidth() const {
-    return _halfWidth;
+    return m_halfWidth;
 }
 
 void TrianglePeak::setHalfWidth(double const &halfWidth) {
-    _halfWidth = halfWidth;
+    m_halfWidth = halfWidth;
 }
 
 RectanglePeak::RectanglePeakConfig::RectanglePeakConfig(
@@ -181,13 +181,13 @@ std::unique_ptr<AbstractPeak::PeakConfig> RectanglePeak::RectanglePeakConfig::cl
 
 RectanglePeak::RectanglePeak(double const &center, double const &amplitude, double const &halfWidth) :
     AbstractPeak(center, amplitude),
-    _halfWidth(halfWidth)
+    m_halfWidth(halfWidth)
 {
 }
 
 RectanglePeak::RectanglePeak(RectanglePeakConfig const &config) :
     AbstractPeak(config.center, config.amplitude),
-    _halfWidth(config.halfWidth)
+    m_halfWidth(config.halfWidth)
 {
 }
 
@@ -196,15 +196,15 @@ AbstractPeak::PeakType RectanglePeak::type() const {
 }
 
 double RectanglePeak::valueAt(double const &deg) const {
-    if (deg < (_center - _halfWidth) || deg > (_center + _halfWidth))
+    if (deg < (m_center - m_halfWidth) || deg > (m_center + m_halfWidth))
         return 0;
-    return _amplitude;
+    return m_amplitude;
 }
 
 double RectanglePeak::halfWidth() const {
-    return _halfWidth;
+    return m_halfWidth;
 }
 
 void RectanglePeak::setHalfWidth(double const &halfWidth) {
-    _halfWidth = halfWidth;
+    m_halfWidth = halfWidth;
 }

@@ -13,38 +13,38 @@ AbstractNoise::NoiseConfig::NoiseConfig() :
 
 AbstractNoise::AbstractNoise(unsigned int const &seed)
     :
-    _seed(seed),
-    _rng(seed)
+    m_seed(seed),
+    m_rng(seed)
 {}
 
 AbstractNoise::AbstractNoise(NoiseConfig const &config)  :
-    _seed(config.seed),
-    _rng(config.seed)
+    m_seed(config.seed),
+    m_rng(config.seed)
 {
 }
 
 AbstractNoise::AbstractNoise()
     :
-      _seed(std::random_device{}()),
-      _rng(_seed)
+      m_seed(std::random_device{}()),
+      m_rng(m_seed)
 {
 }
 
 unsigned int AbstractNoise::seed() const {
-    return _seed;
+    return m_seed;
 }
 
 void AbstractNoise::setSeed(unsigned int const &seed) {
-    _seed = seed;
+    m_seed = seed;
 }
 
 std::mt19937 &AbstractNoise::rng()
 {
-    return _rng;
+    return m_rng;
 }
 
 void AbstractNoise::setRng(const std::mt19937 &rng) {
-    _rng = rng;
+    m_rng = rng;
 }
 
 NormalNoise::NormalNoiseConfig::NormalNoiseConfig(double const &mean, double const &sigma, unsigned int const &seed) :
@@ -74,22 +74,22 @@ AbstractNoise::NoiseType NormalNoise::NormalNoiseConfig::noiseType() const {
 
 NormalNoise::NormalNoise(double const &mean, double const &sigma, unsigned int const &seed) :
     AbstractNoise(seed),
-    _mean(mean),
-    _sigma(sigma)
+    m_mean(mean),
+    m_sigma(sigma)
 {
 }
 
 NormalNoise::NormalNoise(double const &mean, double const &sigma) :
     AbstractNoise(),
-    _mean(mean),
-    _sigma(sigma)
+    m_mean(mean),
+    m_sigma(sigma)
 {
 }
 
 NormalNoise::NormalNoise(NormalNoiseConfig const &config) :
     AbstractNoise(config.seed),
-    _mean(config.mean),
-    _sigma(config.sigma)
+    m_mean(config.mean),
+    m_sigma(config.sigma)
 {
 }
 
@@ -102,23 +102,23 @@ double NormalNoise::next()
     // Чтобы не писать долгую строчку
     using genParam = std::normal_distribution<double>::param_type;
 
-    return _distribution(_rng, genParam(_mean, _sigma));
+    return m_distribution(m_rng, genParam(m_mean, m_sigma));
 }
 
 double NormalNoise::mean() const {
-    return _mean;
+    return m_mean;
 }
 
 void NormalNoise::setMean(double const &mean) {
-    _mean = mean;
+    m_mean = mean;
 }
 
 double NormalNoise::sigma() const {
-    return _sigma;
+    return m_sigma;
 }
 
 void NormalNoise::setSigma(double const &sigma) {
-    _sigma = sigma;
+    m_sigma = sigma;
 }
 
 UniformNoise::UniformNoiseConfig::UniformNoiseConfig(double const &min, double const &max, unsigned int const &seed)
@@ -148,22 +148,22 @@ std::unique_ptr<AbstractNoise::NoiseConfig> UniformNoise::UniformNoiseConfig::cl
 
 UniformNoise::UniformNoise(double const &min, double const &max, unsigned int const &seed) :
     AbstractNoise(seed),
-    _min(min),
-    _max(max)
+    m_min(min),
+    m_max(max)
 {
 }
 
 UniformNoise::UniformNoise(double const &min, double const &max) :
     AbstractNoise(),
-    _min(min),
-    _max(max)
+    m_min(min),
+    m_max(max)
 {
 }
 
 UniformNoise::UniformNoise(UniformNoiseConfig const &config) :
     AbstractNoise(config.seed),
-    _min(config.min),
-    _max(config.max)
+    m_min(config.min),
+    m_max(config.max)
 {
 }
 
@@ -176,22 +176,22 @@ double UniformNoise::next()
     // Чтобы не писать долгую строчку
     using genParam = std::uniform_real_distribution<double>::param_type;
 
-    return _distribution(_rng, genParam(_min, _max));
+    return m_distribution(m_rng, genParam(m_min, m_max));
 }
 
 double UniformNoise::min() const {
-    return _min;
+    return m_min;
 }
 
 void UniformNoise::setMin(double const &min) {
-    _min = min;
+    m_min = min;
 }
 
 double UniformNoise::max() const {
-    return _max;
+    return m_max;
 }
 
 void UniformNoise::setMax(double const &max) {
-    _max = max;
+    m_max = max;
 }
 

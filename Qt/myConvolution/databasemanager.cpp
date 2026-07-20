@@ -14,36 +14,36 @@ DatabaseManager::DatabaseManager(ConnectionBackend *backend,
                                        QString const & connectOptions,
                                        QObject * parent)
     :QObject{parent},
-    _backend(backend),
-    _connectionName(connectionName),
-    _hostName(hostName),
-    _port(5432),
-    _dbName(dbName),
-    _userName(userName),
-    _password(password),
-    _fullConnectionName("\"" + _connectionName
-        + "\": pg://" + _userName
-        + ":" + _password
-        + "@" + _hostName
-        + ":" + QString::number(_port)
-        + "/" + _dbName),
-    _connectOptions(connectOptions)
+    m_backend(backend),
+    m_connectionName(connectionName),
+    m_hostName(hostName),
+    m_port(5432),
+    m_dbName(dbName),
+    m_userName(userName),
+    m_password(password),
+    m_fullConnectionName("\"" + m_connectionName
+        + "\": pg://" + m_userName
+        + ":" + m_password
+        + "@" + m_hostName
+        + ":" + QString::number(m_port)
+        + "/" + m_dbName),
+    m_connectOptions(connectOptions)
 {
     const auto dbConfig = DatabaseConfiguration(connectionName, hostName, dbName, userName, password, port,
                                                            connectOptions);
 
     auto *worker = new DatabaseWorker(dbConfig);   // Создаём объект рабочего класса
-    worker->moveToThread(&workerThread);    // Переносим объект рабочего класса в другой поток
+    worker->moveToThread(&m_workerThread);    // Переносим объект рабочего класса в другой поток
 
     //Соединение сигналов и слотов
-    connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater); // Когда рабочий поток завершится, объект worker удалится
+    connect(&m_workerThread, &QThread::finished, worker, &QObject::deleteLater); // Когда рабочий поток завершится, объект worker удалится
     connect(this, &DatabaseManager::signalConfigUpdate, worker, &DatabaseWorker::slotConfigUpdate);
     connect(this, &DatabaseManager::signalOpenConnection, worker, &DatabaseWorker::slotOpenConnection);
     connect(this, &DatabaseManager::signalCloseConnection, worker, &DatabaseWorker::slotCloseConnection);
     connect(this, &DatabaseManager::signalManagerUpdate, worker, &DatabaseWorker::slotManagerUpdate);
     connect(this, &DatabaseManager::signalInitialize, worker, &DatabaseWorker::slotInitialize);
     connect(worker, &DatabaseWorker::signalManagerUpdate, this, &DatabaseManager::slotManagerUpdate);
-    workerThread.start();
+    m_workerThread.start();
 
     // Проинициализируем рабочий объект
     emit signalInitialize();
@@ -52,179 +52,179 @@ DatabaseManager::DatabaseManager(ConnectionBackend *backend,
 
 DatabaseManager::~DatabaseManager() {
     // Адекватная остановка рабочего потока при уничтожении управляющего рабочим объекта
-    workerThread.quit();
-    workerThread.wait();
+    m_workerThread.quit();
+    m_workerThread.wait();
 }
 
 void DatabaseManager::setHostName(QString const & value) {
-    if (!_valid) {
+    if (!m_valid) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
-    if (_connected) {
+    if (m_connected) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": невозможно изменить параметры "
                                         "открытого соединения.";
         return;
     }
-    if (_hostName == value)
+    if (m_hostName == value)
         return;
-    _hostName = value;
+    m_hostName = value;
     setFullConnectionName();
 
     // Создаём новый конфиг и посылаем его в рабочий класс
-    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
-                                                           _connectOptions);
+    const auto dbConfig = DatabaseConfiguration(m_connectionName, m_hostName, m_dbName, m_userName, m_password, m_port,
+                                                           m_connectOptions);
     emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setPort(int const & value) {
-    if (!_valid) {
+    if (!m_valid) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
-    if (_connected) {
+    if (m_connected) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": невозможно изменить параметры "
                                         "открытого соединения.";
         return;
     }
-    if (_port == value)
+    if (m_port == value)
         return;
-    _port = value;
+    m_port = value;
     setFullConnectionName();
 
     // Создаём новый конфиг и посылаем его в рабочий класс
-    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
-                                                           _connectOptions);
+    const auto dbConfig = DatabaseConfiguration(m_connectionName, m_hostName, m_dbName, m_userName, m_password, m_port,
+                                                           m_connectOptions);
     emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setDbName(QString const & value) {
-    if (!_valid) {
+    if (!m_valid) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
-    if (_connected) {
+    if (m_connected) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": невозможно изменить параметры "
                                         "открытого соединения.";
         return;
     }
-    if (_dbName == value)
+    if (m_dbName == value)
         return;
-    _dbName = value;
+    m_dbName = value;
     setFullConnectionName();
 
     // Создаём новый конфиг и посылаем его в рабочий класс
-    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
-                                                           _connectOptions);
+    const auto dbConfig = DatabaseConfiguration(m_connectionName, m_hostName, m_dbName, m_userName, m_password, m_port,
+                                                           m_connectOptions);
     emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setUserName(QString const & value) {
-    if (!_valid) {
+    if (!m_valid) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
-    if (_connected) {
+    if (m_connected) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": невозможно изменить параметры "
                                         "открытого соединения.";
         return;
     }
-    if (_userName == value)
+    if (m_userName == value)
         return;
-    _userName = value;
+    m_userName = value;
     setFullConnectionName();
 
     // Создаём новый конфиг и посылаем его в рабочий класс
-    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
-                                                           _connectOptions);
+    const auto dbConfig = DatabaseConfiguration(m_connectionName, m_hostName, m_dbName, m_userName, m_password, m_port,
+                                                           m_connectOptions);
     emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setPassword(QString const & value) {
-    if (!_valid) {
+    if (!m_valid) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
-    if (_connected) {
+    if (m_connected) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": невозможно изменить параметры "
                                         "открытого соединения.";
         return;
     }
-    if (_password == value)
+    if (m_password == value)
         return;
-    _password = value;
+    m_password = value;
     setFullConnectionName();
 
     // Создаём новый конфиг и посылаем его в рабочий класс
-    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
-                                                           _connectOptions);
+    const auto dbConfig = DatabaseConfiguration(m_connectionName, m_hostName, m_dbName, m_userName, m_password, m_port,
+                                                           m_connectOptions);
     emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setConnectOptions(QString const & value) {
-    if (!_valid) {
+    if (!m_valid) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": объект подключения не валиден. "
                                      << "Невозможно изменить параметры подключения.";
         return;
     }
-    if (_connected) {
+    if (m_connected) {
         qDebug().noquote().nospace() << "[!] "
-                                     << _fullConnectionName
+                                     << m_fullConnectionName
                                      << ": невозможно изменить параметры "
                                         "открытого соединения.";
         return;
     }
-    if (_connectOptions == value)
+    if (m_connectOptions == value)
         return;
-    _connectOptions = value;
+    m_connectOptions = value;
     setFullConnectionName();
 
     // Создаём новый конфиг и посылаем его в рабочий класс
-    const auto dbConfig = DatabaseConfiguration(_connectionName, _hostName, _dbName, _userName, _password, _port,
-                                                           _connectOptions);
+    const auto dbConfig = DatabaseConfiguration(m_connectionName, m_hostName, m_dbName, m_userName, m_password, m_port,
+                                                           m_connectOptions);
     emit signalConfigUpdate(dbConfig);
 }
 
 void DatabaseManager::setFullConnectionName() {
-    _fullConnectionName = "\"" + _connectionName
-                          + "\": pg://" + _userName
-                          + ":" + _password
-                          + "@" + _hostName
-                          + ":" + QString::number(_port)
-                          + "/" + _dbName;
+    m_fullConnectionName = "\"" + m_connectionName
+                          + "\": pg://" + m_userName
+                          + ":" + m_password
+                          + "@" + m_hostName
+                          + ":" + QString::number(m_port)
+                          + "/" + m_dbName;
 }
 
 void DatabaseManager::openConnection() {
-    if (!_valid) {
+    if (!m_valid) {
         QString errorText = "[!] "
-                            + _fullConnectionName
+                            + m_fullConnectionName
                             + ": объект подключения не валиден. "
                             + "Невозможно открыть соединение.";
         qDebug().noquote().nospace()  << errorText;
@@ -235,9 +235,9 @@ void DatabaseManager::openConnection() {
 }
 
 void DatabaseManager::closeConnection() {
-    if (!_valid) {
+    if (!m_valid) {
         QString errorText = "[!] "
-                            + _fullConnectionName
+                            + m_fullConnectionName
                             + ": объект подключения не валиден. "
                             + "Невозможно закрыть соединение.";
         qDebug().noquote().nospace()  << errorText;
@@ -248,20 +248,20 @@ void DatabaseManager::closeConnection() {
 }
 
 void DatabaseManager::slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError) {
-    _connected = connected;
-    _valid = valid;
-    _busy = busy;
-    _lastError = lastError;
+    m_connected = connected;
+    m_valid = valid;
+    m_busy = busy;
+    m_lastError = lastError;
 
     int dbStatus = 0;
     if (busy) {
         dbStatus = 1;
-    } else if (!_valid || !_connected) {
+    } else if (!m_valid || !m_connected) {
         dbStatus = 0;
     } else {
         dbStatus = 2;
     }
 
-    _backend->setLastError(_lastError);
-    _backend->setDbStatus(dbStatus);
+    m_backend->setLastError(m_lastError);
+    m_backend->setDbStatus(dbStatus);
 }

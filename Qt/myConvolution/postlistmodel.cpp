@@ -2,11 +2,11 @@
 
 PostListModel::PostListModel(std::vector<LoadGenerator::PostConfig> &config, QObject *parent) :
     QAbstractListModel {parent},
-    _config(config)
+    m_config(config)
 {}
 
 int PostListModel::rowCount(const QModelIndex &parent) const {
-    return static_cast<int>(_config.size());
+    return static_cast<int>(m_config.size());
 }
 
 QHash<int, QByteArray> PostListModel::roleNames() const
@@ -22,9 +22,9 @@ QHash<int, QByteArray> PostListModel::roleNames() const
 QVariant PostListModel::data(const QModelIndex &index, int role) const {
 
     // Получаем конфиг по индексу
-    const LoadGenerator::PostConfig &config = _config.at(index.row());
+    const LoadGenerator::PostConfig &config = m_config.at(index.row());
 
-    if (_config.size() == 0)
+    if (m_config.size() == 0)
         return {};
 
     // Проходим по ролям

@@ -8,7 +8,7 @@ class PostListModel : public QAbstractListModel
 {
     Q_OBJECT
 
-    std::vector<LoadGenerator::PostConfig> &_config;    // Ссылка на вектор PostConfig
+    std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
 
 public:
     explicit PostListModel(std::vector<LoadGenerator::PostConfig> &config, QObject *parent = nullptr);

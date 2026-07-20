@@ -25,11 +25,11 @@ public:
     Q_INVOKABLE void onGeneratorEnabledButtonClicked();
 
 private:
-    QThread loadGeneratorThread;    // Поток генератора
-    PostListModel _postListModel;   // Модель для подключения к списку постов
+    QThread m_loadGeneratorThread;    // Поток генератора
+    PostListModel m_postListModel;   // Модель для подключения к списку постов
 
-    bool _generatorEnabled = false;     // Включён ли генератор
-    std::vector<LoadGenerator::PostConfig> _cfg;
+    bool m_generatorEnabled = false;     // Включён ли генератор
+    std::vector<LoadGenerator::PostConfig> m_cfg;
 
 signals:
     void signalPostCallToggle(bool toggle);

@@ -6,7 +6,7 @@
 
 GeneratorBackend::GeneratorBackend(QObject *parent)
     : QObject{parent},
-    _postListModel(_cfg, this)
+    m_postListModel(m_cfg, this)
 {
     // Лямбда для создания начального конфига нагрузки
     auto initialConfig = []() -> std::vector<LoadGenerator::PostConfig>
@@ -51,45 +51,45 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
         }
         return result;
     };
-    _cfg = initialConfig();
+    m_cfg = initialConfig();
     // Создаём генератор нагрузки и засовываем его в отдельный поток
-    auto *loadGenerator = new LoadGenerator(_cfg);
-    loadGenerator->moveToThread(&loadGeneratorThread);
+    auto *loadGenerator = new LoadGenerator(m_cfg);
+    loadGenerator->moveToThread(&m_loadGeneratorThread);
 
     //Соединение сигналов и слотов
-    connect(&loadGeneratorThread, &QThread::finished, loadGenerator, &QObject::deleteLater); // Когда рабочий поток завершится, объект worker удалится
+    connect(&m_loadGeneratorThread, &QThread::finished, loadGenerator, &QObject::deleteLater); // Когда рабочий поток завершится, объект worker удалится
     connect(loadGenerator, &LoadGenerator::signalSendData, this, &GeneratorBackend::slotSendData); // Принимаем пакет данных из генератора
     connect(loadGenerator, &LoadGenerator::signalPostCallToggle, this, &GeneratorBackend::slotPostCallToggle);  // Принимаем информацию о переключении опроса постов
     connect(this, &GeneratorBackend::signalPostCallToggle, loadGenerator, &LoadGenerator::slotPostCallToggle);  // Подаём указание переключить опрос постов
-    loadGeneratorThread.start();
+    m_loadGeneratorThread.start();
 }
 
 GeneratorBackend::~GeneratorBackend() {
-    loadGeneratorThread.quit();
-    loadGeneratorThread.wait();
+    m_loadGeneratorThread.quit();
+    m_loadGeneratorThread.wait();
 }
 
 bool GeneratorBackend::generatorEnabled() const
 {
-    return _generatorEnabled;
+    return m_generatorEnabled;
 }
 
 void GeneratorBackend::setGeneratorEnabled(const bool generatorEnabled)
 {
-    _generatorEnabled = generatorEnabled;
+    m_generatorEnabled = generatorEnabled;
     emit generatorEnabledChanged(generatorEnabled);
 }
 
 PostListModel * GeneratorBackend::postListModel() {
-    return &_postListModel;
+    return &m_postListModel;
 }
 
 void GeneratorBackend::onGeneratorEnabledButtonClicked() {
     qDebug() << "Кнопка переключения генератора нагрузки нажата.";
-    setGeneratorEnabled(!_generatorEnabled);    // Переключаем статус генератора
+    setGeneratorEnabled(!m_generatorEnabled);    // Переключаем статус генератора
 
     // Запускаем (или останавливаем) периодический опрос постов в генераторе
-    emit signalPostCallToggle(_generatorEnabled);
+    emit signalPostCallToggle(m_generatorEnabled);
 }
 
 void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {

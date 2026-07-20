@@ -31,73 +31,73 @@ public:
     // Имя подключения (не путать с именем БД)
     [[nodiscard]] QString connectionName() const
     {
-        return _connectionName;
+        return m_connectionName;
     }
 
     // Адрес хоста
     [[nodiscard]] QString hostName() const
     {
-        return _hostName;
+        return m_hostName;
     }
 
     // Порт
     [[nodiscard]] int port() const
     {
-        return _port;
+        return m_port;
     }
 
     // Имя БД
     [[nodiscard]] QString dbName() const
     {
-        return _dbName;
+        return m_dbName;
     }
 
     // Имя пользователя
     [[nodiscard]] QString userName() const
     {
-        return _userName;
+        return m_userName;
     }
 
     // Пароль
     [[nodiscard]] QString password() const
     {
-        return _password;
+        return m_password;
     }
 
     // Полное имя подключения
     [[nodiscard]] QString fullConnectionName() const
     {
-        return _fullConnectionName;
+        return m_fullConnectionName;
     }
 
     // Настройки подключения
     [[nodiscard]] QString connectOptions() const
     {
-        return _connectOptions;
+        return m_connectOptions;
     }
 
     // Валиден ли объект
     [[nodiscard]] bool valid() const
     {
-        return _valid;
+        return m_valid;
     }
 
     // Занято ли подключение к БД
     [[nodiscard]] bool busy() const
     {
-        return _busy;
+        return m_busy;
     }
 
     // Установлено ли подключение к БД
     [[nodiscard]] bool connected() const
     {
-        return _connected;
+        return m_connected;
     }
 
     // Последняя ошибка БД
     [[nodiscard]] QString lastError() const
     {
-        return _lastError;
+        return m_lastError;
     }
 
     // Задать адрес хоста
@@ -125,15 +125,15 @@ public:
     void closeConnection();
 
 private:
-    ConnectionBackend *_backend;
-    QString const _connectionName;
-    QString _hostName;
-    int _port;
-    QString _dbName;
-    QString _userName;
-    QString _password;
-    QString _fullConnectionName;
-    QString _connectOptions;
+    ConnectionBackend *m_backend;
+    QString const m_connectionName;
+    QString m_hostName;
+    int m_port;
+    QString m_dbName;
+    QString m_userName;
+    QString m_password;
+    QString m_fullConnectionName;
+    QString m_connectOptions;
 
     // Задание полного имени подключения
     void setFullConnectionName();
@@ -141,12 +141,12 @@ private:
     // // Задание новых параметров подключения
     // void update();
 
-    bool _valid = false;     // Если удалось создать подключения, то объект валиден
-    bool _connected = false; // Если удалось подключиться
-    bool _busy = false; // Если рабочий поток занят
-    QString _lastError = "Ошибок нет."; // Последняя ошибка
+    bool m_valid = false;     // Если удалось создать подключения, то объект валиден
+    bool m_connected = false; // Если удалось подключиться
+    bool m_busy = false; // Если рабочий поток занят
+    QString m_lastError = "Ошибок нет."; // Последняя ошибка
 
-    QThread workerThread;  // Поток, где живёт рабочий класс
+    QThread m_workerThread;  // Поток, где живёт рабочий класс
 
 public slots:
     void slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError);

@@ -59,8 +59,8 @@ public:
     void setRng(const std::mt19937 &rng);
 
 protected:
-    unsigned int _seed;   // Семечко для генератора
-    std::mt19937 _rng;  // Движок рандомного генератора
+    unsigned int m_seed;   // Семечко для генератора
+    std::mt19937 m_rng;  // Движок рандомного генератора
 };
 
 class NormalNoise final: public AbstractNoise
@@ -110,10 +110,10 @@ public:
     void setSigma(double const &sigma);
 
 private:
-    std::normal_distribution<double> _distribution; // Гауссово распределение. Туда суём движок и параметры
+    std::normal_distribution<double> m_distribution; // Гауссово распределение. Туда суём движок и параметры
 
-    double _mean;   // Математическое ожидание шума
-    double _sigma;  // Среднеквадратическое отклонение шума
+    double m_mean;   // Математическое ожидание шума
+    double m_sigma;  // Среднеквадратическое отклонение шума
 };
 
 class UniformNoise final: public AbstractNoise
@@ -162,9 +162,9 @@ public:
     void setMax(double const &max);
 
 private:
-    std::uniform_real_distribution<double> _distribution; // Равномерное распределение. Туда суём движок и параметры
+    std::uniform_real_distribution<double> m_distribution; // Равномерное распределение. Туда суём движок и параметры
 
-    double _min;    // Минимальное значение
-    double _max;    // Максимальное значение
+    double m_min;    // Минимальное значение
+    double m_max;    // Максимальное значение
 };
 

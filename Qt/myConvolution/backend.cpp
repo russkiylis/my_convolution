@@ -2,87 +2,87 @@
 #include <QDebug>   // для работы с консолью
 
 int ConnectionBackend::dbStatus() const {
-    return _dbStatus;
+    return m_dbStatus;
 }
 
 QString ConnectionBackend::lastError() const
 {
-    return _db.lastError();
+    return m_db.lastError();
 }
 
 QString ConnectionBackend::hostName() const {
-    return _hostName;
+    return m_hostName;
 }
 
 void ConnectionBackend::setHostName(const QString &host_name) {
-    _hostName = host_name;
-    emit hostNameChanged(_hostName);
+    m_hostName = host_name;
+    emit hostNameChanged(m_hostName);
 }
 
 QString ConnectionBackend::port() const {
-    return _port;
+    return m_port;
 }
 
 void ConnectionBackend::setPort(const QString &port) {
-    _port = port;
-    emit portChanged(_port);
+    m_port = port;
+    emit portChanged(m_port);
 }
 
 QString ConnectionBackend::userName() const {
-    return _userName;
+    return m_userName;
 }
 
 void ConnectionBackend::setUserName(const QString &user_name) {
-    _userName = user_name;
-    emit userNameChanged(_userName);
+    m_userName = user_name;
+    emit userNameChanged(m_userName);
 }
 
 QString ConnectionBackend::password() const {
-    return _password;
+    return m_password;
 }
 
 void ConnectionBackend::setPassword(const QString &password) {
-    _password = password;
-    emit passwordChanged(_password);
+    m_password = password;
+    emit passwordChanged(m_password);
 }
 
 QString ConnectionBackend::databaseName() const {
-    return _databaseName;
+    return m_databaseName;
 }
 
 void ConnectionBackend::setDatabaseName(const QString &database_name) {
-    _databaseName = database_name;
-    emit databaseNameChanged(_databaseName);
+    m_databaseName = database_name;
+    emit databaseNameChanged(m_databaseName);
 }
 
 QString ConnectionBackend::connectOptions() const {
-    return _connectOptions;
+    return m_connectOptions;
 }
 
 void ConnectionBackend::setConnectOptions(const QString &connect_options) {
-    _connectOptions = connect_options;
-    emit connectOptionsChanged(_connectOptions);
+    m_connectOptions = connect_options;
+    emit connectOptionsChanged(m_connectOptions);
 }
 
 void ConnectionBackend::setDbStatus(int const &dbStatus) {
-    if (_dbStatus == dbStatus)
+    if (m_dbStatus == dbStatus)
         return;
-    _dbStatus = dbStatus;
+    m_dbStatus = dbStatus;
 
     emit dbStatusChanged(dbStatus);
 }
 
 void ConnectionBackend::setLastError(QString const &lastError) {
-    if (_lastError == lastError)
+    if (m_lastError == lastError)
         return;
-    _lastError = lastError;
+    m_lastError = lastError;
 
-    emit lastErrorChanged(_lastError);
+    emit lastErrorChanged(m_lastError);
 }
 
 ConnectionBackend::ConnectionBackend(QObject *parent)
     : QObject{parent},
-    _db(this)
+    m_db(this)
 {}
 
 void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString port, QString userName, QString password,
@@ -91,7 +91,7 @@ void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString po
     // FIXME: Если попытаться подключиться к неправильной базке, а затем к правильной, то перед тем как подключиться к правильной, программа попробует подключиться к неправильной
     qDebug() << "Кнопка подключения нажата.";
 
-    if (_dbStatus != 2) {
+    if (m_dbStatus != 2) {
         // Если не БД не подключена, то подключаем
         if (hostName == "")
             hostName = "127.0.0.1";
@@ -106,16 +106,16 @@ void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString po
         if (connectOptions == "")
             connectOptions = "connect_timeout = 3";
 
-        _db.setHostName(hostName);
-        _db.setPort(port.toInt());
-        _db.setUserName(userName);
-        _db.setPassword(password);
-        _db.setDbName(databaseName);
-        _db.setConnectOptions(connectOptions);
+        m_db.setHostName(hostName);
+        m_db.setPort(port.toInt());
+        m_db.setUserName(userName);
+        m_db.setPassword(password);
+        m_db.setDbName(databaseName);
+        m_db.setConnectOptions(connectOptions);
 
-        _db.openConnection();
+        m_db.openConnection();
     } else {
         // Если БД подключена, то отключаем
-        _db.closeConnection();
+        m_db.closeConnection();
     }
 }

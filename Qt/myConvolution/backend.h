@@ -24,18 +24,18 @@ private:
     Q_PROPERTY(QString databaseName READ databaseName WRITE setDatabaseName NOTIFY databaseNameChanged)
     Q_PROPERTY(QString connectOptions READ connectOptions WRITE setConnectOptions NOTIFY connectOptionsChanged)
 
-    DatabaseManager _db;      // Менеджер базы данных
-    int _dbStatus = 0; // Статус базы данных, 0 - не подключена, 1 - готова, 2 - занята
-    QString _lastError = "Ошибок нет."; // Последняя ошибка при работе с БД
+    DatabaseManager m_db;      // Менеджер базы данных
+    int m_dbStatus = 0; // Статус базы данных, 0 - не подключена, 1 - готова, 2 - занята
+    QString m_lastError = "Ошибок нет."; // Последняя ошибка при работе с БД
 
     // Далее идут поля для параметров подключения
 
-    QString _hostName = "";
-    QString _port = "";
-    QString _userName = "";
-    QString _password = "";
-    QString _databaseName = "";
-    QString _connectOptions = "";
+    QString m_hostName = "";
+    QString m_port = "";
+    QString m_userName = "";
+    QString m_password = "";
+    QString m_databaseName = "";
+    QString m_connectOptions = "";
 
 public:
     // Поле "имя хоста"
