@@ -447,11 +447,125 @@ Item {
                 ComboBox {
                     id: noiseTypeComboBox
                     background: TextFieldBackground {}
-                    // placeholderText: "5"
+
+                    model: [
+                        "Нормальный",
+                        "Равномерный"
+                    ]
+
                     Label {
                         text: "Тип шума"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                    }
+                    currentIndex: generatorBackend.postListModel.currentNoiseType
+
+                    onActivated: {
+                        generatorBackend.postListModel.currentNoiseType = currentIndex
+                    }
+
+                    Loader {
+                        sourceComponent: {
+                            switch (generatorBackend.postListModel.currentNoiseType) {
+                                case 0:
+                                    return normalFields
+                                case 1:
+                                    return uniformFields
+                                default:
+                                    return null
+                            }
+                        }
+
+                        anchors.left: parent.right
+                        anchors.leftMargin: 20
+                    }
+
+                    Component {
+                        id: normalFields
+
+                        RowLayout {
+                            spacing: 20
+                            TextField {
+                                id: meanNormalNoiseTextField
+                                background: TextFieldBackground {}
+                                placeholderText: "0"
+                                selectByMouse: true
+                                text: generatorBackend.postListModel.noiseBackend.currentMean
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.noiseBackend.currentMean = text
+                                }
+
+                                Label {
+                                    text: "Мат. ожидание шума"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: sigmaNormalNoiseTextField
+                                background: TextFieldBackground {}
+                                placeholderText: "2"
+                                selectByMouse: true
+                                text: generatorBackend.postListModel.noiseBackend.currentSigma
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.noiseBackend.currentSigma = text
+                                }
+
+                                Label {
+                                    text: "СКО шума"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+                        }
+                    }
+
+                    Component {
+                        id: uniformFields
+
+                        RowLayout {
+                            spacing: 20
+                            TextField {
+                                id: minUniformNoiseTextField
+                                background: TextFieldBackground {}
+                                placeholderText: "-10"
+                                selectByMouse: true
+                                text: generatorBackend.postListModel.noiseBackend.currentMin
+
+
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.noiseBackend.currentMin = text
+                                }
+
+                                Label {
+                                    text: "Мин. значение шума"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: maxUniformNoiseTextField
+                                background: TextFieldBackground {}
+                                placeholderText: "20"
+                                selectByMouse: true
+                                text: generatorBackend.postListModel.noiseBackend.currentMax
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.noiseBackend.currentMax = text
+                                }
+
+                                Label {
+                                    text: "Макс. значение шума"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+                        }
                     }
                 }
             }

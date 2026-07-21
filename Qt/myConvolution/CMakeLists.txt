@@ -36,6 +36,12 @@ set(PROJECT_SOURCES
 
     loadgenerator.h loadgenerator.cpp
     generatorbackend.h generatorbackend.cpp
+        abstractnoisebackend.cpp
+        abstractnoisebackend.h
+        normalnoisebackend.cpp
+        normalnoisebackend.h
+        uniformnoisebackend.cpp
+        uniformnoisebackend.h
 )
 
 add_executable(myConvolution

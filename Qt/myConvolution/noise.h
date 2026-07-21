@@ -22,7 +22,7 @@ public:
 
         [[nodiscard]] virtual NoiseType noiseType() const = 0;
 
-        [[nodiscard]] virtual std::unique_ptr<NoiseConfig> clone() const = 0;
+        [[nodiscard]] virtual std::unique_ptr<NoiseConfig> clone() = 0;
 
         virtual std::unique_ptr<AbstractNoise> createNoise() const = 0;
 
@@ -72,7 +72,7 @@ public:
         explicit NormalNoiseConfig(double const &mean, double const &sigma);
 
         // Клонирование объекта с умным указателем
-        [[nodiscard]] std::unique_ptr<NoiseConfig> clone() const override;
+        [[nodiscard]] std::unique_ptr<NoiseConfig> clone() override;
 
         std::unique_ptr<AbstractNoise> createNoise() const override;
 
@@ -129,7 +129,7 @@ public:
         std::unique_ptr<AbstractNoise> createNoise() const override;
 
         // Клонирование объекта с умным указателем
-        [[nodiscard]] std::unique_ptr<NoiseConfig> clone() const override;
+        [[nodiscard]] std::unique_ptr<NoiseConfig> clone() override;
 
         double min;    // Минимальное значение
         double max;   // Максимальное значение

@@ -207,6 +207,32 @@ bool PostListModel::currentPostEnabled() const {
     return m_config[m_postIndex].enabled;
 }
 
+int PostListModel::currentNoiseType() {
+    if (m_noiseBackend == nullptr) {
+        switch (m_config[m_postIndex].noiseConfig->noiseType()) {
+        case AbstractNoise::NoiseType::Normal:
+            m_noiseBackend = std::make_unique<NormalNoiseBackend>(m_config, m_postIndex);
+            break;
+        case AbstractNoise::NoiseType::Uniform:
+            m_noiseBackend = std::make_unique<UniformNoiseBackend>(m_config, m_postIndex);
+        }
+    }
+    return static_cast<int>(m_config[m_postIndex].noiseConfig->noiseType());
+}
+
+void PostListModel::setCurrentNoiseType(int currentNoiseType) {
+    switch (static_cast<AbstractNoise::NoiseType>(currentNoiseType)) {
+    case AbstractNoise::NoiseType::Normal:
+        m_noiseBackend = std::make_unique<NormalNoiseBackend>(m_config, m_postIndex);
+        m_config[m_postIndex].noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0,2);
+        break;
+    case AbstractNoise::NoiseType::Uniform:
+        m_noiseBackend = std::make_unique<UniformNoiseBackend>(m_config, m_postIndex);
+        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10,20);
+    }
+    emit currentNoiseTypeChanged(currentNoiseType);
+}
+
 void PostListModel::setCurrentPostEnabled(bool currentPostEnabled) {
     m_config[m_postIndex].enabled = currentPostEnabled;
     emit currentPostEnabledChanged(currentPostEnabled);
@@ -323,6 +349,10 @@ void PostListModel::fallback() {
     qDebug() << "Изменения сброшены.";
 }
 
+AbstractNoiseBackend * PostListModel::noiseBackend() const {
+    return m_noiseBackend.get();
+}
+
 void PostListModel::emits() {
     emit currentPostNameChanged(currentPostName());
     emit currentLatitudeChanged(currentLatitude());
@@ -339,4 +369,7 @@ void PostListModel::emits() {
     emit currentMinPeriodChanged(currentMinPeriod());
     emit currentMaxPeriodChanged(currentMaxPeriod());
     emit currentPostEnabledChanged(currentPostEnabled());
+    emit currentNoiseTypeChanged(currentNoiseType());
+
+    m_noiseBackend->emits();
 }

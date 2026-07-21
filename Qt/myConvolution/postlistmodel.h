@@ -4,6 +4,9 @@
 #include <QObject>
 
 #include "loadgenerator.h"
+#include "abstractnoisebackend.h"
+#include "normalnoisebackend.h"
+#include "uniformnoisebackend.h"
 
 class GeneratorBackend;
 
@@ -36,6 +39,9 @@ class PostListModel : public QAbstractListModel
     Q_PROPERTY(QString currentMinPeriod READ currentMinPeriod WRITE setCurrentMinPeriod  NOTIFY currentMinPeriodChanged)
     Q_PROPERTY(QString currentMaxPeriod READ currentMaxPeriod WRITE setCurrentMaxPeriod  NOTIFY currentMaxPeriodChanged)
     Q_PROPERTY(bool currentPostEnabled READ currentPostEnabled WRITE setCurrentPostEnabled NOTIFY currentPostEnabledChanged)
+    Q_PROPERTY(int currentNoiseType READ currentNoiseType WRITE setCurrentNoiseType NOTIFY currentNoiseTypeChanged)
+
+    Q_PROPERTY(AbstractNoiseBackend *noiseBackend READ noiseBackend CONSTANT)
 
     std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
     std::vector<LoadGenerator::PostConfig> m_fallbackConfig;   // Вектор конфигов, к которому мы сможем откатиться
@@ -141,6 +147,12 @@ public:
     // Выдать статус активности поста
     bool currentPostEnabled() const;
 
+    // Выдать текущий тип шума
+    int currentNoiseType();
+
+    // Установить текущий тип шума
+    void setCurrentNoiseType(int currentNoiseType);
+
     // Установить статус активности поста
     void setCurrentPostEnabled(bool currentPostEnabled);
 
@@ -167,6 +179,8 @@ public:
     // Отменяем изменения
     Q_INVOKABLE void fallback();
 
+    AbstractNoiseBackend *noiseBackend() const;
+
 private:
 
     // Роли для данных
@@ -180,6 +194,9 @@ private:
 
     // В одной функции все нужные емиты
     void emits();
+
+    // Объект класса бекенда шума
+    std::unique_ptr<AbstractNoiseBackend> m_noiseBackend;
 
 signals:
     void postIndexChanged(int newPostIndex);
@@ -198,4 +215,5 @@ signals:
     void currentMinPeriodChanged(QString newCurrentMinPeriod);
     void currentMaxPeriodChanged(QString newCurrentMaxPeriod);
     void currentPostEnabledChanged(bool newPostEnabled);
+    void currentNoiseTypeChanged(int newNoiseType);
 };

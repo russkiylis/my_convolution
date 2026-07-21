@@ -60,7 +60,7 @@ NormalNoise::NormalNoiseConfig::NormalNoiseConfig(double const &mean, double con
 {
 }
 
-std::unique_ptr<AbstractNoise::NoiseConfig> NormalNoise::NormalNoiseConfig::clone() const {
+std::unique_ptr<AbstractNoise::NoiseConfig> NormalNoise::NormalNoiseConfig::clone() {
     return std::make_unique<NormalNoiseConfig>(*this);
 }
 
@@ -142,7 +142,7 @@ std::unique_ptr<AbstractNoise> UniformNoise::UniformNoiseConfig::createNoise() c
     return std::make_unique<UniformNoise>(*this);
 }
 
-std::unique_ptr<AbstractNoise::NoiseConfig> UniformNoise::UniformNoiseConfig::clone() const {
+std::unique_ptr<AbstractNoise::NoiseConfig> UniformNoise::UniformNoiseConfig::clone() {
     return std::make_unique<UniformNoiseConfig>(*this);
 }
 
