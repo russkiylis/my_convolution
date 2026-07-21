@@ -42,7 +42,7 @@ Item {
                 let newIndex = generatorBackend.postListModel.addPost()
                 if (newIndex >= 0) {
                     postListView.currentIndex = newIndex
-                    generatorBackend.postListModel.postUpdate()
+                    // generatorBackend.postListModel.postUpdate()
                 }
             }
         }
@@ -61,8 +61,10 @@ Item {
             onClicked: {
                 let newIndex = generatorBackend.postListModel.removePost(postListView.currentIndex)
                 postListView.currentIndex = newIndex
-                generatorBackend.postListModel.postUpdate()
+                // generatorBackend.postListModel.postUpdate()
             }
+
+            enabled: postListView.count > 1
         }
 
         ListView {
@@ -84,7 +86,7 @@ Item {
 
                 onClicked: {
                     postListView.currentIndex = index
-                    generatorBackend.postListModel.postUpdate()
+                    // generatorBackend.postListModel.postUpdate()
                     generatorBackend.postListModel.setPostIndex(index)
                 }
 
@@ -153,6 +155,12 @@ Item {
                 Switch {
                     id: postEnabledButton
                     text: "Пост активен"
+
+                    checked: generatorBackend.postListModel.currentPostEnabled
+
+                    onToggled: {
+                        generatorBackend.postListModel.currentPostEnabled = checked
+                    }
                 }
 
                 TextField {
@@ -160,8 +168,9 @@ Item {
                     background: TextFieldBackground {}
                     placeholderText: "Мой пост"
                     text: generatorBackend.postListModel.currentPostName
+                    selectByMouse: true
 
-                    onEditingFinished: {
+                    onTextEdited: {
                         generatorBackend.postListModel.currentPostName = text
                     }
 
@@ -176,6 +185,12 @@ Item {
                     id: latitudeTextField
                     background: TextFieldBackground {}
                     placeholderText: "60"
+                    text: generatorBackend.postListModel.currentLatitude
+                    selectByMouse: true
+
+                    onTextEdited: {
+                        generatorBackend.postListModel.currentLatitude = text
+                    }
 
                     Label {
                         text: "Широта (град.)"
@@ -189,6 +204,13 @@ Item {
                         placeholderText: "30"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
+                        text: generatorBackend.postListModel.currentLongitude
+                        selectByMouse: true
+
+                        onTextEdited: {
+                            generatorBackend.postListModel.currentLongitude = text
+                        }
+
                         Label {
                             text: "Долгота (град.)"
                             anchors.bottom: parent.top
@@ -201,6 +223,12 @@ Item {
                     id: frequencyTextField
                     background: TextFieldBackground {}
                     placeholderText: "100000000"
+                    text: generatorBackend.postListModel.currentFrequency
+                    selectByMouse: true
+
+                    onTextEdited: {
+                        generatorBackend.postListModel.currentFrequency = text
+                    }
 
                     Label {
                         text: "Частота (Гц)"
@@ -213,6 +241,12 @@ Item {
                     id: levelTextField
                     background: TextFieldBackground {}
                     placeholderText: "10"
+                    text: generatorBackend.postListModel.currentLevel
+                    selectByMouse: true
+
+                    onTextEdited: {
+                        generatorBackend.postListModel.currentLevel = text
+                    }
 
                     Label {
                         text: "Уровень (дБ)"
@@ -226,6 +260,13 @@ Item {
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
+                        text: generatorBackend.postListModel.currentLevelSigma
+                        selectByMouse: true
+
+                        onTextEdited: {
+                            generatorBackend.postListModel.currentLevelSigma = text
+                        }
+
                         Label {
                             text: "СКО уровня"
                             anchors.bottom: parent.top
@@ -238,6 +279,13 @@ Item {
                     id: minAngleHTextField
                     background: TextFieldBackground {}
                     placeholderText: "10"
+                    text: generatorBackend.postListModel.currentMinAngleH
+                    selectByMouse: true
+
+                    onTextEdited: {
+                        generatorBackend.postListModel.currentMinAngleH = text
+                    }
+
                     Label {
                         text: "Мин. гор. угол (град.)"
                         anchors.bottom: parent.top
@@ -250,6 +298,13 @@ Item {
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
+                        text: generatorBackend.postListModel.currentMaxAngleH
+                        selectByMouse: true
+
+                        onTextEdited: {
+                            generatorBackend.postListModel.currentMaxAngleH = text
+                        }
+
                         Label {
                             text: "Макс. гор. угол (град.)"
                             anchors.bottom: parent.top
@@ -262,6 +317,20 @@ Item {
                             // placeholderText: "5"
                             anchors.left: parent.right
                             anchors.leftMargin: 20
+                            currentIndex: generatorBackend.postListModel.currentStepH
+
+                            onActivated: {
+                                generatorBackend.postListModel.currentStepH = currentIndex
+                            }
+
+                            model: [
+                                "1",
+                                "0.5",
+                                "0.2",
+                                "0.1",
+                                "0.01"
+                            ]
+
                             Label {
                                 text: "Шаг гор. угла (град.)"
                                 anchors.bottom: parent.top
@@ -275,6 +344,13 @@ Item {
                     id: minAngleVTextField
                     background: TextFieldBackground {}
                     placeholderText: "10"
+                    text: generatorBackend.postListModel.currentMinAngleV
+                    selectByMouse: true
+
+                    onTextEdited: {
+                        generatorBackend.postListModel.currentMinAngleV = text
+                    }
+
                     Label {
                         text: "Мин. верт. угол (град.)"
                         anchors.bottom: parent.top
@@ -287,6 +363,13 @@ Item {
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
+                        text: generatorBackend.postListModel.currentMaxAngleV
+                        selectByMouse: true
+
+                        onTextEdited: {
+                            generatorBackend.postListModel.currentMaxAngleV = text
+                        }
+
                         Label {
                             text: "Макс. верт. угол (град.)"
                             anchors.bottom: parent.top
@@ -299,6 +382,20 @@ Item {
                             // placeholderText: "5"
                             anchors.left: parent.right
                             anchors.leftMargin: 20
+                            currentIndex: generatorBackend.postListModel.currentStepV
+
+                            onActivated: {
+                                generatorBackend.postListModel.currentStepV = currentIndex
+                            }
+
+                            model: [
+                                "1",
+                                "0.5",
+                                "0.2",
+                                "0.1",
+                                "0.01"
+                            ]
+
                             Label {
                                 text: "Шаг верт. угла (град.)"
                                 anchors.bottom: parent.top
@@ -312,6 +409,12 @@ Item {
                     id: minPeriodField
                     background: TextFieldBackground {}
                     placeholderText: "10"
+                    text: generatorBackend.postListModel.currentMinPeriod
+                    selectByMouse: true
+
+                    onTextEdited: {
+                        generatorBackend.postListModel.currentMinPeriod = text
+                    }
 
                     Label {
                         text: "Мин. период генерации (мс)"
@@ -325,6 +428,13 @@ Item {
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
+                        selectByMouse: true
+                        text: generatorBackend.postListModel.currentMaxPeriod
+
+                        onTextEdited: {
+                            generatorBackend.postListModel.currentMaxPeriod = text
+                        }
+
                         Label {
                             text: "Макс. период генерации (мс)"
                             anchors.bottom: parent.top
@@ -333,6 +443,7 @@ Item {
                     }
                 }
 
+                // TODO: Реализовать интерфейс шума
                 ComboBox {
                     id: noiseTypeComboBox
                     background: TextFieldBackground {}
