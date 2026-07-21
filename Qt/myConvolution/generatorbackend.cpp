@@ -52,6 +52,7 @@ GeneratorBackend::GeneratorBackend(QObject *parent)
         return result;
     };
     m_cfg = initialConfig();
+    m_postListModel.setFallbackConfig(m_cfg);
     // Создаём генератор нагрузки и засовываем его в отдельный поток
     auto *loadGenerator = new LoadGenerator(m_cfg);
     loadGenerator->moveToThread(&m_loadGeneratorThread);

@@ -38,6 +38,11 @@ class PostListModel : public QAbstractListModel
     Q_PROPERTY(bool currentPostEnabled READ currentPostEnabled WRITE setCurrentPostEnabled NOTIFY currentPostEnabledChanged)
 
     std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
+    std::vector<LoadGenerator::PostConfig> m_fallbackConfig;   // Вектор конфигов, к которому мы сможем откатиться
+public:
+    void setFallbackConfig(const std::vector<LoadGenerator::PostConfig> &fallbackConfig);
+
+private:
     GeneratorBackend *m_generatorBackend;
 
     int m_postIndex = 0;    // Индекс выбранного поста
@@ -156,7 +161,11 @@ public:
     // Удаляем пост
     Q_INVOKABLE int removePost(int index);
 
+    // Обновляем посты в генераторе (сохраняем изменения)
     Q_INVOKABLE void postUpdate();
+
+    // Отменяем изменения
+    Q_INVOKABLE void fallback();
 
 private:
 
@@ -168,6 +177,9 @@ private:
         MinPeriodRole = Qt::UserRole + 3,
         MaxPeriodRole = Qt::UserRole + 4
     };
+
+    // В одной функции все нужные емиты
+    void emits();
 
 signals:
     void postIndexChanged(int newPostIndex);

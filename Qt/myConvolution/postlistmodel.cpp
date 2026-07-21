@@ -1,6 +1,11 @@
 #include "postlistmodel.h"
 #include "generatorbackend.h"
 
+void PostListModel::setFallbackConfig(const std::vector<LoadGenerator::PostConfig> &fallbackConfig)
+{
+    m_fallbackConfig = fallbackConfig;
+}
+
 int PostListModel::postIndex() const
 {
     qDebug() << m_postIndex;
@@ -11,21 +16,7 @@ void PostListModel::setPostIndex(int postIndex)
 {
     // qDebug() << postIndex;
     m_postIndex = postIndex;
-    emit currentPostNameChanged(currentPostName());
-    emit currentLatitudeChanged(currentLatitude());
-    emit currentLongitudeChanged(currentLongitude());
-    emit currentFrequencyChanged(currentFrequency());
-    emit currentLevelChanged(currentLevel());
-    emit currentLevelSigmaChanged(currentLevelSigma());
-    emit currentMinAngleHChanged(currentMinAngleH());
-    emit currentMaxAngleHChanged(currentMaxAngleH());
-    emit currentStepHChanged(currentStepH());
-    emit currentMinAngleVChanged(currentMinAngleV());
-    emit currentMaxAngleVChanged(currentMaxAngleV());
-    emit currentStepVChanged(currentStepV());
-    emit currentMinPeriodChanged(currentMinPeriod());
-    emit currentMaxPeriodChanged(currentMaxPeriod());
-    emit currentPostEnabledChanged(currentPostEnabled());
+    emits();
 }
 
 QString PostListModel::currentPostName() const {
@@ -224,8 +215,11 @@ void PostListModel::setCurrentPostEnabled(bool currentPostEnabled) {
 PostListModel::PostListModel(GeneratorBackend *generatorBackend, std::vector<LoadGenerator::PostConfig> &config, QObject *parent) :
     QAbstractListModel {parent},
     m_generatorBackend(generatorBackend),
-    m_config(config)
-{}
+    m_config(config),
+    m_fallbackConfig(config)
+{
+
+}
 
 int PostListModel::rowCount(const QModelIndex &parent) const {
     return static_cast<int>(m_config.size());
@@ -316,6 +310,20 @@ int PostListModel::removePost(int index) {
 void PostListModel::postUpdate() {
     beginResetModel();
     m_generatorBackend->signalPostConfigUpdate(m_config);   // Подаём в loadgenerator сигнал обновить посты
+    emits();
+    endResetModel();
+    m_fallbackConfig = m_config;    // Теперь будем откатываться до этого состояния
+}
+
+void PostListModel::fallback() {
+    m_config = m_fallbackConfig; // Отменяем все изменения
+    beginResetModel();
+    emits();
+    endResetModel();
+    qDebug() << "Изменения сброшены.";
+}
+
+void PostListModel::emits() {
     emit currentPostNameChanged(currentPostName());
     emit currentLatitudeChanged(currentLatitude());
     emit currentLongitudeChanged(currentLongitude());
@@ -331,5 +339,4 @@ void PostListModel::postUpdate() {
     emit currentMinPeriodChanged(currentMinPeriod());
     emit currentMaxPeriodChanged(currentMaxPeriod());
     emit currentPostEnabledChanged(currentPostEnabled());
-    endResetModel();
 }

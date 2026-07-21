@@ -473,16 +473,30 @@ Item {
 
     Button {
         id: postConfigSaveButton
-        width: 100
+        width: 175
         anchors.right: generationToggleButton.left
         anchors.rightMargin: 20
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
         background: ButtonBackground {}
 
-        text : "Сохранить"
+        text : "Сохранить изменения"
 
         onClicked: generatorBackend.postListModel.postUpdate()
+    }
+
+    Button {
+        id: postConfigFallbackButton
+        width: 175
+        anchors.right: postConfigSaveButton.left
+        anchors.rightMargin: 20
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20
+        background: ButtonBackground {}
+
+        text : "Отмена изменений"
+
+        onClicked: generatorBackend.postListModel.fallback()
     }
 
 }
