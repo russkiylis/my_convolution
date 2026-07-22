@@ -8,7 +8,7 @@ void PostListModel::setFallbackConfig(const std::vector<LoadGenerator::PostConfi
 
 int PostListModel::postIndex() const
 {
-    qDebug() << m_postIndex;
+    // qDebug() << m_postIndex;
     return m_postIndex;
 }
 
@@ -16,6 +16,7 @@ void PostListModel::setPostIndex(int postIndex)
 {
     // qDebug() << postIndex;
     m_postIndex = postIndex;
+    emit postIndexChanged(m_postIndex);
     emits();
 }
 
@@ -223,14 +224,27 @@ int PostListModel::currentNoiseType() {
 void PostListModel::setCurrentNoiseType(int currentNoiseType) {
     switch (static_cast<AbstractNoise::NoiseType>(currentNoiseType)) {
     case AbstractNoise::NoiseType::Normal:
-        m_noiseBackend = std::make_unique<NormalNoiseBackend>(m_config, m_postIndex);
-        m_config[m_postIndex].noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0,2);
+
+        if (!dynamic_cast<NormalNoiseBackend*>(m_noiseBackend.get())) {
+            m_noiseBackend = std::make_unique<NormalNoiseBackend>(m_config, m_postIndex);
+        }
+        if (!dynamic_cast<NormalNoise::NormalNoiseConfig*>(m_config[m_postIndex].noiseConfig.get())) {
+            m_config[m_postIndex].noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0,2);
+        }
         break;
+
     case AbstractNoise::NoiseType::Uniform:
-        m_noiseBackend = std::make_unique<UniformNoiseBackend>(m_config, m_postIndex);
-        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10,20);
+        if (!dynamic_cast<UniformNoiseBackend*>(m_noiseBackend.get())) {
+            m_noiseBackend = std::make_unique<UniformNoiseBackend>(m_config, m_postIndex);
+        }
+
+        if (!dynamic_cast<UniformNoise::UniformNoiseConfig*>(m_config[m_postIndex].noiseConfig.get())) {
+            m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10,20);
+        }
     }
+
     emit currentNoiseTypeChanged(currentNoiseType);
+    emit noiseBackendChanged();
 }
 
 void PostListModel::setCurrentPostEnabled(bool currentPostEnabled) {
@@ -317,6 +331,7 @@ int PostListModel::removePost(int index) {
 
     // Список стал пустым, значит выбранного элемента больше нет
     if (newSize == 0) {
+        // TODO: Сейчас интерфейс не даёт удалить все посты, но если это сделать, программа упадёт.
         int i = -1;
         setPostIndex(i);
         return i;
@@ -339,14 +354,19 @@ void PostListModel::postUpdate() {
     emits();
     endResetModel();
     m_fallbackConfig = m_config;    // Теперь будем откатываться до этого состояния
+    m_fallbackPostIndex = postIndex();
 }
 
-void PostListModel::fallback() {
-    m_config = m_fallbackConfig; // Отменяем все изменения
+int PostListModel::fallback() {
     beginResetModel();
-    emits();
+    m_config = m_fallbackConfig; // Отменяем все изменения
     endResetModel();
+    if (postIndex() >= m_fallbackConfig.size()) {
+        setPostIndex(m_fallbackPostIndex);
+    }
+    emits();
     qDebug() << "Изменения сброшены.";
+    return postIndex();
 }
 
 AbstractNoiseBackend * PostListModel::noiseBackend() const {
@@ -369,6 +389,7 @@ void PostListModel::emits() {
     emit currentMinPeriodChanged(currentMinPeriod());
     emit currentMaxPeriodChanged(currentMaxPeriod());
     emit currentPostEnabledChanged(currentPostEnabled());
+    setCurrentNoiseType(currentNoiseType());
     emit currentNoiseTypeChanged(currentNoiseType());
 
     m_noiseBackend->emits();

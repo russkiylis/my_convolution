@@ -610,7 +610,9 @@ Item {
 
         text : "Отмена изменений"
 
-        onClicked: generatorBackend.postListModel.fallback()
+        onClicked: {
+            postListView.currentIndex = generatorBackend.postListModel.fallback()
+        }
     }
 
 }

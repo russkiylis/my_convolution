@@ -41,10 +41,11 @@ class PostListModel : public QAbstractListModel
     Q_PROPERTY(bool currentPostEnabled READ currentPostEnabled WRITE setCurrentPostEnabled NOTIFY currentPostEnabledChanged)
     Q_PROPERTY(int currentNoiseType READ currentNoiseType WRITE setCurrentNoiseType NOTIFY currentNoiseTypeChanged)
 
-    Q_PROPERTY(AbstractNoiseBackend *noiseBackend READ noiseBackend CONSTANT)
+    Q_PROPERTY(AbstractNoiseBackend *noiseBackend READ noiseBackend NOTIFY noiseBackendChanged)
 
     std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
     std::vector<LoadGenerator::PostConfig> m_fallbackConfig;   // Вектор конфигов, к которому мы сможем откатиться
+    int m_fallbackPostIndex = 0;
 public:
     void setFallbackConfig(const std::vector<LoadGenerator::PostConfig> &fallbackConfig);
 
@@ -177,7 +178,7 @@ public:
     Q_INVOKABLE void postUpdate();
 
     // Отменяем изменения
-    Q_INVOKABLE void fallback();
+    Q_INVOKABLE int fallback();
 
     AbstractNoiseBackend *noiseBackend() const;
 
@@ -216,4 +217,5 @@ signals:
     void currentMaxPeriodChanged(QString newCurrentMaxPeriod);
     void currentPostEnabledChanged(bool newPostEnabled);
     void currentNoiseTypeChanged(int newNoiseType);
+    void noiseBackendChanged();
 };

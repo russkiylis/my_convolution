@@ -17,13 +17,13 @@ public:
     QString currentMin() const;
 
     // Установить текущее среднее значение
-    void setCurrentMin(const QString &currentMin) const;
+    void setCurrentMin(const QString &currentMin);
 
     // Получить текущее СКО
     QString currentMax() const;
 
     // Установить текущее СКО
-    void setCurrentMax(const QString &currentMax) const;
+    void setCurrentMax(const QString &currentMax);
 
 signals:
     void currentMinChanged(QString newMin);

@@ -18,7 +18,7 @@ NormalNoise::NormalNoiseConfig* NormalNoiseBackend::noiseConfigAcess() const
 
 void NormalNoiseBackend::setCurrentMean(const QString &currentMean) {
     m_config[m_postIndex].noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(currentMean.toDouble(), currentSigma().toDouble());
-    emit currentMeanChanged(currentMean);
+    emit currentMeanChanged(this->currentMean());
 }
 
 QString NormalNoiseBackend::currentSigma() const {
@@ -27,7 +27,7 @@ QString NormalNoiseBackend::currentSigma() const {
 
 void NormalNoiseBackend::setCurrentSigma(const QString &currentSigma) {
     m_config[m_postIndex].noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(currentMean().toDouble(), currentSigma.toDouble());
-    emit currentSigmaChanged(currentSigma);
+    emit currentSigmaChanged(this->currentSigma());
 }
 
 QString NormalNoiseBackend::currentMean() const {
