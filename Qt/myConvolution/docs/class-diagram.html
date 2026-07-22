@@ -1,0 +1,3219 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>myConvolution — интерактивная диаграмма классов</title>
+  <style>
+    :root {
+      --page: #edf2f8;
+      --surface: #ffffff;
+      --surface-soft: #f6f8fc;
+      --surface-strong: #eef2f8;
+      --text: #142036;
+      --muted: #627089;
+      --border: #d7dfeb;
+      --accent: #4057d6;
+      --accent-soft: #e9edff;
+      --accent-contrast: #ffffff;
+      --success: #147d64;
+      --shadow: 0 18px 46px rgba(28, 44, 72, 0.11);
+      --radius: 20px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --page: #080d18;
+        --surface: #111827;
+        --surface-soft: #0d1422;
+        --surface-strong: #172136;
+        --text: #ecf1fb;
+        --muted: #9eabc1;
+        --border: #293650;
+        --accent: #918aff;
+        --accent-soft: #24244a;
+        --accent-contrast: #0b1020;
+        --success: #4bd3ad;
+        --shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 8% -8%, color-mix(in srgb, var(--accent) 17%, transparent), transparent 34rem),
+        linear-gradient(180deg, color-mix(in srgb, var(--page) 92%, #ffffff) 0, var(--page) 24rem);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, select { font: inherit; }
+
+    button {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.66rem 0.88rem;
+      cursor: pointer;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    }
+
+    button:hover {
+      border-color: color-mix(in srgb, var(--accent) 48%, var(--border));
+      background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+    }
+
+    button:active { transform: translateY(1px); }
+
+    button:focus-visible, select:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--accent) 38%, transparent);
+      outline-offset: 2px;
+    }
+
+    .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-contrast);
+      box-shadow: 0 6px 18px color-mix(in srgb, var(--accent) 24%, transparent);
+    }
+
+    .primary:hover {
+      background: color-mix(in srgb, var(--accent) 88%, var(--surface));
+      border-color: var(--accent);
+    }
+
+    .page-shell {
+      width: min(1840px, 100%);
+      margin: 0 auto;
+      padding: clamp(1rem, 3vw, 2.3rem);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .title-block { max-width: 57rem; }
+
+    .eyebrow-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 0.76rem;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid color-mix(in srgb, var(--success) 32%, var(--border));
+      border-radius: 999px;
+      color: var(--success);
+      background: color-mix(in srgb, var(--success) 8%, var(--surface));
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .verified::before {
+      content: "";
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    h1 {
+      margin: 0.38rem 0 0;
+      font-size: clamp(1.65rem, 4vw, 2.7rem);
+      line-height: 1.06;
+      letter-spacing: -0.035em;
+    }
+
+    .subtitle {
+      max-width: 55rem;
+      margin: 0.68rem 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .actions, .zoom-actions, .legend, .detail-meta, .heading-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.52rem;
+    }
+
+    .actions {
+      justify-content: flex-end;
+      flex: 0 0 auto;
+      max-width: 40rem;
+    }
+
+    .language-switch {
+      display: inline-flex;
+      padding: 0.2rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-soft);
+    }
+
+    .language-switch button {
+      min-width: 2.65rem;
+      padding: 0.43rem 0.58rem;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--muted);
+    }
+
+    .language-switch button[aria-pressed="true"] {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(25, 38, 63, 0.11);
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--surface) 96%, transparent);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .detail {
+      position: relative;
+      padding: 1.15rem 1.25rem;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .detail::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 4px;
+      background: var(--detail-color, var(--accent));
+      opacity: 0.9;
+    }
+
+    .detail-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.8fr);
+      gap: 1rem 2rem;
+      align-items: center;
+    }
+
+    .detail-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .detail-kicker {
+      color: var(--accent);
+      font-size: 0.71rem;
+      font-weight: 750;
+      letter-spacing: 0.095em;
+      text-transform: uppercase;
+    }
+
+    .detail h2 {
+      margin: 0.22rem 0 0;
+      font-size: 1.16rem;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+    }
+
+    .detail p {
+      margin: 0.45rem 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .detail-meta {
+      justify-content: flex-end;
+      align-content: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.36rem;
+      max-width: 100%;
+      padding: 0.42rem 0.62rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--muted);
+      font-size: 0.8rem;
+      overflow-wrap: anywhere;
+    }
+
+    .pill-dot {
+      width: 0.56rem;
+      height: 0.56rem;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: var(--dot, var(--accent));
+    }
+
+    .collapse-button[hidden] { display: none; }
+
+    .overview-guide {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .guide-step {
+      min-width: 0;
+      padding: 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-soft);
+    }
+
+    .guide-number {
+      display: inline-grid;
+      place-items: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 50%;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .guide-step strong {
+      display: block;
+      margin-top: 0.55rem;
+      font-size: 0.87rem;
+    }
+
+    .guide-step span:last-child {
+      display: block;
+      margin-top: 0.3rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .member-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows 240ms ease, opacity 180ms ease;
+    }
+
+    .member-panel[hidden] { display: none; }
+
+    .detail.is-expanded .member-panel {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+
+    .detail.is-expanded {
+      position: sticky;
+      top: 0.75rem;
+      z-index: 30;
+      max-height: calc(100vh - 1.5rem);
+      overflow: auto;
+      box-shadow: 0 24px 70px rgba(22, 34, 58, 0.23);
+    }
+
+    .member-panel-inner {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .member-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.78rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .member-section {
+      min-width: 0;
+      padding: 0.92rem;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--surface-soft);
+    }
+
+    .member-section h3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin: 0;
+      font-size: 0.88rem;
+    }
+
+    .member-count {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .member-list {
+      display: grid;
+      gap: 0.68rem;
+      margin: 0.78rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .member-list li {
+      display: grid;
+      grid-template-columns: 1.45rem minmax(0, 1fr);
+      gap: 0.52rem;
+      align-items: start;
+    }
+
+    .member-list li.empty-member {
+      display: block;
+      padding: 0.68rem;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      line-height: 1.4;
+    }
+
+    .access {
+      display: inline-grid;
+      place-items: center;
+      width: 1.38rem;
+      height: 1.38rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--accent);
+      font: 750 0.76rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .member-copy { min-width: 0; }
+
+    .member-copy code {
+      display: block;
+      color: var(--text);
+      font: 650 0.75rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .member-copy span {
+      display: block;
+      margin-top: 0.16rem;
+      color: var(--muted);
+      font-size: 0.73rem;
+      line-height: 1.38;
+    }
+
+    .relation-item {
+      display: grid;
+      grid-template-columns: 1.45rem minmax(0, 1fr);
+      gap: 0.52rem;
+    }
+
+    .relation-arrow { color: var(--accent); font-weight: 800; text-align: center; }
+
+    .relation-title {
+      display: block;
+      color: var(--text);
+      font-size: 0.76rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .relation-note {
+      display: block;
+      margin-top: 0.14rem;
+      color: var(--muted);
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+
+    .source-note {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 0.78rem;
+      padding: 0.68rem 0.78rem;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--surface-soft) 82%, transparent);
+      font-size: 0.73rem;
+    }
+
+    .access-legend { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+    .access-legend span { white-space: nowrap; }
+
+    .implementation-note {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 0.65rem;
+      align-items: start;
+      margin-top: 0.72rem;
+      padding: 0.75rem 0.82rem;
+      border: 1px solid color-mix(in srgb, #c77a14 42%, var(--border));
+      border-radius: 12px;
+      background: color-mix(in srgb, #f3a938 9%, var(--surface));
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .implementation-note[hidden] { display: none; }
+
+    .implementation-note strong {
+      color: color-mix(in srgb, #b46508 82%, var(--text));
+      white-space: nowrap;
+    }
+
+    .workspace { padding: 0.8rem; }
+
+    .toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      padding: 0.18rem 0.25rem 0.82rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 0.35rem;
+      flex: 1 1 23rem;
+      max-width: 39rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 650;
+    }
+
+    select {
+      width: 100%;
+      min-height: 2.72rem;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 0.58rem 0.75rem;
+    }
+
+    .zoom-actions button { min-width: 2.7rem; }
+
+    .legend {
+      padding: 0 0.25rem 0.74rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.36rem;
+      white-space: nowrap;
+    }
+
+    .legend-line {
+      width: 2rem;
+      height: 0;
+      border-top: 2px solid currentColor;
+    }
+
+    .legend-line.inheritance { position: relative; }
+
+    .legend-line.inheritance::after {
+      content: "";
+      position: absolute;
+      right: -1px;
+      top: -5px;
+      width: 7px;
+      height: 7px;
+      border-top: 2px solid currentColor;
+      border-right: 2px solid currentColor;
+      transform: rotate(45deg);
+      background: var(--surface);
+    }
+
+    .legend-line.composition { border-top-width: 3px; }
+    .legend-line.reference { border-top-style: dashed; }
+    .legend-line.signal { border-top-style: dotted; }
+    .legend-line.lifecycle { border-top: 2px dashed currentColor; opacity: 0.8; }
+
+    .canvas-shell {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface-soft);
+    }
+
+    #class-diagram {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 34rem;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .hint {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.7rem 0.35rem 0.05rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+    }
+
+    .status { min-height: 1.2em; color: var(--accent); font-weight: 650; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .scenarios {
+      margin-top: 1rem;
+      padding: clamp(1rem, 2vw, 1.55rem);
+      overflow: hidden;
+    }
+
+    .scenario-heading {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.65fr);
+      gap: 1rem 2rem;
+      align-items: end;
+    }
+
+    .scenario-heading h2 {
+      margin: 0.25rem 0 0;
+      font-size: clamp(1.3rem, 2.5vw, 1.85rem);
+      letter-spacing: -0.025em;
+    }
+
+    .scenario-heading p {
+      max-width: 53rem;
+      margin: 0.48rem 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .scenario-heading-aside {
+      display: grid;
+      gap: 0.72rem;
+      justify-items: end;
+    }
+
+    .scenario-proof {
+      display: flex;
+      align-items: center;
+      gap: 0.64rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+      text-align: right;
+    }
+
+    .scenario-proof strong {
+      color: var(--accent);
+      font-size: 1.75rem;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .thread-legend {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 0.42rem;
+    }
+
+    .thread-key,
+    .thread-badge,
+    .transfer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.36rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .thread-key { padding: 0.36rem 0.52rem; }
+    .thread-badge, .transfer-badge { padding: 0.3rem 0.48rem; }
+
+    .thread-key::before,
+    .thread-badge::before {
+      content: "";
+      width: 0.48rem;
+      height: 0.48rem;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--thread-color, var(--accent));
+    }
+
+    [data-thread="main"] { --thread-color: #4f5fd1; }
+    [data-thread="db"] { --thread-color: #168167; }
+    [data-thread="gen"] { --thread-color: #c87016; }
+    [data-thread="external"] { --thread-color: #64748b; }
+
+    .scenario-switcher {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(11.6rem, 1fr));
+      gap: 0.52rem;
+      margin-top: 1.15rem;
+      padding: 0.62rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface-soft);
+    }
+
+    .scenario-tab {
+      min-width: 0;
+      padding: 0.7rem 0.76rem;
+      text-align: left;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .scenario-tab[aria-pressed="true"] {
+      border-color: color-mix(in srgb, var(--accent) 58%, var(--border));
+      background: var(--surface);
+      box-shadow: 0 7px 20px rgba(25, 38, 63, 0.1);
+    }
+
+    .scenario-tab-number {
+      display: block;
+      color: var(--accent);
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .scenario-tab-title {
+      display: block;
+      margin-top: 0.24rem;
+      font-size: 0.81rem;
+      font-weight: 760;
+      line-height: 1.28;
+    }
+
+    .scenario-tab-copy {
+      display: block;
+      margin-top: 0.22rem;
+      color: var(--muted);
+      font-size: 0.69rem;
+      line-height: 1.35;
+    }
+
+    .scenario-stage {
+      margin-top: 1rem;
+      padding: clamp(0.9rem, 2vw, 1.25rem);
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: color-mix(in srgb, var(--surface) 74%, var(--surface-soft));
+    }
+
+    .scenario-overview {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
+      gap: 1rem 1.5rem;
+      align-items: start;
+    }
+
+    .scenario-overview h3 {
+      margin: 0.22rem 0 0;
+      font-size: clamp(1.12rem, 2vw, 1.45rem);
+      letter-spacing: -0.018em;
+    }
+
+    .scenario-summary {
+      margin: 0.42rem 0 0;
+      color: var(--muted);
+      line-height: 1.52;
+    }
+
+    .scenario-actions {
+      display: grid;
+      gap: 0.55rem;
+      justify-items: stretch;
+    }
+
+    .scenario-trigger {
+      padding: 0.72rem 0.78rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-soft);
+    }
+
+    .scenario-trigger strong,
+    .scenario-route-label,
+    .scenario-outcome strong,
+    .scenario-boundary strong {
+      display: block;
+      color: var(--muted);
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .scenario-trigger span {
+      display: block;
+      margin-top: 0.3rem;
+      font-size: 0.76rem;
+      line-height: 1.4;
+    }
+
+    #highlight-scenario[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 740;
+    }
+
+    .scenario-route-wrap {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      border: 1px dashed var(--border);
+      border-radius: 13px;
+      background: var(--surface-soft);
+    }
+
+    .scenario-route {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.42rem;
+      margin-top: 0.52rem;
+    }
+
+    .route-hop {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.42rem;
+      min-width: 0;
+    }
+
+    .route-actor {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.9rem;
+      padding: 0.36rem 0.54rem;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--text);
+      font: 680 0.71rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    button.route-actor:hover { color: var(--accent); }
+
+    .route-connector {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.24rem;
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .route-connector::before { font-size: 1rem; line-height: 1; }
+    .route-connector[data-transfer="direct"]::before { content: "→"; }
+    .route-connector[data-transfer="queued"]::before { content: "⇢"; color: var(--accent); }
+    .route-connector[data-transfer="data"]::before { content: "···▶"; color: var(--accent); font-size: 0.72rem; }
+    .route-connector[data-transfer="timer"]::before { content: "↻"; color: #c87016; }
+    .route-connector[data-transfer="driver"]::before { content: "⇥"; color: #168167; }
+    .route-connector[data-transfer="branch"]::before { content: "↳"; color: #64748b; }
+
+    .scenario-flow {
+      margin: 1.15rem 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .scenario-step {
+      position: relative;
+      display: grid;
+      grid-template-columns: 2.75rem minmax(0, 1fr);
+      gap: 0.76rem;
+      padding-bottom: 0.82rem;
+    }
+
+    .scenario-step:last-child { padding-bottom: 0; }
+
+    .step-rail {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+
+    .step-rail::after {
+      content: "";
+      position: absolute;
+      top: 2.05rem;
+      bottom: -0.82rem;
+      width: 2px;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--thread-color) 34%, var(--border));
+    }
+
+    .scenario-step:last-child .step-rail::after { display: none; }
+
+    .step-number {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 2.05rem;
+      height: 2.05rem;
+      border: 2px solid color-mix(in srgb, var(--thread-color) 62%, var(--border));
+      border-radius: 50%;
+      background: var(--surface);
+      color: var(--thread-color);
+      font-size: 0.7rem;
+      font-weight: 820;
+    }
+
+    .step-card {
+      min-width: 0;
+      padding: 0.78rem 0.86rem;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--thread-color);
+      border-radius: 13px;
+      background: var(--surface-soft);
+    }
+
+    .step-heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.7rem;
+    }
+
+    .step-heading h4 {
+      margin: 0;
+      font-size: 0.86rem;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .step-badges {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 0.34rem;
+    }
+
+    .transfer-badge::before {
+      content: "→";
+      color: var(--accent);
+      font-size: 0.84rem;
+    }
+
+    .transfer-badge[data-transfer="queued"]::before { content: "⇢"; }
+    .transfer-badge[data-transfer="data"]::before { content: "···▶"; font-size: 0.62rem; }
+    .transfer-badge[data-transfer="timer"]::before { content: "↻"; }
+    .transfer-badge[data-transfer="driver"]::before { content: "⇥"; }
+    .transfer-badge[data-transfer="branch"]::before { content: "↳"; }
+
+    .step-copy {
+      margin: 0.38rem 0 0;
+      color: var(--muted);
+      font-size: 0.77rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .step-evidence {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.46rem;
+      margin-top: 0.6rem;
+      padding-top: 0.58rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .class-link {
+      min-height: 1.9rem;
+      padding: 0.34rem 0.52rem;
+      border-color: color-mix(in srgb, var(--accent) 28%, var(--border));
+      color: var(--accent);
+      background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+      font-size: 0.71rem;
+      font-weight: 740;
+    }
+
+    .step-evidence code {
+      min-width: 0;
+      padding: 0.33rem 0.48rem;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--text);
+      font: 630 0.68rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+
+    .scenario-outcome,
+    .scenario-boundary {
+      display: grid;
+      grid-template-columns: minmax(8.5rem, auto) minmax(0, 1fr);
+      gap: 0.6rem 1rem;
+      align-items: start;
+      margin-top: 0.92rem;
+      padding: 0.78rem 0.84rem;
+      border-radius: 12px;
+      font-size: 0.77rem;
+      line-height: 1.48;
+    }
+
+    .scenario-outcome {
+      border: 1px solid color-mix(in srgb, var(--success) 32%, var(--border));
+      background: color-mix(in srgb, var(--success) 7%, var(--surface));
+    }
+
+    .scenario-outcome strong { color: var(--success); }
+
+    .scenario-boundary {
+      border: 1px solid color-mix(in srgb, #c77a14 40%, var(--border));
+      background: color-mix(in srgb, #f3a938 8%, var(--surface));
+    }
+
+    .scenario-boundary strong { color: color-mix(in srgb, #b46508 82%, var(--text)); }
+
+    footer { padding: 1rem 0.3rem 0; color: var(--muted); font-size: 0.76rem; text-align: right; }
+
+    @media (max-width: 1120px) {
+      .topbar { display: grid; }
+      .actions { justify-content: flex-start; max-width: none; }
+      .overview-guide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .member-grid { grid-template-columns: 1fr 1fr; }
+      .member-section:last-child { grid-column: 1 / -1; }
+      .scenario-heading { grid-template-columns: 1fr; align-items: start; }
+      .scenario-heading-aside { justify-items: start; }
+      .scenario-proof { text-align: left; }
+      .thread-legend { justify-content: flex-start; }
+    }
+
+    @media (max-width: 760px) {
+      .detail-summary { grid-template-columns: 1fr; }
+      .detail-meta { justify-content: flex-start; }
+      .member-grid, .overview-guide { grid-template-columns: 1fr; }
+      .member-section:last-child { grid-column: auto; }
+      .detail.is-expanded { top: 0.35rem; max-height: calc(100vh - 0.7rem); }
+      #class-diagram { min-height: 26rem; }
+      .scenario-overview { grid-template-columns: 1fr; }
+      .scenario-outcome, .scenario-boundary { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .page-shell { padding: 0.72rem; }
+      .actions { width: 100%; }
+      .actions > button { flex: 1 1 8rem; }
+      .workspace { padding: 0.52rem; }
+      .zoom-actions { width: 100%; }
+      .zoom-actions button { flex: 1; }
+      .scenario-switcher { grid-template-columns: 1fr; }
+      .scenario-step { grid-template-columns: 2.35rem minmax(0, 1fr); gap: 0.5rem; }
+      .step-heading { display: grid; }
+      .step-badges { justify-content: flex-start; }
+      .thread-badge, .transfer-badge { max-width: 100%; white-space: normal; text-align: left; line-height: 1.25; }
+      .scenario-route > .route-actor { max-width: 100%; overflow-wrap: anywhere; }
+      .route-hop { width: 100%; align-items: flex-start; }
+      .route-hop .route-connector { flex: 0 1 6.8rem; white-space: normal; line-height: 1.25; }
+      .route-hop .route-actor { min-width: 0; flex: 1 1 0; overflow-wrap: anywhere; }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+        --page: #ffffff;
+        --surface: #ffffff;
+        --surface-soft: #f6f8fc;
+        --surface-strong: #eef2f8;
+        --text: #142036;
+        --muted: #4b556b;
+        --border: #d7dfeb;
+        --accent: #4057d6;
+        --accent-soft: #e9edff;
+        --accent-contrast: #ffffff;
+        --success: #147d64;
+        --shadow: none;
+      }
+      body { background: #ffffff; }
+      .page-shell { width: 100%; padding: 0; }
+      .topbar .actions, .detail, .toolbar, .hint, .scenario-switcher, .scenario-actions button, footer { display: none; }
+      .panel, .canvas-shell { border: 0; box-shadow: none; }
+      #class-diagram { min-height: 0; }
+      .scenarios { break-before: page; padding: 0; }
+      .scenario-stage { border: 0; padding: 0; }
+      .scenario-step, .step-card, .scenario-outcome, .scenario-boundary { break-inside: avoid; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="title-block">
+        <div class="eyebrow-row">
+          <div class="eyebrow" data-i18n="eyebrow">Qt 5.15 · C++17 · 27 типов · 1 точка входа</div>
+          <span class="verified" data-i18n="verified">Сверено с исходным кодом</span>
+        </div>
+        <h1 data-i18n="heading">Архитектура классов myConvolution</h1>
+        <p class="subtitle" data-i18n="subtitle">Маршрут от main() к UI и рабочим потокам. Показаны только подтверждённые связи; генератор не записывает данные в PostgreSQL в текущей реализации.</p>
+      </div>
+      <div class="actions" data-i18n-aria="exportAria" aria-label="Экспорт диаграммы">
+        <div class="language-switch" data-i18n-aria="languageAria" aria-label="Язык диаграммы">
+          <button type="button" data-language="ru" aria-pressed="true">RU</button>
+          <button type="button" data-language="en" aria-pressed="false">EN</button>
+        </div>
+        <button type="button" id="share-svg" class="primary" data-i18n="shareSvg">Поделиться SVG</button>
+        <button type="button" id="download-svg" data-i18n="downloadSvg">Скачать SVG</button>
+        <button type="button" id="download-png" data-i18n="downloadPng">Скачать PNG</button>
+        <button type="button" id="print-diagram" data-i18n="printPdf">PDF: диаграмма + выбранный сценарий</button>
+      </div>
+    </header>
+
+    <section class="detail panel" id="detail-card" aria-live="polite">
+      <div class="detail-summary">
+        <div>
+          <div class="detail-heading">
+            <div>
+              <div class="detail-kicker" id="detail-kicker">Как читать диаграмму</div>
+              <h2 id="detail-name">Вся архитектура</h2>
+            </div>
+            <button type="button" id="collapse-detail" class="collapse-button" hidden>Свернуть</button>
+          </div>
+          <p id="detail-purpose"></p>
+        </div>
+        <div class="detail-meta">
+          <span class="pill" id="detail-layer"></span>
+          <span class="pill" id="detail-file"></span>
+          <span class="pill" id="detail-thread"></span>
+        </div>
+      </div>
+
+      <div class="overview-guide" id="overview-guide"></div>
+
+      <div class="member-panel" id="member-panel" hidden>
+        <div class="member-panel-inner">
+          <div class="member-grid">
+            <section class="member-section">
+              <h3><span id="fields-title"></span><span class="member-count" id="fields-count"></span></h3>
+              <ul class="member-list" id="fields-list"></ul>
+            </section>
+            <section class="member-section">
+              <h3><span id="methods-title"></span><span class="member-count" id="methods-count"></span></h3>
+              <ul class="member-list" id="methods-list"></ul>
+            </section>
+            <section class="member-section">
+              <h3><span id="relations-title"></span><span class="member-count" id="relations-count"></span></h3>
+              <div class="member-list" id="relations-list"></div>
+            </section>
+          </div>
+          <div class="source-note">
+            <span id="source-note"></span>
+            <span class="access-legend" id="access-legend"></span>
+          </div>
+          <div class="implementation-note" id="implementation-note" hidden>
+            <strong id="implementation-note-title"></strong>
+            <span id="implementation-note-copy"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <main class="workspace panel">
+      <div class="toolbar">
+        <label class="field" for="class-picker">
+          <span data-i18n="selectedClass">Выбранный класс</span>
+          <select id="class-picker"></select>
+        </label>
+        <div class="zoom-actions" data-i18n-aria="zoomAria" aria-label="Масштаб диаграммы">
+          <button type="button" id="toggle-secondary" aria-pressed="false">Показать доп. связи</button>
+          <button type="button" id="zoom-out" data-i18n-aria="zoomOutAria" aria-label="Уменьшить">−</button>
+          <button type="button" id="zoom-fit" data-i18n="fullView" data-i18n-aria="fullViewAria" aria-label="Показать всю диаграмму">Вся картина</button>
+          <button type="button" id="zoom-in" data-i18n-aria="zoomInAria" aria-label="Увеличить">+</button>
+        </div>
+      </div>
+
+      <div class="legend" data-i18n-aria="legendAria" aria-label="Типы связей">
+        <span class="legend-item"><span class="legend-line inheritance"></span><span data-i18n="inheritance">наследование</span></span>
+        <span class="legend-item"><span class="legend-line composition"></span><span data-i18n="ownership">владение</span></span>
+        <span class="legend-item"><span class="legend-line reference"></span><span data-i18n="reference">ссылка / создание</span></span>
+        <span class="legend-item"><span class="legend-line signal"></span><span data-i18n="signalFlow">сигнал / поток данных</span></span>
+        <span class="legend-item"><span class="legend-line lifecycle"></span><span data-i18n="lifecycle">создание и жизненный цикл потока</span></span>
+        <span class="legend-item"><strong>1 · 0..1 · 0..*</strong><span data-i18n="multiplicity">один · необязательный · много</span></span>
+      </div>
+
+      <div class="canvas-shell">
+        <svg id="class-diagram" class="diagram-svg" viewBox="0 0 2200 2120" role="img" aria-labelledby="diagram-title diagram-description"></svg>
+      </div>
+
+      <div class="hint">
+        <span data-i18n="hint">Клик по классу — раскрыть поля и методы · кнопки ± — масштаб · перетаскивание пустого места — панорама</span>
+        <span id="status" class="status"></span>
+      </div>
+    </main>
+
+    <section class="scenarios panel" id="work-scenarios" aria-labelledby="scenarios-title">
+      <header class="scenario-heading">
+        <div>
+          <div class="detail-kicker" data-i18n="scenariosKicker">От действия к результату</div>
+          <h2 id="scenarios-title" data-i18n="scenariosHeading">Как приложение работает по шагам</h2>
+          <p data-i18n="scenariosIntro">Выберите сценарий: каждый шаг показывает исполнителя, поток, способ передачи управления и точный вызов в коде.</p>
+        </div>
+        <div class="scenario-heading-aside">
+          <div class="scenario-proof"><strong>7</strong><span data-i18n="scenariosVerified">проверенных маршрутов<br>по текущему исходному коду</span></div>
+          <div class="thread-legend" data-i18n-aria="threadLegendAria" aria-label="Потоки и внешняя система">
+            <span class="thread-key" data-thread="main" data-i18n="threadMain">QML / главный</span>
+            <span class="thread-key" data-thread="db" data-i18n="threadDb">поток БД</span>
+            <span class="thread-key" data-thread="gen" data-i18n="threadGen">поток генератора</span>
+            <span class="thread-key" data-thread="external" data-i18n="threadExternal">PostgreSQL</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="scenario-switcher" id="scenario-switcher" role="group" data-i18n-aria="scenarioSwitcherAria" aria-label="Выбор сценария работы"></div>
+
+      <article class="scenario-stage" id="scenario-stage" aria-labelledby="scenario-name">
+        <div class="scenario-overview">
+          <div>
+            <div class="detail-kicker" id="scenario-kicker"></div>
+            <h3 id="scenario-name"></h3>
+            <p class="scenario-summary" id="scenario-summary"></p>
+          </div>
+          <div class="scenario-actions">
+            <div class="scenario-trigger"><strong data-i18n="scenarioTrigger">Что запускает</strong><span id="scenario-trigger"></span></div>
+            <button type="button" id="highlight-scenario" aria-pressed="false" data-i18n="scenarioHighlight">Подсветить маршрут на диаграмме</button>
+          </div>
+        </div>
+
+        <div class="scenario-route-wrap">
+          <span class="scenario-route-label" data-i18n="scenarioRoute">Ключевой маршрут</span>
+          <div class="scenario-route" id="scenario-route"></div>
+        </div>
+
+        <ol class="scenario-flow" id="scenario-steps"></ol>
+
+        <div class="scenario-outcome"><strong data-i18n="scenarioOutcome">Итог</strong><span id="scenario-outcome"></span></div>
+        <div class="scenario-boundary"><strong data-i18n="scenarioBoundary">Важно в текущей реализации</strong><span id="scenario-boundary"></span></div>
+        <span class="sr-only" id="scenario-status" role="status" aria-live="polite"></span>
+      </article>
+    </section>
+
+    <footer data-i18n="footer">Сформировано по текущим заголовкам и connect-цепочкам проекта.</footer>
+  </div>
+
+  <script>
+    (() => {
+      const WIDTH = 2200;
+      const HEIGHT = 2120;
+      let currentLanguage = 'ru';
+
+      const L = (ru, en) => ({ ru, en });
+      const M = (access, signature, ru, en) => ({ access, signature, note: L(ru, en) });
+      const t = (value, language = currentLanguage) => typeof value === 'string' ? value : value[language];
+
+      const ui = {
+        ru: {
+          pageTitle: 'myConvolution — интерактивная диаграмма классов',
+          eyebrow: 'Qt 5.15 · C++17 · 27 типов · 1 точка входа',
+          verified: 'Сверено с исходным кодом',
+          heading: 'Архитектура классов myConvolution',
+          subtitle: 'Маршрут от main() к UI и рабочим потокам. Показаны только подтверждённые связи; генератор не записывает данные в PostgreSQL в текущей реализации.',
+          exportAria: 'Экспорт диаграммы',
+          languageAria: 'Язык диаграммы',
+          shareSvg: 'Поделиться SVG',
+          downloadSvg: 'Скачать SVG',
+          downloadPng: 'Скачать PNG',
+          printPdf: 'PDF: диаграмма + выбранный сценарий',
+          selectedClass: 'Выбранный класс',
+          zoomAria: 'Масштаб диаграммы',
+          zoomOutAria: 'Уменьшить',
+          fullViewAria: 'Показать всю диаграмму',
+          zoomInAria: 'Увеличить',
+          fullView: 'Вся картина',
+          legendAria: 'Типы связей',
+          inheritance: 'наследование',
+          ownership: 'владение',
+          reference: 'ссылка / создание',
+          signalFlow: 'сигнал / поток данных',
+          lifecycle: 'создание и жизненный цикл потока',
+          multiplicity: 'один · необязательный · много',
+          hint: 'Клик по классу — раскрыть поля и методы · кнопки ± — масштаб · перетаскивание пустого места — панорама',
+          footer: 'Сформировано по текущим заголовкам и connect-цепочкам проекта.',
+          diagramTitle: 'Интерактивная диаграмма классов myConvolution',
+          diagramDescription: 'Точка входа main() и 27 классов и структур выстроены сверху вниз и сгруппированы по UI, базе данных, генерации, шуму и пикам.',
+          overviewKicker: 'Как читать диаграмму',
+          overviewName: 'Вся архитектура',
+          overviewPurpose: 'Начните с main() сверху и двигайтесь по веткам вниз. Цвет показывает архитектурную область, линия — характер связи, а клик раскрывает проверенные поля и методы.',
+          overviewLayer: '5 архитектурных областей',
+          overviewFile: '11 заголовочных файлов',
+          overviewThread: 'Главный + 2 рабочих потока',
+          expandedKicker: 'Раскрытая карточка класса',
+          collapse: 'Свернуть',
+          fields: 'Ключевые поля',
+          methods: 'Методы и сигналы',
+          relations: 'Место в архитектуре',
+          implementationNote: 'Нюанс реализации',
+          sourceChecked: 'Сверено с исходником:',
+          allOption: 'Вся картина · 27 типов + вход',
+          selectedStatus: 'Выбран: {name} · прямых связей: {count}',
+          overviewStatus: 'Диаграмма целиком помещена в область просмотра',
+          detailsCollapsed: 'Карточка класса свёрнута',
+          svgSaved: 'SVG сохранён — его можно вставить в документ или отправить отдельно',
+          pngSaved: 'PNG сохранён в высоком разрешении',
+          shareTitle: 'Диаграмма классов myConvolution',
+          shareText: 'Архитектурная диаграмма проекта myConvolution',
+          shared: 'Диаграмма передана в системное меню «Поделиться»',
+          shareFallback: 'Системный Share недоступен — SVG скачан для отправки',
+          shareError: 'Не удалось открыть Share — SVG скачан для отправки',
+          noOwnMethods: 'Собственных методов нет: это контейнер данных.',
+          accessPublic: '+ открытый',
+          accessProtected: '# защищённый',
+          accessPrivate: '− закрытый',
+          accessLocal: '• локальная переменная',
+          accessSignal: '⚡ сигнал',
+          accessSlot: '↳ слот',
+          accessInherited: '↥ унаследовано',
+          edgeInheritance: 'наследование',
+          edgeComposition: 'владение',
+          edgeReference: 'ссылка / создание',
+          edgeSignal: 'сигнал / поток данных',
+          edgeLifecycle: 'создание и жизненный цикл',
+          extends: 'наследует ',
+          nodeHint: 'Клик: раскрыть поля и методы',
+          connectionIncoming: 'входит',
+          connectionOutgoing: 'выходит',
+          showSecondary: 'Показать доп. связи',
+          hideSecondary: 'Скрыть доп. связи',
+          secondaryShown: 'Показаны все 39 подтверждённых связей',
+          secondaryHidden: 'Оставлено основное дерево; дополнительные связи появятся при выборе класса',
+          scenariosKicker: 'От действия к результату',
+          scenariosHeading: 'Как приложение работает по шагам',
+          scenariosIntro: 'Выберите сценарий: каждый шаг показывает исполнителя, поток, способ передачи управления и точный вызов в коде.',
+          scenariosVerified: 'проверенных маршрутов по текущему исходному коду',
+          threadLegendAria: 'Потоки и внешняя система',
+          threadMain: 'QML / главный',
+          threadDb: 'поток БД',
+          threadGen: 'поток генератора',
+          threadExternal: 'PostgreSQL',
+          scenarioSwitcherAria: 'Выбор сценария работы',
+          scenarioTrigger: 'Что запускает',
+          scenarioHighlight: 'Подсветить маршрут на диаграмме',
+          scenarioUnhighlight: 'Убрать подсветку маршрута',
+          scenarioRoute: 'Ключевой маршрут',
+          scenarioOutcome: 'Итог',
+          scenarioBoundary: 'Важно в текущей реализации',
+          scenarioNumber: 'Сценарий {current} из {total}',
+          scenarioClassAria: 'Открыть {name} в диаграмме классов',
+          scenarioSelected: 'Выбран сценарий: {name}',
+          scenarioHighlighted: 'Маршрут «{name}» подсвечен на диаграмме',
+          scenarioHighlightCleared: 'Подсветка маршрута убрана'
+        },
+        en: {
+          pageTitle: 'myConvolution — Interactive Class Diagram',
+          eyebrow: 'Qt 5.15 · C++17 · 27 types · 1 entry point',
+          verified: 'Verified against source code',
+          heading: 'Class Architecture of myConvolution',
+          subtitle: 'A route from main() to the UI and worker threads. Only confirmed relationships are shown; the generator does not write data to PostgreSQL in the current implementation.',
+          exportAria: 'Diagram export',
+          languageAria: 'Diagram language',
+          shareSvg: 'Share SVG',
+          downloadSvg: 'Download SVG',
+          downloadPng: 'Download PNG',
+          printPdf: 'PDF: diagram + selected scenario',
+          selectedClass: 'Selected class',
+          zoomAria: 'Diagram zoom',
+          zoomOutAria: 'Zoom out',
+          fullViewAria: 'Show the entire diagram',
+          zoomInAria: 'Zoom in',
+          fullView: 'Full view',
+          legendAria: 'Relationship types',
+          inheritance: 'inheritance',
+          ownership: 'ownership',
+          reference: 'reference / creation',
+          signalFlow: 'signal / data flow',
+          lifecycle: 'creation and thread lifecycle',
+          multiplicity: 'one · optional · many',
+          hint: 'Click a class — reveal fields and methods · ± buttons — zoom · drag empty space — pan',
+          footer: 'Generated from the current headers and connect() chains of the project.',
+          diagramTitle: 'Interactive Class Diagram of myConvolution',
+          diagramDescription: 'The main() entry point and 27 classes and structs are arranged top to bottom and grouped into UI, database, generation, noise, and peak areas.',
+          overviewKicker: 'How to read the diagram',
+          overviewName: 'Entire architecture',
+          overviewPurpose: 'Start with main() at the top and follow the branches downward. Color identifies the architectural area, each line describes a relationship, and a click reveals verified fields and methods.',
+          overviewLayer: '5 architectural areas',
+          overviewFile: '11 header files',
+          overviewThread: 'Main + 2 worker threads',
+          expandedKicker: 'Expanded class card',
+          collapse: 'Collapse',
+          fields: 'Key fields',
+          methods: 'Methods and signals',
+          relations: 'Architectural context',
+          implementationNote: 'Implementation note',
+          sourceChecked: 'Verified against source:',
+          allOption: 'Full view · 27 types + entry point',
+          selectedStatus: 'Selected: {name} · direct connections: {count}',
+          overviewStatus: 'The diagram is fitted to the viewport',
+          detailsCollapsed: 'Class card collapsed',
+          svgSaved: 'SVG saved—it can be inserted into a document or sent separately',
+          pngSaved: 'High-resolution PNG saved',
+          shareTitle: 'Class Diagram of myConvolution',
+          shareText: 'Architecture diagram of the myConvolution project',
+          shared: 'Diagram sent to the system share menu',
+          shareFallback: 'System sharing is unavailable—SVG downloaded for sending',
+          shareError: 'Could not open the share menu—SVG downloaded for sending',
+          noOwnMethods: 'No methods are declared: this type is a data container.',
+          accessPublic: '+ public',
+          accessProtected: '# protected',
+          accessPrivate: '− private',
+          accessLocal: '• local variable',
+          accessSignal: '⚡ signal',
+          accessSlot: '↳ slot',
+          accessInherited: '↥ inherited',
+          edgeInheritance: 'inheritance',
+          edgeComposition: 'ownership',
+          edgeReference: 'reference / creation',
+          edgeSignal: 'signal / data flow',
+          edgeLifecycle: 'creation and lifecycle',
+          extends: 'extends ',
+          nodeHint: 'Click to reveal fields and methods',
+          connectionIncoming: 'incoming',
+          connectionOutgoing: 'outgoing',
+          showSecondary: 'Show additional links',
+          hideSecondary: 'Hide additional links',
+          secondaryShown: 'All 39 confirmed relationships are shown',
+          secondaryHidden: 'Only the main tree is shown; additional links appear when a class is selected',
+          scenariosKicker: 'From action to result',
+          scenariosHeading: 'How the application works, step by step',
+          scenariosIntro: 'Choose a scenario: every step names the actor, thread, hand-off type, and exact call in the code.',
+          scenariosVerified: 'verified routes from the current source code',
+          threadLegendAria: 'Threads and external system',
+          threadMain: 'QML / main',
+          threadDb: 'database thread',
+          threadGen: 'generator thread',
+          threadExternal: 'PostgreSQL',
+          scenarioSwitcherAria: 'Choose a runtime scenario',
+          scenarioTrigger: 'Trigger',
+          scenarioHighlight: 'Highlight route on the diagram',
+          scenarioUnhighlight: 'Clear route highlight',
+          scenarioRoute: 'Key route',
+          scenarioOutcome: 'Outcome',
+          scenarioBoundary: 'Important in the current implementation',
+          scenarioNumber: 'Scenario {current} of {total}',
+          scenarioClassAria: 'Open {name} in the class diagram',
+          scenarioSelected: 'Selected scenario: {name}',
+          scenarioHighlighted: 'The “{name}” route is highlighted on the diagram',
+          scenarioHighlightCleared: 'Route highlight cleared'
+        }
+      };
+
+      const layerMeta = {
+        entry: { label: L('Точка входа', 'Entry point'), color: '#334155' },
+        ui: { label: L('UI / QML', 'UI / QML'), color: '#4f5fd1' },
+        db: { label: L('База данных', 'Database'), color: '#168167' },
+        gen: { label: L('Генерация', 'Generation'), color: '#c87016' },
+        noise: { label: L('Шум', 'Noise'), color: '#087da8' },
+        peak: { label: L('Пики', 'Peaks'), color: '#a8498d' }
+      };
+
+      const implementationNotes = {
+        'connection-backend': L(
+          'Комментарий у m_dbStatus не совпадает с фактической шкалой: менеджер использует 0 = нет соединения, 1 = занято, 2 = подключено и свободно.',
+          'The m_dbStatus comment does not match the effective scale: the manager uses 0 = disconnected, 1 = busy, 2 = connected and idle.'
+        ),
+        'database-manager': L(
+          'Конструктор инициализирует m_port значением 5432 независимо от аргумента port, хотя начальный DatabaseConfiguration получает переданный аргумент.',
+          'The constructor initializes m_port to 5432 regardless of the port argument, while the initial DatabaseConfiguration receives the supplied argument.'
+        ),
+        'post-list-model': L(
+          'rowCount() требует проверки: для невалидного parent он возвращает -1, тогда как плоская Qt-модель обычно возвращает размер списка, а для валидного parent — 0.',
+          'rowCount() needs review: it returns -1 for an invalid parent, while a flat Qt model normally returns the list size and returns 0 for a valid parent.'
+        ),
+        'post-config': L(
+          'PostConfig::operator=() не очищает peakConfigsV/H перед клонированием; повторное присваивание может накапливать дубликаты пиков.',
+          'PostConfig::operator=() does not clear peakConfigsV/H before cloning; repeated assignment can accumulate duplicate peaks.'
+        ),
+        'abstract-noise': L(
+          'setSeed() меняет m_seed, но не переинициализирует m_rng; вызов сам по себе не перезапускает последовательность.',
+          'setSeed() changes m_seed but does not reseed m_rng; the call alone does not restart the random sequence.'
+        ),
+        'uniform-noise-backend': L(
+          'Проверки границ в setCurrentMin/Max() требуют ревизии: std::numeric_limits<float>::min() — минимальное положительное число, не самое отрицательное.',
+          'Range checks in setCurrentMin/Max() need review: std::numeric_limits<float>::min() is the smallest positive value, not the most negative value.'
+        ),
+        'data-package': L(
+          'qualityH/V сейчас получают максимум свёртки до нормировки; корректная формула качества в коде ещё не определена.',
+          'qualityH/V currently receive the convolution maximum before normalization; the final quality formula is not yet defined in code.'
+        ),
+        'generator-backend': L(
+          'slotSendData() сейчас только журналирует DataPackage через qDebug; связи передачи сгенерированных данных в ветку БД нет.',
+          'slotSendData() currently only logs DataPackage through qDebug; there is no generated-data path into the database branch.'
+        )
+      };
+
+      const clusters = [
+        { id: 'ui', label: L('UI / QML · главный поток', 'UI / QML · main thread'), x: 40, y: 130, w: 2120, h: 530 },
+        { id: 'db', label: L('Ветка базы данных', 'Database branch'), x: 40, y: 700, w: 620, h: 410 },
+        { id: 'gen', label: L('Ветка генерации нагрузки', 'Load-generation branch'), x: 700, y: 700, w: 1460, h: 410 },
+        { id: 'noise', label: L('Модель шума', 'Noise model'), x: 40, y: 1150, w: 920, h: 900 },
+        { id: 'peak', label: L('Модель пиков', 'Peak model'), x: 1000, y: 1150, w: 1160, h: 900 }
+      ];
+
+      const nodes = [
+        {
+          id: 'app-entry', name: L('main() · корневой контекст QML', 'main() · QML root context'), layer: 'entry',
+          kind: L('точка входа приложения', 'application entry'), base: 'main.cpp · main.qml', file: 'main.cpp · main.qml',
+          thread: L('Главный поток', 'Main thread'), x: 930, y: 28, w: 340, h: 64, compact: true,
+          purpose: L('Создаёт приложение и оба фасада, регистрирует метатипы, публикует фасады в QML и запускает цикл событий.', 'Creates the application and both backend objects, registers metatypes, exposes the backends to QML, and starts the event loop.'),
+          fields: [
+            M('local', 'QGuiApplication app', 'Главный цикл событий Qt.', 'The main Qt event loop.'),
+            M('local', 'ConnectionBackend connectionBackend', 'Общий вход в ветку базы данных из QML.', 'The QML entry into the database branch.'),
+            M('local', 'GeneratorBackend generatorBackend', 'Общий вход в ветку генератора из QML.', 'The QML entry into the generator branch.'),
+            M('local', 'QQmlApplicationEngine engine', 'Загружает main.qml и хранит корневой контекст.', 'Loads main.qml and owns the root context.')
+          ],
+          methods: [
+            M('public', 'qRegisterMetaType<T>()', 'Разрешает передавать пользовательские типы через queued signal/slot.', 'Enables custom types in queued signal/slot calls.'),
+            M('public', 'rootContext()->setContextProperty(...)', 'Делает оба фасада видимыми в QML.', 'Exposes both backends to QML.'),
+            M('public', 'engine.load("qrc:/main.qml")', 'Загружает корневой интерфейс.', 'Loads the root UI.'),
+            M('public', 'QGuiApplication::exec()', 'Запускает приложение до закрытия пользователем.', 'Runs the application until the user closes it.')
+          ]
+        },
+        {
+          id: 'connection-backend', name: 'ConnectionBackend', layer: 'ui',
+          kind: L('QObject-фасад', 'QObject facade'), base: 'QObject', extendsBase: true, file: 'backend.h · backend.cpp',
+          thread: L('Главный поток', 'Main thread'), x: 300, y: 190, w: 310, h: 82,
+          purpose: L('QML-фасад подключения: принимает параметры формы, управляет DatabaseManager и публикует статус с последней ошибкой.', 'QML connection facade: accepts form parameters, manages DatabaseManager, and exposes connection status and the latest error.'),
+          fields: [
+            M('private', 'DatabaseManager m_db', 'Владеет менеджером ветки базы данных.', 'Owns the database branch manager.'),
+            M('private', 'int m_dbStatus', 'Состояние БД для QML: 0/1/2.', 'Database state exposed to QML: 0/1/2.'),
+            M('private', 'QString m_lastError', 'Последняя ошибка для интерфейса.', 'Latest error exposed to the UI.'),
+            M('private', 'QString m_hostName, m_port, ...', 'Поля формы подключения к PostgreSQL.', 'PostgreSQL connection form values.')
+          ],
+          methods: [
+            M('public', 'onDbConnectionButtonClicked(...)', 'Q_INVOKABLE: реагирует на кнопку подключения.', 'Q_INVOKABLE handler for the connection button.'),
+            M('public', 'dbStatus() / lastError()', 'Геттеры Q_PROPERTY для отображения состояния.', 'Q_PROPERTY getters for status display.'),
+            M('public', 'setHostName(...) / setPort(...) / ...', 'Обновляет параметры, пришедшие из QML.', 'Updates values received from QML.'),
+            M('signal', 'dbStatusChanged(...) / lastErrorChanged(...)', 'Уведомляет QML об изменении состояния.', 'Notifies QML when state changes.')
+          ]
+        },
+        {
+          id: 'generator-backend', name: 'GeneratorBackend', layer: 'ui',
+          kind: L('QObject-фасад', 'QObject facade'), base: 'QObject', extendsBase: true, file: 'generatorbackend.h · generatorbackend.cpp',
+          thread: L('Главный поток · владеет QThread', 'Main thread · owns QThread'), x: 1390, y: 190, w: 320, h: 82,
+          purpose: L('QML-фасад генератора: хранит редактируемую конфигурацию постов, управляет рабочим потоком и связывает UI с LoadGenerator.', 'QML generator facade: stores editable station configurations, manages the worker thread, and connects the UI to LoadGenerator.'),
+          fields: [
+            M('private', 'std::vector<PostConfig> m_cfg', 'Источник конфигураций постов для UI и генератора.', 'Source of station configurations for UI and generator.'),
+            M('private', 'QThread m_loadGeneratorThread', 'Поток, в котором работает LoadGenerator.', 'Thread where LoadGenerator runs.'),
+            M('private', 'PostListModel m_postListModel', 'Модель списка, опубликованная в QML.', 'List model exposed to QML.'),
+            M('private', 'bool m_generatorEnabled', 'Текущий флаг запуска генерации.', 'Current generation enabled flag.')
+          ],
+          methods: [
+            M('public', 'onGeneratorEnabledButtonClicked()', 'Q_INVOKABLE: переключает генерацию из UI.', 'Q_INVOKABLE: toggles generation from the UI.'),
+            M('public', 'setCfg(const std::vector<PostConfig>&)', 'Сохраняет отредактированную конфигурацию.', 'Stores edited configuration.'),
+            M('slot', 'slotSendData(const DataPackage&)', 'Принимает пакет из рабочего потока; сейчас только пишет qDebug.', 'Receives a package from the worker thread; currently only logs with qDebug.'),
+            M('signal', 'signalPostConfigUpdate(...)', 'Передаёт конфигурацию в LoadGenerator.', 'Sends configuration to LoadGenerator.')
+          ]
+        },
+        {
+          id: 'post-list-model', name: 'PostListModel', layer: 'ui',
+          kind: L('модель списка QML', 'QML list model'), base: 'QAbstractListModel', extendsBase: true, file: 'postlistmodel.h · postlistmodel.cpp',
+          thread: L('Главный поток', 'Main thread'), x: 1390, y: 330, w: 320, h: 82,
+          purpose: L('Редактируемая модель постов для QML: роли списка, выбранная запись, откат и переключение адаптера шума.', 'Editable station model for QML: list roles, selected record, rollback, and noise-adapter switching.'),
+          fields: [
+            M('private', 'std::vector<PostConfig>& m_config', 'Прямая ссылка на GeneratorBackend::m_cfg.', 'Direct reference to GeneratorBackend::m_cfg.'),
+            M('private', 'std::vector<PostConfig> m_fallbackConfig', 'Копия для отмены несохранённых изменений.', 'Copy used to cancel unsaved changes.'),
+            M('private', 'int m_postIndex', 'Индекс выбранного поста.', 'Index of the selected station.'),
+            M('private', 'std::unique_ptr<AbstractNoiseBackend> m_noiseBackend', 'Адаптер параметров выбранного типа шума.', 'Adapter for parameters of the selected noise type.')
+          ],
+          methods: [
+            M('public', 'rowCount() / data() / roleNames()', 'Стандартный контракт QAbstractListModel для QML.', 'Standard QAbstractListModel contract for QML.'),
+            M('public', 'addPost() / removePost(index)', 'Добавляет и удаляет посты.', 'Adds and removes stations.'),
+            M('public', 'postUpdate() / fallback()', 'Сохраняет правки или откатывает к копии.', 'Commits edits or rolls them back.'),
+            M('public', 'setCurrentNoiseType(int)', 'Меняет NoiseConfig и соответствующий QML-адаптер.', 'Switches NoiseConfig and its QML adapter.')
+          ]
+        },
+        {
+          id: 'abstract-noise-backend', name: 'AbstractNoiseBackend', layer: 'ui',
+          kind: L('абстрактный QML-адаптер', 'abstract QML adapter'), base: 'QObject', extendsBase: true, file: 'abstractnoisebackend.h · abstractnoisebackend.cpp',
+          thread: L('Главный поток', 'Main thread'), x: 1390, y: 460, w: 320, h: 82,
+          purpose: L('Общий адаптер к полиморфному NoiseConfig. Хранит ссылки на общий вектор конфигураций и выбранный индекс.', 'Common adapter for polymorphic NoiseConfig. Stores references to the shared configuration vector and selected index.'),
+          fields: [
+            M('protected', 'std::vector<PostConfig>& m_config', 'Ссылка на общие конфигурации постов.', 'Reference to shared station configurations.'),
+            M('protected', 'int& m_postIndex', 'Ссылка на текущий индекс в PostListModel.', 'Reference to the current PostListModel index.')
+          ],
+          methods: [
+            M('public', 'AbstractNoiseBackend(config, postIndex, parent)', 'Связывает адаптер с моделью без копирования данных.', 'Binds the adapter to the model without copying data.'),
+            M('public', 'virtual void qmlUpdate() = 0', 'Контракт обновления Q_PROPERTY конкретного адаптера.', 'Contract for refreshing concrete adapter Q_PROPERTY values.'),
+            M('public', 'virtual ~AbstractNoiseBackend()', 'Безопасное удаление через базовый указатель.', 'Safe deletion through a base pointer.')
+          ]
+        },
+        {
+          id: 'normal-noise-backend', name: 'NormalNoiseBackend', layer: 'ui',
+          kind: L('QML-адаптер', 'QML adapter'), base: 'AbstractNoiseBackend', extendsBase: true, file: 'normalnoisebackend.h · normalnoisebackend.cpp',
+          thread: L('Главный поток', 'Main thread'), x: 1080, y: 570, w: 300, h: 82,
+          purpose: L('Редактирует mean и sigma конкретного NormalNoiseConfig выбранного поста.', 'Edits mean and sigma in the selected station NormalNoiseConfig.'),
+          fields: [
+            M('inherited', 'm_config / m_postIndex', 'Использует ссылки базового адаптера.', 'Uses references owned by the base adapter.'),
+            M('public', 'Q_PROPERTY QString currentMean / currentSigma', 'Вычисляемые QML-свойства; отдельного значения адаптер не хранит.', 'Computed QML properties; the adapter stores no separate values.')
+          ],
+          methods: [
+            M('private', 'NormalNoiseConfig* noiseConfigAcess() const', 'Проверяет и возвращает конкретную конфигурацию; имя Acess соответствует коду.', 'Checks and returns the concrete configuration; Acess matches the source spelling.'),
+            M('public', 'currentMean() / setCurrentMean(...)', 'Q_PROPERTY для математического ожидания.', 'Q_PROPERTY for the distribution mean.'),
+            M('public', 'currentSigma() / setCurrentSigma(...)', 'Q_PROPERTY для СКО.', 'Q_PROPERTY for standard deviation.'),
+            M('signal', 'currentMeanChanged(...) / currentSigmaChanged(...)', 'Перезапускает QML bindings; qmlUpdate() эмитит оба сигнала.', 'Refreshes QML bindings; qmlUpdate() emits both signals.')
+          ]
+        },
+        {
+          id: 'uniform-noise-backend', name: 'UniformNoiseBackend', layer: 'ui',
+          kind: L('финальный QML-адаптер', 'final QML adapter'), base: 'AbstractNoiseBackend', extendsBase: true, file: 'uniformnoisebackend.h · uniformnoisebackend.cpp',
+          thread: L('Главный поток', 'Main thread'), x: 1710, y: 570, w: 300, h: 82,
+          purpose: L('Редактирует min и max конкретного UniformNoiseConfig выбранного поста.', 'Edits min and max in the selected station UniformNoiseConfig.'),
+          fields: [
+            M('inherited', 'm_config / m_postIndex', 'Использует ссылки базового адаптера.', 'Uses references owned by the base adapter.'),
+            M('public', 'Q_PROPERTY QString currentMin / currentMax', 'Вычисляемые QML-свойства; отдельного значения адаптер не хранит.', 'Computed QML properties; the adapter stores no separate values.')
+          ],
+          methods: [
+            M('private', 'UniformNoiseConfig* noiseConfigAcess() const', 'Проверяет и возвращает конкретную конфигурацию; имя Acess соответствует коду.', 'Checks and returns the concrete configuration; Acess matches the source spelling.'),
+            M('public', 'currentMin() / setCurrentMin(...)', 'Q_PROPERTY для нижней границы.', 'Q_PROPERTY for the lower bound.'),
+            M('public', 'currentMax() / setCurrentMax(...)', 'Q_PROPERTY для верхней границы.', 'Q_PROPERTY for the upper bound.'),
+            M('signal', 'currentMinChanged(...) / currentMaxChanged(...)', 'Перезапускает QML bindings; qmlUpdate() эмитит оба сигнала.', 'Refreshes QML bindings; qmlUpdate() emits both signals.')
+          ]
+        },
+        {
+          id: 'database-manager', name: 'DatabaseManager', layer: 'db',
+          kind: L('QObject-координатор', 'QObject coordinator'), base: 'QObject', extendsBase: true, file: 'databasemanager.h · databasemanager.cpp',
+          thread: L('Главный поток · владеет QThread', 'Main thread · owns QThread'), x: 190, y: 755, w: 320, h: 82,
+          purpose: L('Хранит состояние подключения и пересылает команды рабочему объекту через очередь сигналов и слотов в отдельный поток.', 'Stores connection state and forwards commands to the worker through queued signal/slot calls in a separate thread.'),
+          fields: [
+            M('private', 'ConnectionBackend* m_backend', 'Обратная связь с QML-фасадом.', 'Back-reference to the QML facade.'),
+            M('private', 'QString m_hostName, m_dbName, ...', 'Актуальные параметры подключения.', 'Current connection parameters.'),
+            M('private', 'bool m_valid, m_connected, m_busy', 'Сводное состояние подключения.', 'Aggregate connection state.'),
+            M('private', 'QThread m_workerThread', 'Владеет потоком DatabaseWorker.', 'Owns the DatabaseWorker thread.')
+          ],
+          methods: [
+            M('public', 'openConnection() / closeConnection()', 'Запускает операции через сигналы.', 'Starts operations through signals.'),
+            M('public', 'setHostName(...) / setDbName(...) / ...', 'Меняет конфигурацию менеджера.', 'Changes manager configuration.'),
+            M('slot', 'slotManagerUpdate(...)', 'Принимает состояние из DatabaseWorker.', 'Receives state from DatabaseWorker.'),
+            M('signal', 'signalConfigUpdate(const DatabaseConfiguration&)', 'Передаёт снимок конфигурации в рабочий поток.', 'Sends a configuration snapshot to the worker thread.')
+          ]
+        },
+        {
+          id: 'database-worker', name: 'DatabaseWorker', layer: 'db',
+          kind: L('рабочий QObject-объект', 'QObject worker'), base: 'QObject', extendsBase: true, file: 'databaseworker.h · databaseworker.cpp',
+          thread: L('Поток базы данных', 'Database thread'), x: 190, y: 885, w: 320, h: 82,
+          purpose: L('Непосредственно создаёт, открывает и закрывает QSqlDatabase, затем сообщает менеджеру актуальное состояние.', 'Directly creates, opens, and closes QSqlDatabase, then reports current state to the manager.'),
+          fields: [
+            M('private', 'DatabaseConfiguration _config', 'Локальная копия параметров подключения.', 'Local copy of connection parameters.'),
+            M('private', 'bool _connected, _valid, _busy', 'Состояние рабочего объекта.', 'Worker state flags.'),
+            M('private', 'QString _lastError', 'Текст последней SQL-ошибки.', 'Latest SQL error text.')
+          ],
+          methods: [
+            M('private', 'update() / setFullConnectionName()', 'Синхронизирует QSqlDatabase с конфигурацией.', 'Synchronizes QSqlDatabase with configuration.'),
+            M('slot', 'slotInitialize() / slotOpenConnection()', 'Создаёт и открывает подключение.', 'Creates and opens the connection.'),
+            M('slot', 'slotCloseConnection() / slotConfigUpdate(...)', 'Закрывает БД или применяет новый снимок.', 'Closes the database or applies a new snapshot.'),
+            M('signal', 'signalManagerUpdate(...)', 'Возвращает состояние в главный поток.', 'Returns state to the main thread.')
+          ]
+        },
+        {
+          id: 'database-configuration', name: 'DatabaseConfiguration', layer: 'db',
+          kind: L('объект-значение', 'value object'), base: L('тип-значение', 'value type'), file: 'databaseworker.h · databaseworker.cpp',
+          thread: L('Передаётся между потоками', 'Passed between threads'), x: 160, y: 1010, w: 380, h: 82,
+          purpose: L('Снимок параметров PostgreSQL-подключения, зарегистрированный как Qt metatype.', 'Snapshot of PostgreSQL connection parameters registered as a Qt metatype.'),
+          fields: [
+            M('public', 'QString const connectionName', 'Неизменяемое имя Qt-подключения.', 'Immutable Qt connection name.'),
+            M('public', 'QString hostName, dbName, userName', 'Адрес и идентификация базы.', 'Database address and identity.'),
+            M('public', 'QString password, connectOptions', 'Секрет и дополнительные параметры.', 'Secret and additional options.'),
+            M('public', 'int port / QString fullConnectionName', 'Порт и собранное имя подключения.', 'Port and composed connection name.')
+          ],
+          methods: [
+            M('public', 'DatabaseConfiguration(...)', 'Создаёт полный снимок параметров.', 'Builds a complete parameter snapshot.'),
+            M('public', 'DatabaseConfiguration(const ...&)', 'Копирует снимок для межпоточной очереди сигналов и слотов.', 'Copies a snapshot for queued signal/slot transport.'),
+            M('public', 'operator=(...)', 'Поддерживает копирующее и перемещающее присваивание.', 'Supports copy and move assignment.')
+          ]
+        },
+        {
+          id: 'load-generator', name: 'LoadGenerator', layer: 'gen',
+          kind: L('QObject-движок', 'QObject engine'), base: 'QObject', extendsBase: true, file: 'loadgenerator.h · loadgenerator.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 1380, y: 755, w: 320, h: 82,
+          purpose: L('Владеет набором постов, опрашивает их по QTimer и отправляет DataPackage в GeneratorBackend.', 'Owns a collection of stations, polls them with QTimer, and sends DataPackage to GeneratorBackend.'),
+          fields: [
+            M('private', 'std::vector<PostConfig> m_postConfigs', 'Входные настройки всех постов.', 'Input configuration for all stations.'),
+            M('private', 'std::vector<Post> m_posts', 'Рабочие объекты, построенные из конфигураций.', 'Runtime objects built from configurations.'),
+            M('private', 'bool m_callingEnabled', 'Разрешён ли периодический опрос.', 'Whether periodic polling is enabled.'),
+            M('private', 'QTimer* m_timer', 'Точный 10-мс таймер вызывает slotPostCall() в рабочем потоке.', 'A precise 10 ms timer calls slotPostCall() in the worker thread.')
+          ],
+          methods: [
+            M('private', 'load()', 'Пересоздаёт Post из m_postConfigs.', 'Rebuilds Post objects from m_postConfigs.'),
+            M('slot', 'slotPostCallToggle(bool)', 'Запускает или останавливает опрос.', 'Starts or stops polling.'),
+            M('slot', 'slotPostConfigUpdate(std::vector<PostConfig>)', 'Принимает новые настройки из UI.', 'Receives new settings from the UI.'),
+            M('signal', 'signalSendData(const DataPackage&)', 'Отправляет результат обратно в GeneratorBackend.', 'Sends a result back to GeneratorBackend.')
+          ]
+        },
+        {
+          id: 'post-config', name: 'LoadGenerator::PostConfig', layer: 'gen',
+          kind: L('конфигурация', 'configuration'), base: L('вложенная структура', 'nested struct'), file: 'loadgenerator.h · loadgenerator.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 850, y: 900, w: 390, h: 82,
+          purpose: L('Полная конфигурация одного поста: координаты, углы, период, шум и наборы пиков по двум осям.', 'Complete configuration of one station: coordinates, angles, period, noise, and peak sets on two axes.'),
+          fields: [
+            M('public', 'enabled / postName / latitude / longitude', 'Идентичность, включение и координаты поста.', 'Station identity, enabled state, and coordinates.'),
+            M('public', 'frequency / level / levelSigma', 'Параметры моделируемого сигнала.', 'Simulated signal parameters.'),
+            M('public', 'minAngleH/V, maxAngleH/V, stepH/V', 'Диапазоны углов и шаг дискретизации.', 'Angle ranges and sampling step.'),
+            M('public', 'noiseConfig / peakConfigsH / peakConfigsV', 'Полиморфные настройки шума и пиков.', 'Polymorphic noise and peak settings.')
+          ],
+          methods: [
+            M('public', 'PostConfig()', 'Создаёт конфигурацию по умолчанию.', 'Creates a default configuration.'),
+            M('public', 'PostConfig(const PostConfig&)', 'Глубоко копирует unique_ptr-конфигурации.', 'Deep-copies unique_ptr configurations.'),
+            M('public', 'operator=(const PostConfig&)', 'Глубокое копирующее присваивание.', 'Deep copy assignment.')
+          ]
+        },
+        {
+          id: 'post', name: 'LoadGenerator::Post', layer: 'gen',
+          kind: L('вложенный рабочий объект', 'nested worker'), base: L('вложенный класс', 'nested class'), file: 'loadgenerator.h · loadgenerator.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 1360, y: 900, w: 360, h: 82,
+          purpose: L('Строит две свёртки, нормирует их, ищет максимумы и планирует следующее измерение.', 'Builds two convolutions, normalizes them, finds maxima, and schedules the next measurement.'),
+          fields: [
+            M('private', 'LoadGenerator* m_loadGenerator', 'Обратная ссылка для отправки пакета.', 'Back-reference used to send a package.'),
+            M('private', 'PostConfig m_config / DataPackage m_data', 'Снимок настроек и переиспользуемый результат.', 'Configuration snapshot and reusable result.'),
+            M('private', 'std::mt19937 m_rng / TimePoint m_nextGenTime', 'Случайность и расписание следующего вызова.', 'Randomness and next-call schedule.'),
+            M('private', 'm_noise / m_peaksH / m_peaksV', 'Конкретные рабочие объекты шума и пиков.', 'Concrete noise and peak runtime objects.')
+          ],
+          methods: [
+            M('public', 'Post(const PostConfig&, LoadGenerator*)', 'Фабрично создаёт шум и пики из конфигураций.', 'Builds noise and peaks through configuration factories.'),
+            M('public', 'call(const TimePoint& now)', 'Если время пришло, формирует свёртки и DataPackage.', 'Builds convolutions and DataPackage when due.'),
+            M('private', 'newNextGenTime()', 'Выбирает следующий момент в заданном диапазоне.', 'Chooses the next moment within the configured range.')
+          ]
+        },
+        {
+          id: 'data-package', name: 'LoadGenerator::DataPackage', layer: 'gen',
+          kind: 'DTO', base: L('вложенная структура', 'nested struct'), file: 'loadgenerator.h',
+          thread: L('Поток генератора → UI', 'Generator thread → UI'), x: 1740, y: 1010, w: 380, h: 82,
+          purpose: L('Результат измерения: направления, качество, уровень, координаты и две нормированные свёртки.', 'Measurement result: directions, quality, level, coordinates, and two normalized convolutions.'),
+          fields: [
+            M('public', 'timestamp / postName / coordinate', 'Когда и каким постом создан пакет.', 'When and by which station the package was created.'),
+            M('public', 'bearingH/V / qualityH/V', 'Оценённые направления и качество максимумов.', 'Estimated directions and peak quality.'),
+            M('public', 'level / frequency', 'Уровень и частота сигнала.', 'Signal level and frequency.'),
+            M('public', 'std::vector<double> convH / convV', 'Нормированные свёртки по двум осям.', 'Normalized convolutions on both axes.')
+          ],
+          methods: []
+        },
+        {
+          id: 'abstract-noise', name: 'AbstractNoise', layer: 'noise',
+          kind: L('абстрактная реализация', 'abstract runtime'), base: L('абстрактный класс', 'abstract class'), file: 'noise.h · noise.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 100, y: 1220, w: 340, h: 82,
+          purpose: L('Полиморфный интерфейс генератора шума с RNG, типом распределения и методом next().', 'Polymorphic noise-generator interface with RNG, distribution type, and next().'),
+          fields: [
+            M('protected', 'unsigned int m_seed', 'Семя псевдослучайного генератора.', 'Pseudo-random generator seed.'),
+            M('protected', 'std::mt19937 m_rng', 'Общий генератор для конкретных распределений.', 'Shared generator used by concrete distributions.')
+          ],
+          methods: [
+            M('public', 'virtual NoiseType type() const = 0', 'Возвращает вид шума.', 'Returns the noise kind.'),
+            M('public', 'virtual double next() = 0', 'Генерирует следующее значение.', 'Generates the next value.'),
+            M('public', 'seed() / setSeed(...)', 'Читает или меняет семя.', 'Reads or changes the seed.'),
+            M('public', 'rng() / setRng(...)', 'Даёт контролируемый доступ к движку.', 'Provides controlled access to the engine.')
+          ]
+        },
+        {
+          id: 'noise-config', name: 'AbstractNoise::NoiseConfig', layer: 'noise',
+          kind: L('абстрактная конфигурация', 'abstract config'), base: L('вложенная структура', 'nested struct'), file: 'noise.h · noise.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 550, y: 1220, w: 360, h: 82,
+          purpose: L('Полиморфная конфигурация шума: клонируется и фабрично создаёт конкретный AbstractNoise.', 'Polymorphic noise configuration that can be cloned and creates a concrete AbstractNoise through a factory.'),
+          fields: [
+            M('public', 'unsigned int seed', 'Семя будущего рабочего объекта.', 'Seed for the future runtime object.')
+          ],
+          methods: [
+            M('public', 'virtual NoiseType noiseType() const = 0', 'Сообщает тип конфигурации без RTTI.', 'Reports configuration type without RTTI.'),
+            M('public', 'virtual std::unique_ptr<NoiseConfig> clone() = 0', 'Поддерживает глубокое копирование PostConfig.', 'Enables deep copies of PostConfig.'),
+            M('public', 'virtual std::unique_ptr<AbstractNoise> createNoise() const = 0', 'Фабрика рабочего объекта.', 'Factory for the runtime object.')
+          ]
+        },
+        {
+          id: 'normal-noise', name: 'NormalNoise', layer: 'noise',
+          kind: L('финальная реализация', 'final runtime'), base: 'AbstractNoise', extendsBase: true, file: 'noise.h · noise.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 100, y: 1420, w: 340, h: 82,
+          purpose: L('Генерирует значения нормального распределения с заданными mean и sigma.', 'Generates normally distributed values with the specified mean and sigma.'),
+          fields: [
+            M('private', 'std::normal_distribution<double> m_distribution', 'Распределение, применяемое к m_rng.', 'Distribution applied to m_rng.'),
+            M('private', 'double m_mean / m_sigma', 'Среднее и среднеквадратическое отклонение.', 'Mean and standard deviation.'),
+            M('inherited', 'm_seed / m_rng', 'Унаследованное состояние генератора.', 'Inherited generator state.')
+          ],
+          methods: [
+            M('public', 'double next() override', 'Возвращает один случайный отсчёт.', 'Returns one random sample.'),
+            M('public', 'NoiseType type() const override', 'Возвращает NoiseType::Normal.', 'Returns NoiseType::Normal.'),
+            M('public', 'mean() / setMean(...)', 'Доступ к математическому ожиданию.', 'Access to the mean.'),
+            M('public', 'sigma() / setSigma(...)', 'Доступ к СКО.', 'Access to standard deviation.')
+          ]
+        },
+        {
+          id: 'normal-noise-config', name: 'NormalNoise::NormalNoiseConfig', layer: 'noise',
+          kind: L('финальная конфигурация', 'final config'), base: 'AbstractNoise::NoiseConfig', extendsBase: true, file: 'noise.h · noise.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 550, y: 1420, w: 360, h: 82,
+          purpose: L('Хранит mean/sigma, клонируется и создаёт NormalNoise.', 'Stores mean/sigma, can be cloned, and creates NormalNoise.'),
+          fields: [
+            M('public', 'double mean / double sigma', 'Параметры нормального распределения.', 'Normal distribution parameters.'),
+            M('inherited', 'unsigned int seed', 'Семя из NoiseConfig.', 'Seed inherited from NoiseConfig.')
+          ],
+          methods: [
+            M('public', 'clone() override', 'Возвращает независимую копию конфигурации.', 'Returns an independent configuration copy.'),
+            M('public', 'createNoise() const override', 'Создаёт NormalNoise.', 'Creates NormalNoise.'),
+            M('public', 'noiseType() const override', 'Возвращает NoiseType::Normal.', 'Returns NoiseType::Normal.')
+          ]
+        },
+        {
+          id: 'uniform-noise', name: 'UniformNoise', layer: 'noise',
+          kind: L('финальная реализация', 'final runtime'), base: 'AbstractNoise', extendsBase: true, file: 'noise.h · noise.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 100, y: 1620, w: 340, h: 82,
+          purpose: L('Генерирует значения равномерного распределения между min и max.', 'Generates uniformly distributed values between min and max.'),
+          fields: [
+            M('private', 'std::uniform_real_distribution<double> m_distribution', 'Равномерное распределение для m_rng.', 'Uniform distribution applied to m_rng.'),
+            M('private', 'double m_min / m_max', 'Границы диапазона.', 'Range bounds.'),
+            M('inherited', 'm_seed / m_rng', 'Унаследованное состояние генератора.', 'Inherited generator state.')
+          ],
+          methods: [
+            M('public', 'double next() override', 'Возвращает один случайный отсчёт.', 'Returns one random sample.'),
+            M('public', 'NoiseType type() const override', 'Возвращает NoiseType::Uniform.', 'Returns NoiseType::Uniform.'),
+            M('public', 'min() / setMin(...)', 'Доступ к нижней границе.', 'Access to the lower bound.'),
+            M('public', 'max() / setMax(...)', 'Доступ к верхней границе.', 'Access to the upper bound.')
+          ]
+        },
+        {
+          id: 'uniform-noise-config', name: 'UniformNoise::UniformNoiseConfig', layer: 'noise',
+          kind: L('финальная конфигурация', 'final config'), base: 'AbstractNoise::NoiseConfig', extendsBase: true, file: 'noise.h · noise.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 550, y: 1620, w: 360, h: 82,
+          purpose: L('Хранит min/max, клонируется и создаёт UniformNoise.', 'Stores min/max, can be cloned, and creates UniformNoise.'),
+          fields: [
+            M('public', 'double min / double max', 'Границы равномерного распределения.', 'Uniform distribution bounds.'),
+            M('inherited', 'unsigned int seed', 'Семя из NoiseConfig.', 'Seed inherited from NoiseConfig.')
+          ],
+          methods: [
+            M('public', 'clone() override', 'Возвращает независимую копию конфигурации.', 'Returns an independent configuration copy.'),
+            M('public', 'createNoise() const override', 'Создаёт UniformNoise.', 'Creates UniformNoise.'),
+            M('public', 'noiseType() const override', 'Возвращает NoiseType::Uniform.', 'Returns NoiseType::Uniform.')
+          ]
+        },
+        {
+          id: 'abstract-peak', name: 'AbstractPeak', layer: 'peak',
+          kind: L('абстрактная реализация', 'abstract runtime'), base: L('абстрактный класс', 'abstract class'), file: 'peak.h · peak.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 1040, y: 1220, w: 340, h: 82,
+          purpose: L('Интерфейс пика функции правдоподобия: тип, центр, амплитуда и вычисление valueAt().', 'Likelihood-function peak interface: type, center, amplitude, and valueAt() evaluation.'),
+          fields: [
+            M('protected', 'double m_center', 'Координата центра в градусах.', 'Center coordinate in degrees.'),
+            M('protected', 'double m_amplitude', 'Высота пика.', 'Peak height.')
+          ],
+          methods: [
+            M('public', 'virtual PeakType type() const = 0', 'Сообщает форму пика.', 'Reports peak shape.'),
+            M('public', 'virtual double valueAt(double deg) const = 0', 'Вычисляет значение функции в угле deg.', 'Evaluates the function at angle deg.'),
+            M('public', 'center() / setCenter(...)', 'Доступ к центру.', 'Access to the center.'),
+            M('public', 'amplitude() / setAmplitude(...)', 'Доступ к амплитуде.', 'Access to amplitude.')
+          ]
+        },
+        {
+          id: 'peak-config', name: 'AbstractPeak::PeakConfig', layer: 'peak',
+          kind: L('абстрактная конфигурация', 'abstract config'), base: L('вложенная структура', 'nested struct'), file: 'peak.h · peak.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 1580, y: 1220, w: 420, h: 82,
+          purpose: L('Полиморфная конфигурация пика с клонированием и фабричным созданием AbstractPeak.', 'Polymorphic peak configuration with cloning and factory creation of AbstractPeak.'),
+          fields: [
+            M('public', 'double center', 'Центр будущего пика.', 'Center of the future peak.'),
+            M('public', 'double amplitude', 'Амплитуда будущего пика.', 'Amplitude of the future peak.')
+          ],
+          methods: [
+            M('public', 'virtual PeakType type() const = 0', 'Сообщает форму конфигурации.', 'Reports configuration shape.'),
+            M('public', 'virtual std::unique_ptr<PeakConfig> clone() const = 0', 'Поддерживает глубокое копирование.', 'Enables deep copying.'),
+            M('public', 'virtual std::unique_ptr<AbstractPeak> createPeak() const = 0', 'Фабрика рабочего пика.', 'Factory for the runtime peak.')
+          ]
+        },
+        {
+          id: 'gauss-peak', name: 'GaussPeak', layer: 'peak',
+          kind: L('финальная реализация', 'final runtime'), base: 'AbstractPeak', extendsBase: true, file: 'peak.h · peak.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 1040, y: 1410, w: 340, h: 82,
+          purpose: L('Гауссов пик функции правдоподобия с параметром sigma.', 'Gaussian likelihood-function peak with a sigma parameter.'),
+          fields: [
+            M('private', 'double m_sigma', 'Ширина гауссовой формы.', 'Width of the Gaussian shape.'),
+            M('inherited', 'm_center / m_amplitude', 'Общие параметры из AbstractPeak.', 'Common parameters from AbstractPeak.')
+          ],
+          methods: [
+            M('public', 'double valueAt(double deg) const override', 'Вычисляет гауссову кривую.', 'Evaluates the Gaussian curve.'),
+            M('public', 'PeakType type() const override', 'Возвращает PeakType::Gauss.', 'Returns PeakType::Gauss.'),
+            M('public', 'sigma() / setSigma(...)', 'Доступ к sigma.', 'Access to sigma.')
+          ]
+        },
+        {
+          id: 'gauss-peak-config', name: 'GaussPeak::GaussPeakConfig', layer: 'peak',
+          kind: L('финальная конфигурация', 'final config'), base: 'AbstractPeak::PeakConfig', extendsBase: true, file: 'peak.h · peak.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 1580, y: 1410, w: 420, h: 82,
+          purpose: L('Хранит center/amplitude/sigma и создаёт GaussPeak.', 'Stores center/amplitude/sigma and creates GaussPeak.'),
+          fields: [
+            M('public', 'double sigma', 'СКО гауссовой формы.', 'Standard deviation of the Gaussian shape.'),
+            M('inherited', 'center / amplitude', 'Общие параметры из PeakConfig.', 'Common parameters from PeakConfig.')
+          ],
+          methods: [
+            M('public', 'clone() const override', 'Клонирует конфигурацию.', 'Clones the configuration.'),
+            M('public', 'createPeak() const override', 'Создаёт GaussPeak.', 'Creates GaussPeak.'),
+            M('public', 'type() const override', 'Возвращает PeakType::Gauss.', 'Returns PeakType::Gauss.')
+          ]
+        },
+        {
+          id: 'triangle-peak', name: 'TrianglePeak', layer: 'peak',
+          kind: L('финальная реализация', 'final runtime'), base: 'AbstractPeak', extendsBase: true, file: 'peak.h · peak.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 1040, y: 1590, w: 340, h: 82,
+          purpose: L('Треугольный пик с линейным спадом до нуля на заданной полуширине.', 'Triangular peak with linear falloff to zero at the specified half-width.'),
+          fields: [
+            M('private', 'double m_halfWidth', 'Расстояние от центра до нулевого значения.', 'Distance from center to zero.'),
+            M('inherited', 'm_center / m_amplitude', 'Общие параметры из AbstractPeak.', 'Common parameters from AbstractPeak.')
+          ],
+          methods: [
+            M('public', 'double valueAt(double deg) const override', 'Вычисляет линейный профиль.', 'Evaluates the linear profile.'),
+            M('public', 'PeakType type() const override', 'Возвращает PeakType::Triangle.', 'Returns PeakType::Triangle.'),
+            M('public', 'halfWidth() / setHalfWidth(...)', 'Доступ к полуширине.', 'Access to half-width.')
+          ]
+        },
+        {
+          id: 'triangle-peak-config', name: 'TrianglePeak::TrianglePeakConfig', layer: 'peak',
+          kind: L('финальная конфигурация', 'final config'), base: 'AbstractPeak::PeakConfig', extendsBase: true, file: 'peak.h · peak.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 1580, y: 1590, w: 420, h: 82,
+          purpose: L('Хранит center/amplitude/halfWidth и создаёт TrianglePeak.', 'Stores center/amplitude/halfWidth and creates TrianglePeak.'),
+          fields: [
+            M('public', 'double halfWidth', 'Полуширина треугольника.', 'Triangle half-width.'),
+            M('inherited', 'center / amplitude', 'Общие параметры из PeakConfig.', 'Common parameters from PeakConfig.')
+          ],
+          methods: [
+            M('public', 'clone() const override', 'Клонирует конфигурацию.', 'Clones the configuration.'),
+            M('public', 'createPeak() const override', 'Создаёт TrianglePeak.', 'Creates TrianglePeak.'),
+            M('public', 'type() const override', 'Возвращает PeakType::Triangle.', 'Returns PeakType::Triangle.')
+          ]
+        },
+        {
+          id: 'rectangle-peak', name: 'RectanglePeak', layer: 'peak',
+          kind: L('финальная реализация', 'final runtime'), base: 'AbstractPeak', extendsBase: true, file: 'peak.h · peak.cpp',
+          thread: L('Поток генератора', 'Generator thread'), x: 1040, y: 1770, w: 340, h: 82,
+          purpose: L('Прямоугольный пик постоянной амплитуды внутри заданной полуширины.', 'Rectangular peak with constant amplitude inside the specified half-width.'),
+          fields: [
+            M('private', 'double m_halfWidth', 'Граница прямоугольной области.', 'Boundary of the rectangular region.'),
+            M('inherited', 'm_center / m_amplitude', 'Общие параметры из AbstractPeak.', 'Common parameters from AbstractPeak.')
+          ],
+          methods: [
+            M('public', 'double valueAt(double deg) const override', 'Возвращает amplitude внутри диапазона, иначе 0.', 'Returns amplitude inside the range, otherwise 0.'),
+            M('public', 'PeakType type() const override', 'Возвращает PeakType::Rectangle.', 'Returns PeakType::Rectangle.'),
+            M('public', 'halfWidth() / setHalfWidth(...)', 'Доступ к полуширине.', 'Access to half-width.')
+          ]
+        },
+        {
+          id: 'rectangle-peak-config', name: 'RectanglePeak::RectanglePeakConfig', layer: 'peak',
+          kind: L('финальная конфигурация', 'final config'), base: 'AbstractPeak::PeakConfig', extendsBase: true, file: 'peak.h · peak.cpp',
+          thread: L('UI → поток генератора', 'UI → generator thread'), x: 1580, y: 1770, w: 420, h: 82,
+          purpose: L('Хранит center/amplitude/halfWidth и создаёт RectanglePeak.', 'Stores center/amplitude/halfWidth and creates RectanglePeak.'),
+          fields: [
+            M('public', 'double halfWidth', 'Полуширина прямоугольника.', 'Rectangle half-width.'),
+            M('inherited', 'center / amplitude', 'Общие параметры из PeakConfig.', 'Common parameters from PeakConfig.')
+          ],
+          methods: [
+            M('public', 'clone() const override', 'Клонирует конфигурацию.', 'Clones the configuration.'),
+            M('public', 'createPeak() const override', 'Создаёт RectanglePeak.', 'Creates RectanglePeak.'),
+            M('public', 'type() const override', 'Возвращает PeakType::Rectangle.', 'Returns PeakType::Rectangle.')
+          ]
+        }
+      ];
+
+      const edges = [
+        { source: 'app-entry', target: 'connection-backend', type: 'lifecycle', from: 'bottom', to: 'top', via: [[1100, 120], [455, 120], [455, 180]] },
+        { source: 'app-entry', target: 'generator-backend', type: 'lifecycle', from: 'bottom', to: 'top', via: [[1100, 120], [1550, 120], [1550, 180]] },
+        { source: 'connection-backend', target: 'database-manager', type: 'composition', from: 'bottom', to: 'top', via: [[455, 680], [350, 680], [350, 745]], label: '1', labelAt: [438, 675] },
+        { source: 'database-manager', target: 'database-worker', type: 'lifecycle', from: 'bottom', to: 'top', label: L('создаёт · QThread', 'creates · QThread'), labelAt: [455, 865] },
+        { source: 'database-worker', target: 'database-configuration', type: 'composition', from: 'bottom', to: 'top', label: '1', labelAt: [370, 995] },
+        { source: 'generator-backend', target: 'post-list-model', type: 'composition', from: 'bottom', to: 'top', label: '1', labelAt: [1580, 314] },
+        { source: 'post-list-model', target: 'abstract-noise-backend', type: 'composition', from: 'bottom', to: 'top', label: '0..1', labelAt: [1590, 445] },
+        { source: 'normal-noise-backend', target: 'abstract-noise-backend', type: 'inheritance', from: 'top', to: 'left', via: [[1230, 550], [1370, 550], [1370, 501]] },
+        { source: 'uniform-noise-backend', target: 'abstract-noise-backend', type: 'inheritance', from: 'top', to: 'right', via: [[1860, 550], [1730, 550], [1730, 501]] },
+        { source: 'generator-backend', target: 'load-generator', type: 'lifecycle', from: 'left', to: 'top', via: [[1030, 231], [1030, 720], [1540, 720]], label: L('создаёт · QThread', 'creates · QThread'), labelAt: [1280, 712] },
+        { source: 'load-generator', target: 'post-config', type: 'composition', from: 'bottom', to: 'top', via: [[1540, 865], [1045, 865]], label: '0..*', labelAt: [1260, 857] },
+        { source: 'load-generator', target: 'post', type: 'composition', from: 'bottom', to: 'top', label: '0..*', labelAt: [1560, 880] },
+        { source: 'post', target: 'data-package', type: 'composition', from: 'right', to: 'top', via: [[1740, 941], [1930, 941]], label: '1', labelAt: [1828, 933] },
+        { source: 'post', target: 'abstract-noise', type: 'composition', from: 'bottom', to: 'top', via: [[1540, 1130], [270, 1130]], bridges: [[1270, 1130], [730, 1130]], label: '1', labelAt: [510, 1122] },
+        { source: 'post', target: 'abstract-peak', type: 'composition', from: 'bottom', to: 'top', via: [[1540, 1140], [1210, 1140]], bridges: [[1270, 1140]], label: '0..*', labelAt: [1355, 1132] },
+        { source: 'post-config', target: 'noise-config', type: 'composition', from: 'bottom', to: 'top', via: [[1045, 1100], [730, 1100]], label: '1', labelAt: [850, 1092] },
+        { source: 'post-config', target: 'peak-config', type: 'composition', from: 'right', to: 'top', via: [[1270, 941], [1270, 1160], [1790, 1160]], label: '0..*', labelAt: [1550, 1152] },
+        { source: 'normal-noise', target: 'abstract-noise', type: 'inheritance', from: 'top', to: 'bottom' },
+        { source: 'uniform-noise', target: 'abstract-noise', type: 'inheritance', from: 'left', to: 'left', via: [[70, 1661], [70, 1261]] },
+        { source: 'normal-noise-config', target: 'noise-config', type: 'inheritance', from: 'top', to: 'bottom' },
+        { source: 'uniform-noise-config', target: 'noise-config', type: 'inheritance', from: 'right', to: 'right', via: [[930, 1661], [930, 1261]] },
+        { source: 'gauss-peak', target: 'abstract-peak', type: 'inheritance', from: 'top', to: 'bottom' },
+        { source: 'triangle-peak', target: 'abstract-peak', type: 'inheritance', from: 'left', to: 'left', via: [[1015, 1631], [1015, 1261]] },
+        { source: 'rectangle-peak', target: 'abstract-peak', type: 'inheritance', from: 'left', to: 'left', via: [[990, 1811], [990, 1261]] },
+        { source: 'gauss-peak-config', target: 'peak-config', type: 'inheritance', from: 'top', to: 'bottom' },
+        { source: 'triangle-peak-config', target: 'peak-config', type: 'inheritance', from: 'right', to: 'right', via: [[2030, 1631], [2030, 1261]] },
+        { source: 'rectangle-peak-config', target: 'peak-config', type: 'inheritance', from: 'right', to: 'right', via: [[2055, 1811], [2055, 1261]] },
+
+        { source: 'generator-backend', target: 'load-generator', type: 'signal', crosslink: true, bidirectional: true, from: 'right', to: 'right', via: [[2075, 231], [2075, 796]], label: L('запуск/остановка · конфигурация ↔ данные', 'start/stop · config ↔ data'), labelAt: [1920, 692] },
+        { source: 'database-manager', target: 'database-configuration', type: 'signal', crosslink: true, from: 'right', to: 'right', via: [[570, 796], [570, 1051]], label: L('сигнал конфигурации', 'configuration signal'), labelAt: [565, 930] },
+        { source: 'post-list-model', target: 'post-config', type: 'reference', crosslink: true, from: 'left', to: 'left', via: [[820, 371], [820, 941]], label: L('прямая ссылка', 'live reference'), labelAt: [815, 675] },
+        { source: 'normal-noise-backend', target: 'normal-noise-config', type: 'reference', crosslink: true, from: 'left', to: 'left', via: [[680, 611], [680, 1130], [520, 1130], [520, 1461]], label: L('редактирует', 'edits'), labelAt: [515, 1360] },
+        { source: 'uniform-noise-backend', target: 'uniform-noise-config', type: 'reference', crosslink: true, from: 'right', to: 'left', via: [[2140, 611], [2140, 1130], [530, 1130], [530, 1661]], label: L('редактирует', 'edits'), labelAt: [525, 1555] },
+        { source: 'noise-config', target: 'abstract-noise', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('фабрика', 'factory'), labelAt: [495, 1254] },
+        { source: 'normal-noise-config', target: 'normal-noise', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('создаёт', 'creates'), labelAt: [495, 1454] },
+        { source: 'uniform-noise-config', target: 'uniform-noise', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('создаёт', 'creates'), labelAt: [495, 1654] },
+        { source: 'peak-config', target: 'abstract-peak', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('фабрика', 'factory'), labelAt: [1480, 1254] },
+        { source: 'gauss-peak-config', target: 'gauss-peak', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('создаёт', 'creates'), labelAt: [1480, 1444] },
+        { source: 'triangle-peak-config', target: 'triangle-peak', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('создаёт', 'creates'), labelAt: [1480, 1624] },
+        { source: 'rectangle-peak-config', target: 'rectangle-peak', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('создаёт', 'creates'), labelAt: [1480, 1804] }
+      ];
+
+      const nodeById = new Map(nodes.map(node => [node.id, node]));
+
+      const scenarioThreadMeta = {
+        main: { label: L('QML / главный поток', 'QML / main thread') },
+        db: { label: L('Поток БД', 'Database thread') },
+        gen: { label: L('Поток генератора', 'Generator thread') },
+        external: { label: L('Внешняя система', 'External system') }
+      };
+
+      const scenarioTransferMeta = {
+        direct: { label: L('прямой вызов', 'direct call') },
+        queued: { label: L('сигнал через очередь Qt', 'queued Qt signal') },
+        data: { label: L('сигнал с данными', 'data signal') },
+        timer: { label: L('событие таймера', 'timer event') },
+        driver: { label: L('Qt SQL / драйвер', 'Qt SQL / driver') },
+        branch: { label: L('параллельная ветка', 'parallel branch') }
+      };
+
+      const scenarios = [
+        {
+          id: 'startup',
+          title: L('Запуск приложения', 'Application startup'),
+          tabCopy: L('UI и два рабочих потока', 'UI and two worker threads'),
+          summary: L(
+            'Точка входа собирает приложение: создаёт два QML-фасада, поднимает отдельные потоки базы данных и генератора, затем загружает интерфейс.',
+            'The entry point assembles the application: it creates two QML facades, starts separate database and generator threads, and then loads the interface.'
+          ),
+          trigger: L('Запуск исполняемого файла myConvolution.', 'Starting the myConvolution executable.'),
+          outcome: L(
+            'QML видит ConnectionBackend и GeneratorBackend; поток БД и поток генератора готовы принимать команды, цикл событий Qt запущен.',
+            'QML can access ConnectionBackend and GeneratorBackend; the database and generator threads are ready for commands, and the Qt event loop is running.'
+          ),
+          boundary: L(
+            'Инициализация БД асинхронна, а опрос генератора после запуска остаётся выключенным. Создание объектов не означает ни подключения к PostgreSQL, ни начала генерации.',
+            'Database initialization is asynchronous, while generator polling remains off after startup. Object creation does not mean PostgreSQL is connected or generation has started.'
+          ),
+          route: [
+            { label: 'main()', nodeId: 'app-entry' },
+            { label: 'ConnectionBackend', nodeId: 'connection-backend', transfer: 'direct' },
+            { label: 'DatabaseManager', nodeId: 'database-manager', transfer: 'direct' },
+            { label: 'DatabaseWorker', nodeId: 'database-worker', transfer: 'queued' },
+            { label: 'main()', nodeId: 'app-entry', transfer: 'branch' },
+            { label: 'GeneratorBackend', nodeId: 'generator-backend', transfer: 'direct' },
+            { label: 'LoadGenerator', nodeId: 'load-generator', transfer: 'direct' },
+            { label: 'main.qml', transfer: 'direct' }
+          ],
+          edgePairs: [
+            ['app-entry', 'connection-backend'],
+            ['connection-backend', 'database-manager'],
+            ['database-manager', 'database-worker'],
+            ['app-entry', 'generator-backend'],
+            ['generator-backend', 'post-list-model'],
+            ['generator-backend', 'load-generator']
+          ],
+          steps: [
+            {
+              title: L('Создаёт Qt-приложение и фасады', 'Creates the Qt application and facades'),
+              copy: L('main() создаёт QGuiApplication, затем по порядку конструирует ConnectionBackend и GeneratorBackend.', 'main() creates QGuiApplication, then constructs ConnectionBackend and GeneratorBackend in order.'),
+              actor: 'main()', nodeId: 'app-entry', thread: 'main', transfer: 'direct', signature: 'QGuiApplication · ConnectionBackend · GeneratorBackend'
+            },
+            {
+              title: L('Собирает ветку базы данных', 'Builds the database branch'),
+              copy: L('Поле DatabaseManager создаётся вместе с ConnectionBackend и сразу готовит worker-объект.', 'The DatabaseManager member is constructed with ConnectionBackend and immediately prepares its worker object.'),
+              actor: 'ConnectionBackend', nodeId: 'connection-backend', thread: 'main', transfer: 'direct', signature: 'ConnectionBackend::ConnectionBackend()'
+            },
+            {
+              title: L('Переносит работу с SQL в отдельный поток', 'Moves SQL work to a separate thread'),
+              copy: L('DatabaseManager создаёт DatabaseWorker, переносит его в m_workerThread, связывает сигналы со слотами и запускает поток.', 'DatabaseManager creates DatabaseWorker, moves it to m_workerThread, connects signals to slots, and starts the thread.'),
+              actor: 'DatabaseManager', nodeId: 'database-manager', thread: 'main', transfer: 'direct', signature: 'moveToThread() · QThread::start()'
+            },
+            {
+              title: L('Инициализирует именованное QPSQL-соединение', 'Initializes the named QPSQL connection'),
+              copy: L('signalInitialize() доставляется через очередь и может выполняться параллельно с дальнейшей сборкой приложения. Worker сообщает busy, создаёт QSqlDatabase с драйвером QPSQL и применяет начальную конфигурацию.', 'signalInitialize() is delivered through the queue and may run in parallel with the rest of application construction. The worker reports busy, creates a QSqlDatabase handle with the QPSQL driver, and applies the initial configuration.'),
+              actor: 'DatabaseWorker', nodeId: 'database-worker', thread: 'db', transfer: 'queued', signature: 'signalInitialize() → slotInitialize()'
+            },
+            {
+              title: L('Собирает ветку генератора', 'Builds the generator branch'),
+              copy: L('GeneratorBackend создаёт три стартовых PostConfig, PostListModel и LoadGenerator; LoadGenerator строит runtime-объекты Post.', 'GeneratorBackend creates three initial PostConfig objects, PostListModel, and LoadGenerator; LoadGenerator builds runtime Post objects.'),
+              actor: 'GeneratorBackend', nodeId: 'generator-backend', thread: 'main', transfer: 'direct', signature: 'GeneratorBackend::GeneratorBackend() · LoadGenerator::load()'
+            },
+            {
+              title: L('Запускает поток генератора', 'Starts the generator thread'),
+              copy: L('LoadGenerator переносится в m_loadGeneratorThread. Команды, подтверждения и возврат DataPackage связываются сигналами; таймер пока не запущен.', 'LoadGenerator moves to m_loadGeneratorThread. Commands, acknowledgements, and DataPackage return are connected with signals; the timer is not running yet.'),
+              actor: 'GeneratorBackend', nodeId: 'generator-backend', thread: 'main', transfer: 'direct', signature: 'loadGenerator->moveToThread() · m_loadGeneratorThread.start()'
+            },
+            {
+              title: L('Публикует API в QML и запускает цикл событий', 'Exposes the API to QML and starts the event loop'),
+              copy: L('main() регистрирует межпоточные типы, добавляет оба фасада в rootContext, загружает qrc:/main.qml и передаёт управление QGuiApplication::exec().', 'main() registers cross-thread types, adds both facades to rootContext, loads qrc:/main.qml, and hands control to QGuiApplication::exec().'),
+              actor: 'main()', nodeId: 'app-entry', thread: 'main', transfer: 'direct', signature: 'qRegisterMetaType() · setContextProperty() · engine.load() · exec()'
+            }
+          ]
+        },
+        {
+          id: 'db-connect',
+          title: L('Подключение к PostgreSQL', 'Connect to PostgreSQL'),
+          tabCopy: L('Форма → worker → статус QML', 'Form → worker → QML status'),
+          summary: L(
+            'Параметры из формы превращаются в снимки DatabaseConfiguration, последовательно проходят очередь потока БД и только затем используется QSqlDatabase::open().',
+            'Form values become DatabaseConfiguration snapshots, pass through the database-thread queue in order, and only then reach QSqlDatabase::open().'
+          ),
+          trigger: L('Нажатие «Подключиться» в ConnectTab.qml при dbStatus = 0.', 'Clicking “Connect” in ConnectTab.qml while dbStatus = 0.'),
+          outcome: L(
+            'Успех: dbStatus = 2 и кнопка предлагает отключение. Ошибка: dbStatus = 0, а connectionBackend.lastError отображается в интерфейсе.',
+            'Success: dbStatus = 2 and the button offers disconnect. Failure: dbStatus = 0 and connectionBackend.lastError is displayed in the UI.'
+          ),
+          boundary: L(
+            'Подключение лишь открывает SQL-соединение: запросов и записи DataPackage здесь нет. Если нажать до завершения асинхронного slotInitialize(), m_valid ещё false — DatabaseManager отклонит setters/open в главном потоке, и показанный worker-маршрут не начнётся.',
+            'This only opens the SQL connection: no query or DataPackage write happens here. If clicked before asynchronous slotInitialize() finishes, m_valid is still false—DatabaseManager rejects setters/open in the main thread, so the shown worker route does not start.'
+          ),
+          route: [
+            { label: 'ConnectTab.qml' },
+            { label: 'ConnectionBackend', nodeId: 'connection-backend', transfer: 'direct' },
+            { label: 'DatabaseManager', nodeId: 'database-manager', transfer: 'direct' },
+            { label: 'DatabaseConfiguration', nodeId: 'database-configuration', transfer: 'data' },
+            { label: 'DatabaseWorker', nodeId: 'database-worker', transfer: 'queued' },
+            { label: 'QPSQL / PostgreSQL', transfer: 'driver' },
+            { label: 'DatabaseManager', nodeId: 'database-manager', transfer: 'queued' },
+            { label: 'ConnectionBackend → QML', nodeId: 'connection-backend', transfer: 'direct' }
+          ],
+          edgePairs: [
+            ['connection-backend', 'database-manager'],
+            ['database-manager', 'database-worker'],
+            ['database-manager', 'database-configuration'],
+            ['database-worker', 'database-configuration']
+          ],
+          steps: [
+            {
+              title: L('Передаёт шесть значений формы', 'Passes six form values'),
+              copy: L('ConnectTab.qml вызывает общий обработчик кнопки с host, port, user, password, databaseName и connectOptions.', 'ConnectTab.qml calls the shared button handler with host, port, user, password, databaseName, and connectOptions.'),
+              actor: 'ConnectionBackend', nodeId: 'connection-backend', thread: 'main', transfer: 'direct', signature: 'onDbConnectionButtonClicked(...)'
+            },
+            {
+              title: L('Выбирает ветку подключения', 'Selects the connect branch'),
+              copy: L('При m_dbStatus != 2 пустые поля заменяются встроенными значениями по умолчанию; затем вызываются setter-методы DatabaseManager.', 'When m_dbStatus != 2, empty fields are replaced with built-in defaults; DatabaseManager setters are then called.'),
+              actor: 'ConnectionBackend', nodeId: 'connection-backend', thread: 'main', transfer: 'direct', signature: 'm_dbStatus != 2 · setHostName() · setPort() · …'
+            },
+            {
+              title: L('Формирует снимки конфигурации', 'Builds configuration snapshots'),
+              copy: L('Если manager валиден и соединение закрыто, каждый реально изменившийся setter сохраняет значение, создаёт полный DatabaseConfiguration и испускает signalConfigUpdate(...).', 'If the manager is valid and disconnected, every setter whose value actually changed stores it, creates a full DatabaseConfiguration, and emits signalConfigUpdate(...).'),
+              actor: 'DatabaseManager', nodeId: 'database-manager', thread: 'main', transfer: 'data', signature: 'signalConfigUpdate(DatabaseConfiguration)'
+            },
+            {
+              title: L('Применяет параметры к QSqlDatabase', 'Applies values to QSqlDatabase'),
+              copy: L('Qt копирует зарегистрированный снимок в поток БД. slotConfigUpdate() отмечает busy и обновляет параметры именованного SQL-объекта.', 'Qt copies the registered snapshot into the database thread. slotConfigUpdate() reports busy and updates the named SQL handle.'),
+              actor: 'DatabaseWorker', nodeId: 'database-worker', thread: 'db', transfer: 'queued', signature: 'slotConfigUpdate(DatabaseConfiguration)'
+            },
+            {
+              title: L('Ставит открытие в ту же очередь', 'Queues opening in the same thread'),
+              copy: L('После setter-методов DatabaseManager::openConnection() испускает signalOpenConnection(). Команда доставляется после ранее поставленных обновлений конфигурации.', 'After the setters, DatabaseManager::openConnection() emits signalOpenConnection(). The command is delivered after the previously queued configuration updates.'),
+              actor: 'DatabaseManager', nodeId: 'database-manager', thread: 'main', transfer: 'queued', signature: 'openConnection() → signalOpenConnection()'
+            },
+            {
+              title: L('Открывает физическое соединение', 'Opens the physical connection'),
+              copy: L('slotOpenConnection() сообщает busy = true, проверяет состояние и вызывает QSqlDatabase::open() через драйвер QPSQL.', 'slotOpenConnection() reports busy = true, validates state, and calls QSqlDatabase::open() through the QPSQL driver.'),
+              actor: 'DatabaseWorker', nodeId: 'database-worker', thread: 'db', transfer: 'driver', signature: 'slotOpenConnection() · QSqlDatabase::open()'
+            },
+            {
+              title: L('Возвращает результат в главный поток', 'Returns the result to the main thread'),
+              copy: L('Сигнал worker передаёт connected, valid, busy и текст ошибки; DatabaseManager::slotManagerUpdate(...) принимает их уже в главном потоке.', 'The worker signal carries connected, valid, busy, and error text; DatabaseManager::slotManagerUpdate(...) receives them in the main thread.'),
+              actor: 'DatabaseManager', nodeId: 'database-manager', thread: 'main', transfer: 'queued', signature: 'signalManagerUpdate(...) → DatabaseManager::slotManagerUpdate(...)'
+            },
+            {
+              title: L('Обновляет состояние интерфейса', 'Updates the interface state'),
+              copy: L('Менеджер вычисляет шкалу 0 = нет соединения, 1 = занято, 2 = подключено; ConnectionBackend испускает NOTIFY-сигналы, и QML меняет кнопку и сообщение.', 'The manager derives 0 = disconnected, 1 = busy, 2 = connected; ConnectionBackend emits NOTIFY signals, and QML updates the button and message.'),
+              actor: 'ConnectionBackend', nodeId: 'connection-backend', thread: 'main', transfer: 'direct', signature: 'setDbStatus() · setLastError() · dbStatusChanged()'
+            }
+          ]
+        },
+        {
+          id: 'db-disconnect',
+          title: L('Отключение от БД', 'Disconnect from the database'),
+          tabCopy: L('Закрытие соединения и возврат статуса', 'Close connection and return status'),
+          summary: L(
+            'Та же кнопка выбирает обратную ветку: команда закрытия уходит в поток БД, QSqlDatabase закрывается там же, а итоговое состояние возвращается в QML.',
+            'The same button selects the reverse branch: the close command enters the database thread, QSqlDatabase closes there, and final state returns to QML.'
+          ),
+          trigger: L('Нажатие «Отключиться» при dbStatus = 2.', 'Clicking “Disconnect” while dbStatus = 2.'),
+          outcome: L('Соединение закрыто, dbStatus = 0, интерфейс снова предлагает подключиться.', 'The connection is closed, dbStatus = 0, and the interface offers connection again.'),
+          boundary: L(
+            'При m_valid = false DatabaseManager возвращает ошибку без команды worker-у; если валидная команда доходит до уже закрытого соединения, ошибку формирует worker. Статус остаётся 0, а именованное QSqlDatabase-соединение не удаляется.',
+            'When m_valid = false, DatabaseManager returns an error without commanding the worker; if a valid command reaches an already closed connection, the worker reports the error. Status remains 0, and the named QSqlDatabase connection is not removed.'
+          ),
+          route: [
+            { label: 'ConnectTab.qml' },
+            { label: 'ConnectionBackend', nodeId: 'connection-backend', transfer: 'direct' },
+            { label: 'DatabaseManager', nodeId: 'database-manager', transfer: 'direct' },
+            { label: 'DatabaseWorker', nodeId: 'database-worker', transfer: 'queued' },
+            { label: 'QSqlDatabase::close()', transfer: 'driver' },
+            { label: 'DatabaseManager', nodeId: 'database-manager', transfer: 'queued' },
+            { label: 'ConnectionBackend → QML', nodeId: 'connection-backend', transfer: 'direct' }
+          ],
+          edgePairs: [
+            ['connection-backend', 'database-manager'],
+            ['database-manager', 'database-worker']
+          ],
+          steps: [
+            {
+              title: L('Выбирает ветку отключения', 'Selects the disconnect branch'),
+              copy: L('При dbStatus == 2 тот же onDbConnectionButtonClicked(...) не читает форму, а вызывает DatabaseManager::closeConnection().', 'When dbStatus == 2, the same onDbConnectionButtonClicked(...) handler does not read the form and calls DatabaseManager::closeConnection().'),
+              actor: 'ConnectionBackend', nodeId: 'connection-backend', thread: 'main', transfer: 'direct', signature: 'm_dbStatus == 2 · closeConnection()'
+            },
+            {
+              title: L('Отправляет команду в поток БД', 'Sends the command to the database thread'),
+              copy: L('Менеджер проверяет валидность и испускает signalCloseConnection(); Qt доставляет его в worker через очередь.', 'The manager validates the handle and emits signalCloseConnection(); Qt delivers it to the worker through the queue.'),
+              actor: 'DatabaseManager', nodeId: 'database-manager', thread: 'main', transfer: 'queued', signature: 'signalCloseConnection() → slotCloseConnection()'
+            },
+            {
+              title: L('Закрывает QSqlDatabase', 'Closes QSqlDatabase'),
+              copy: L('Worker сначала сообщает busy = true, затем вызывает db.close(), сбрасывает connected и очищает ошибку.', 'The worker first reports busy = true, then calls db.close(), clears connected, and clears the error.'),
+              actor: 'DatabaseWorker', nodeId: 'database-worker', thread: 'db', transfer: 'driver', signature: 'DatabaseWorker::slotCloseConnection() · db.close()'
+            },
+            {
+              title: L('Возвращает финальные флаги', 'Returns final flags'),
+              copy: L('Сигнал worker доставляет connected = false, valid, busy = false и lastError; DatabaseManager::slotManagerUpdate(...) обрабатывает их в главном потоке.', 'The worker signal delivers connected = false, valid, busy = false, and lastError; DatabaseManager::slotManagerUpdate(...) handles them in the main thread.'),
+              actor: 'DatabaseManager', nodeId: 'database-manager', thread: 'main', transfer: 'queued', signature: 'signalManagerUpdate(...) → DatabaseManager::slotManagerUpdate(...)'
+            },
+            {
+              title: L('Переключает QML в отключённое состояние', 'Switches QML to disconnected state'),
+              copy: L('DatabaseManager вычисляет dbStatus = 0, а ConnectionBackend уведомляет привязки интерфейса.', 'DatabaseManager derives dbStatus = 0, and ConnectionBackend notifies the interface bindings.'),
+              actor: 'ConnectionBackend', nodeId: 'connection-backend', thread: 'main', transfer: 'direct', signature: 'dbStatusChanged() · lastErrorChanged()'
+            }
+          ]
+        },
+        {
+          id: 'post-save',
+          title: L('Редактирование и сохранение постов', 'Edit and save stations'),
+          tabCopy: L('Черновик UI → runtime-конфигурация', 'UI draft → runtime configuration'),
+          summary: L(
+            'Форма редактирует живой UI-черновик m_cfg. Только кнопка «Сохранить» копирует весь вектор PostConfig в поток генератора и полностью перестраивает runtime-посты.',
+            'The form edits the live UI draft m_cfg. Only Save copies the full PostConfig vector into the generator thread and completely rebuilds runtime stations.'
+          ),
+          trigger: L('Изменение полей, добавление/удаление поста и нажатие «Сохранить изменения» в GenTab.qml.', 'Editing fields, adding/removing a station, and clicking “Save changes” in GenTab.qml.'),
+          outcome: L('LoadGenerator использует новый набор Post; если таймер включён, следующий tick работает уже с перестроенными объектами.', 'LoadGenerator uses the new Post set; if the timer is active, the next tick already uses the rebuilt objects.'),
+          boundary: L(
+            'До Save worker работает со старой копией, а после отправки нет ack/error-канала. PostConfig::operator=() не очищает массивы пиков, поэтому Save/fallback могут накапливать дубликаты. Также rowCount() сейчас возвращает -1 для корневого parent — список QML и add/remove требуют исправления и повторной проверки.',
+            'Before Save, the worker uses its previous copy, and there is no acknowledgement or error channel. PostConfig::operator=() does not clear peak arrays, so Save/fallback can accumulate duplicates. rowCount() also returns -1 for the root parent, so the QML list and add/remove require a fix and retest.'
+          ),
+          route: [
+            { label: 'GenTab.qml' },
+            { label: 'PostListModel', nodeId: 'post-list-model', transfer: 'direct' },
+            { label: 'PostConfig[]', nodeId: 'post-config', transfer: 'data' },
+            { label: 'GeneratorBackend', nodeId: 'generator-backend', transfer: 'direct' },
+            { label: 'LoadGenerator', nodeId: 'load-generator', transfer: 'queued' },
+            { label: 'Post[]', nodeId: 'post', transfer: 'direct' }
+          ],
+          edgePairs: [
+            ['generator-backend', 'post-list-model'],
+            ['post-list-model', 'post-config'],
+            ['generator-backend', 'load-generator'],
+            ['load-generator', 'post-config'],
+            ['load-generator', 'post']
+          ],
+          steps: [
+            {
+              title: L('Изменяет UI-черновик', 'Changes the UI draft'),
+              copy: L('Привязки формы вызывают setter-методы PostListModel и меняют текущий PostConfig в m_cfg главного потока.', 'Form bindings call PostListModel setters and modify the current PostConfig in main-thread m_cfg.'),
+              actor: 'PostListModel', nodeId: 'post-list-model', thread: 'main', transfer: 'direct', signature: 'setCurrentPostName() · setCurrentLatitude() · …'
+            },
+            {
+              title: L('Меняет состав списка локально', 'Changes list membership locally'),
+              copy: L('addPost() и removePost() вставляют или удаляют PostConfig в модели и выбирают актуальный индекс; worker пока не уведомляется.', 'addPost() and removePost() insert or remove PostConfig entries in the model and select a valid index; the worker is not notified yet.'),
+              actor: 'PostListModel', nodeId: 'post-list-model', thread: 'main', transfer: 'direct', signature: 'addPost() · removePost(index)'
+            },
+            {
+              title: L('Фиксирует весь набор конфигураций', 'Commits the full configuration set'),
+              copy: L('Кнопка сохранения вызывает postUpdate(); модель начинает reset и передаёт полный m_config через сигнал GeneratorBackend.', 'The save button calls postUpdate(); the model begins a reset and passes the full m_config through a GeneratorBackend signal.'),
+              actor: 'PostListModel', nodeId: 'post-list-model', thread: 'main', transfer: 'data', signature: 'PostListModel::postUpdate()'
+            },
+            {
+              title: L('Отправляет копию и фиксирует fallback', 'Sends the copy and stores fallback'),
+              copy: L('PostListModel вызывает signalPostConfigUpdate(m_config) у GeneratorBackend, затем сразу сохраняет m_fallbackConfig и выбранный индекс в UI.', 'PostListModel invokes GeneratorBackend signalPostConfigUpdate(m_config), then immediately stores m_fallbackConfig and the selected index in the UI.'),
+              actor: 'PostListModel', nodeId: 'post-list-model', thread: 'main', transfer: 'queued', signature: 'signalPostConfigUpdate(...) · m_fallbackConfig = m_config'
+            },
+            {
+              title: L('Принимает новую копию в worker', 'Receives the new copy in the worker'),
+              copy: L('LoadGenerator::slotPostConfigUpdate() присваивает входящий вектор собственному m_postConfigs; затем начинается перестройка runtime-объектов.', 'LoadGenerator::slotPostConfigUpdate() assigns the incoming vector to its own m_postConfigs; runtime rebuilding then begins.'),
+              actor: 'LoadGenerator', nodeId: 'load-generator', thread: 'gen', transfer: 'queued', signature: 'slotPostConfigUpdate() → setPostConfigs()'
+            },
+            {
+              title: L('Полностью перестраивает runtime-посты', 'Rebuilds runtime stations completely'),
+              copy: L('load() очищает старые Post и создаёт новые. Каждый Post через фабрики строит конкретные noise/peak-объекты и угловые сетки.', 'load() clears old Post objects and creates new ones. Each Post builds concrete noise/peak objects and angular grids through factories.'),
+              actor: 'LoadGenerator', nodeId: 'load-generator', thread: 'gen', transfer: 'direct', signature: 'LoadGenerator::load() · Post::Post(PostConfig)'
+            },
+            {
+              title: L('Продолжает генерацию с новым набором', 'Continues generation with the new set'),
+              copy: L('Если QTimer уже работает, следующий timeout обходит новый m_posts; включённый новый пост обычно готов к генерации сразу.', 'If QTimer is already running, the next timeout iterates the new m_posts; an enabled new station is normally due immediately.'),
+              actor: 'Post', nodeId: 'post', thread: 'gen', transfer: 'timer', signature: 'QTimer::timeout → slotPostCall() → Post::call()'
+            }
+          ]
+        },
+        {
+          id: 'noise-switch',
+          title: L('Смена типа шума', 'Switch the noise type'),
+          tabCopy: L('Конфигурация + QML-адаптер', 'Configuration + QML adapter'),
+          summary: L(
+            'PostListModel поддерживает согласованную пару: конкретная NoiseConfig хранит данные, а соответствующий NoiseBackend предоставляет нужные поля QML.',
+            'PostListModel keeps a matching pair: a concrete NoiseConfig stores data, while the corresponding NoiseBackend exposes the correct fields to QML.'
+          ),
+          trigger: L('Выбор Normal или Uniform в ComboBox редактора поста.', 'Selecting Normal or Uniform in the station editor ComboBox.'),
+          outcome: L('QML Loader показывает поля выбранного распределения; runtime-объект шума изменится после общего сохранения постов.', 'The QML Loader shows fields for the selected distribution; the runtime noise object changes after the overall station configuration is saved.'),
+          boundary: L(
+            'Смена типа создаёт конфигурацию с defaults и не восстанавливает старые параметры при возврате. Кроме того, проверки границ UniformNoiseBackend сейчас некорректно используют numeric_limits<float>::min/max: обычные min/max могут отклоняться или превращаться в предельные значения.',
+            'Switching type creates a configuration with defaults and does not restore old values when switching back. In addition, UniformNoiseBackend range checks misuse numeric_limits<float>::min/max, so ordinary min/max values may be rejected or replaced with extreme values.'
+          ),
+          route: [
+            { label: 'GenTab.qml · ComboBox' },
+            { label: 'PostListModel', nodeId: 'post-list-model', transfer: 'direct' },
+            { label: 'NoiseConfig', nodeId: 'noise-config', transfer: 'data' },
+            { label: 'Normal / Uniform Backend', nodeId: 'abstract-noise-backend', transfer: 'direct' },
+            { label: 'QML Loader', transfer: 'direct' },
+            { label: L('LoadGenerator · после Save', 'LoadGenerator · after Save'), nodeId: 'load-generator', transfer: 'queued' }
+          ],
+          edgePairs: [
+            ['post-list-model', 'abstract-noise-backend'],
+            ['normal-noise-backend', 'abstract-noise-backend'],
+            ['uniform-noise-backend', 'abstract-noise-backend'],
+            ['post-config', 'noise-config'],
+            ['normal-noise-backend', 'normal-noise-config'],
+            ['uniform-noise-backend', 'uniform-noise-config'],
+            ['generator-backend', 'load-generator']
+          ],
+          steps: [
+            {
+              title: L('Записывает выбранный enum', 'Writes the selected enum'),
+              copy: L('ComboBox присваивает currentNoiseType выбранного поста.', 'The ComboBox assigns currentNoiseType for the selected station.'),
+              actor: 'PostListModel', nodeId: 'post-list-model', thread: 'main', transfer: 'direct', signature: 'setCurrentNoiseType(int)'
+            },
+            {
+              title: L('Проверяет пару «конфигурация ↔ адаптер»', 'Checks the configuration-to-adapter pair'),
+              copy: L('Модель отдельно проверяет конкретный тип NoiseConfig и конкретный класс AbstractNoiseBackend.', 'The model separately checks the concrete NoiseConfig type and the concrete AbstractNoiseBackend class.'),
+              actor: 'PostListModel', nodeId: 'post-list-model', thread: 'main', transfer: 'direct', signature: 'NoiseType · dynamic_cast<...NoiseConfig*> · dynamic_cast<...Backend*>'
+            },
+            {
+              title: L('Заменяет конфигурацию при необходимости', 'Replaces configuration when needed'),
+              copy: L('Для Normal создаётся NormalNoiseConfig(0, 2), для Uniform — UniformNoiseConfig(-10, 20).', 'Normal creates NormalNoiseConfig(0, 2); Uniform creates UniformNoiseConfig(-10, 20).'),
+              actor: 'AbstractNoise::NoiseConfig', nodeId: 'noise-config', thread: 'main', transfer: 'data', signature: 'NormalNoiseConfig · UniformNoiseConfig'
+            },
+            {
+              title: L('Устанавливает подходящий QML-адаптер', 'Installs the matching QML adapter'),
+              copy: L('NormalNoiseBackend или UniformNoiseBackend получает ссылку на новую конфигурацию текущего поста.', 'NormalNoiseBackend or UniformNoiseBackend receives a reference to the new configuration of the current station.'),
+              actor: 'AbstractNoiseBackend', nodeId: 'abstract-noise-backend', thread: 'main', transfer: 'direct', signature: 'NormalNoiseBackend(...) · UniformNoiseBackend(...)'
+            },
+            {
+              title: L('Уведомляет QML в безопасном порядке', 'Notifies QML in a safe order'),
+              copy: L('Сначала испускается currentNoiseTypeChanged(), затем noiseBackendChanged(); так Loader сначала выбирает форму, затем получает её backend.', 'currentNoiseTypeChanged() is emitted first, followed by noiseBackendChanged(); the Loader selects the form before receiving its backend.'),
+              actor: 'PostListModel', nodeId: 'post-list-model', thread: 'main', transfer: 'direct', signature: 'currentNoiseTypeChanged() → noiseBackendChanged()'
+            },
+            {
+              title: L('Переключает набор полей редактора', 'Switches the editor fields'),
+              copy: L('QML Loader создаёт форму среднего/сигмы либо min/max; её bindings работают через новый backend.', 'The QML Loader creates the mean/sigma or min/max form; its bindings use the new backend.'),
+              actor: 'Normal / Uniform Backend', nodeId: 'abstract-noise-backend', thread: 'main', transfer: 'direct', signature: 'noiseBackend Q_PROPERTY · Loader.sourceComponent'
+            },
+            {
+              title: L('Передаёт тип в runtime только после Save', 'Sends the type to runtime only after Save'),
+              copy: L('Общий postUpdate() копирует PostConfig в LoadGenerator; фабрика NoiseConfig::createNoise() создаёт конкретный runtime-шум.', 'The shared postUpdate() copies PostConfig into LoadGenerator; NoiseConfig::createNoise() creates the concrete runtime noise.'),
+              actor: 'LoadGenerator', nodeId: 'load-generator', thread: 'gen', transfer: 'queued', signature: 'slotPostConfigUpdate() · NoiseConfig::createNoise()'
+            }
+          ]
+        },
+        {
+          id: 'generator-toggle',
+          title: L('Запуск и остановка генератора', 'Start and stop the generator'),
+          tabCopy: L('Команда UI ↔ подтверждение worker', 'UI command ↔ worker acknowledgement'),
+          summary: L(
+            'Кнопка меняет желаемое состояние в главном потоке, worker запускает или останавливает точный 10-мс QTimer и возвращает подтверждённое состояние.',
+            'The button changes desired state in the main thread, the worker starts or stops a precise 10 ms QTimer, and returns confirmed state.'
+          ),
+          trigger: L('Нажатие кнопки запуска/остановки в GenTab.qml.', 'Clicking the start/stop button in GenTab.qml.'),
+          outcome: L('generatorEnabled в QML синхронизирован с фактическим состоянием polling в LoadGenerator.', 'generatorEnabled in QML is synchronized with the actual polling state in LoadGenerator.'),
+          boundary: L(
+            'Остановка не сбрасывает Post и их nextGenTime: просроченный пост сгенерирует пакет на первом tick после рестарта. Повторный старт также повторяет connect(timeout, ...), что требует проверки на дублирование вызовов.',
+            'Stopping does not reset Post objects or nextGenTime: an overdue station generates on the first tick after restart. Restart also repeats connect(timeout, ...), which should be reviewed for duplicate callbacks.'
+          ),
+          route: [
+            { label: 'GenTab.qml' },
+            { label: 'GeneratorBackend', nodeId: 'generator-backend', transfer: 'direct' },
+            { label: 'LoadGenerator', nodeId: 'load-generator', transfer: 'queued' },
+            { label: 'QTimer · 10 ms', transfer: 'timer' },
+            { label: 'GeneratorBackend → QML', nodeId: 'generator-backend', transfer: 'queued' }
+          ],
+          edgePairs: [
+            ['app-entry', 'generator-backend'],
+            ['generator-backend', 'load-generator']
+          ],
+          steps: [
+            {
+              title: L('Переключает желаемое состояние', 'Toggles desired state'),
+              copy: L('GenTab.qml вызывает onGeneratorEnabledButtonClicked(); backend сразу инвертирует локальный generatorEnabled и уведомляет QML.', 'GenTab.qml calls onGeneratorEnabledButtonClicked(); the backend immediately inverts local generatorEnabled and notifies QML.'),
+              actor: 'GeneratorBackend', nodeId: 'generator-backend', thread: 'main', transfer: 'direct', signature: 'onGeneratorEnabledButtonClicked() · generatorEnabledChanged()'
+            },
+            {
+              title: L('Отправляет команду worker-объекту', 'Sends the command to the worker'),
+              copy: L('GeneratorBackend::signalPostCallToggle(bool) через очередь вызывает одноимённый slot LoadGenerator в generator thread.', 'GeneratorBackend::signalPostCallToggle(bool) invokes the matching LoadGenerator slot through the generator-thread queue.'),
+              actor: 'GeneratorBackend', nodeId: 'generator-backend', thread: 'main', transfer: 'queued', signature: 'signalPostCallToggle(bool) → LoadGenerator::slotPostCallToggle(bool)'
+            },
+            {
+              title: L('Проверяет текущее состояние polling', 'Checks current polling state'),
+              copy: L('Worker отклоняет бессмысленную повторную команду: нельзя второй раз запустить уже включённый polling или остановить выключенный.', 'The worker rejects a redundant command: active polling cannot be started again, and stopped polling cannot be stopped again.'),
+              actor: 'LoadGenerator', nodeId: 'load-generator', thread: 'gen', transfer: 'queued', signature: 'm_callingEnabled == toggle'
+            },
+            {
+              title: L('Запускает или останавливает QTimer', 'Starts or stops QTimer'),
+              copy: L('При первом старте создаётся QTimer с Qt::PreciseTimer и interval = 10 ms; следующие старты используют тот же объект, а остановка вызывает QTimer::stop().', 'The first start creates a QTimer with Qt::PreciseTimer and interval = 10 ms; later starts reuse the same object, while stopping calls QTimer::stop().'),
+              actor: 'LoadGenerator', nodeId: 'load-generator', thread: 'gen', transfer: 'timer', signature: 'setTimerType(Qt::PreciseTimer) · setInterval(10) · start()/stop()'
+            },
+            {
+              title: L('Возвращает подтверждённое состояние', 'Returns confirmed state'),
+              copy: L('Сигнал LoadGenerator::signalPostCallToggle(bool) возвращается через очередь; GeneratorBackend::slotPostCallToggle() принимает ответ worker в главном потоке.', 'LoadGenerator::signalPostCallToggle(bool) returns through the queue; GeneratorBackend::slotPostCallToggle() receives the worker acknowledgement in the main thread.'),
+              actor: 'GeneratorBackend', nodeId: 'generator-backend', thread: 'main', transfer: 'queued', signature: 'LoadGenerator::signalPostCallToggle() → GeneratorBackend::slotPostCallToggle()'
+            },
+            {
+              title: L('Синхронизирует кнопку QML', 'Synchronizes the QML button'),
+              copy: L('GeneratorBackend присваивает подтверждённый toggle и повторно уведомляет binding, чтобы UI отражал фактическое состояние.', 'GeneratorBackend assigns the confirmed toggle and notifies the binding again so the UI reflects actual state.'),
+              actor: 'GeneratorBackend', nodeId: 'generator-backend', thread: 'main', transfer: 'direct', signature: 'setGeneratorEnabled(toggle)'
+            }
+          ]
+        },
+        {
+          id: 'one-package',
+          title: L('Один цикл и DataPackage', 'One cycle and DataPackage'),
+          tabCopy: L('Таймер → расчёт → диагностический лог', 'Timer → compute → diagnostic log'),
+          summary: L(
+            'Каждый tick опрашивает runtime-посты. Только включённый и уже наступивший по времени Post строит две свёртки, вычисляет пеленги и выпускает снимок DataPackage.',
+            'Each tick polls runtime stations. Only an enabled Post whose due time has arrived builds two convolutions, calculates bearings, and emits a DataPackage snapshot.'
+          ),
+          trigger: L('QTimer::timeout примерно каждые 10 мс при включённом генераторе.', 'QTimer::timeout approximately every 10 ms while generation is enabled.'),
+          outcome: L('DataPackage приходит в GeneratorBackend::slotSendData(); qDebug выводит только postName, level, timestamp и convV, причём timestamp в первой строке ошибочно подписан как convV.', 'DataPackage reaches GeneratorBackend::slotSendData(); qDebug prints only postName, level, timestamp, and convV, with timestamp mislabeled as convV on the first line.'),
+          boundary: L(
+            'На этом маршрут заканчивается: связи DataPackage → DatabaseManager/DatabaseWorker нет. Подключённая БД не получает сгенерированные измерения.',
+            'The route ends here: there is no DataPackage → DatabaseManager/DatabaseWorker link. A connected database does not receive generated measurements.'
+          ),
+          route: [
+            { label: 'QTimer::timeout' },
+            { label: 'LoadGenerator', nodeId: 'load-generator', transfer: 'timer' },
+            { label: 'Post::call()', nodeId: 'post', transfer: 'direct' },
+            { label: 'Noise + Peaks', nodeId: 'abstract-noise', transfer: 'direct' },
+            { label: 'DataPackage', nodeId: 'data-package', transfer: 'data' },
+            { label: 'GeneratorBackend', nodeId: 'generator-backend', transfer: 'queued' },
+            { label: L('qDebug · конец маршрута', 'qDebug · route ends'), transfer: 'direct' }
+          ],
+          edgePairs: [
+            ['generator-backend', 'load-generator'],
+            ['load-generator', 'post'],
+            ['post', 'abstract-noise'],
+            ['post', 'abstract-peak'],
+            ['post', 'data-package']
+          ],
+          steps: [
+            {
+              title: L('Запускает цикл опроса', 'Starts a polling cycle'),
+              copy: L('Событие QTimer::timeout вызывает LoadGenerator::slotPostCall() в generator thread.', 'QTimer::timeout calls LoadGenerator::slotPostCall() in the generator thread.'),
+              actor: 'LoadGenerator', nodeId: 'load-generator', thread: 'gen', transfer: 'timer', signature: 'QTimer::timeout → LoadGenerator::slotPostCall()'
+            },
+            {
+              title: L('Обходит все runtime-посты', 'Iterates all runtime stations'),
+              copy: L('LoadGenerator берёт монотонное время steady_clock и передаёт его каждому Post::call(now) для проверки срока генерации.', 'LoadGenerator reads monotonic steady_clock time and passes it to every Post::call(now) to check whether generation is due.'),
+              actor: 'LoadGenerator', nodeId: 'load-generator', thread: 'gen', transfer: 'direct', signature: 'for (auto &post : m_posts) post.call(steady_clock::now())'
+            },
+            {
+              title: L('Отбрасывает неготовые посты', 'Skips stations that are not ready'),
+              copy: L('Выключенный пост или пост с now < nextGenTime ничего не создаёт; расчёт начинается только в разрешённой ветке.', 'A disabled station or one with now < nextGenTime produces nothing; calculation starts only in the eligible branch.'),
+              actor: 'Post', nodeId: 'post', thread: 'gen', transfer: 'direct', signature: 'if (m_config.enabled) · if (now >= m_nextGenTime)'
+            },
+            {
+              title: L('Строит горизонтальную и вертикальную свёртки', 'Builds horizontal and vertical convolutions'),
+              copy: L('Для каждого угла складываются noise->next() и значения всех peaks->valueAt(angle), после чего берётся модуль.', 'For every angle, noise->next() and all peak->valueAt(angle) values are summed, then converted to absolute values.'),
+              actor: 'AbstractNoise + AbstractPeak', nodeId: 'abstract-noise', thread: 'gen', transfer: 'direct', signature: 'noise->next() + Σ peak->valueAt(angle)'
+            },
+            {
+              title: L('Находит максимум, пеленг и качество', 'Finds maximum, bearing, and quality'),
+              copy: L('Индекс максимума сопоставляется углу bearingH/V; значение максимума сохраняется как qualityH/V до нормировки, затем обе свёртки нормируются.', 'The maximum index is mapped to the corresponding bearingH/V angle; the maximum value is stored as qualityH/V before normalization, and both convolutions are then normalized.'),
+              actor: 'Post', nodeId: 'post', thread: 'gen', transfer: 'direct', signature: 'max_element() · value /= maxValueH/V'
+            },
+            {
+              title: L('Заполняет снимок результата', 'Fills the result snapshot'),
+              copy: L('DataPackage получает UTC timestamp, уровень, имя, частоту, координаты, параметры угловых сеток min/max/step, обе свёртки, пеленги и quality.', 'DataPackage receives UTC timestamp, level, name, frequency, coordinates, angular-grid min/max/step parameters, both convolutions, bearings, and quality.'),
+              actor: 'DataPackage', nodeId: 'data-package', thread: 'gen', transfer: 'data', signature: 'LoadGenerator::DataPackage m_data'
+            },
+            {
+              title: L('Планирует следующий пакет', 'Schedules the next package'),
+              copy: L('newNextGenTime() выбирает случайную задержку между minPeriod и maxPeriod.', 'newNextGenTime() selects a random delay between minPeriod and maxPeriod.'),
+              actor: 'Post', nodeId: 'post', thread: 'gen', transfer: 'direct', signature: 'newNextGenTime()'
+            },
+            {
+              title: L('Возвращает DataPackage в главный поток', 'Returns DataPackage to the main thread'),
+              copy: L('Post вызывает LoadGenerator::sendData(); signalSendData(package) копирует пакет через очередь в GeneratorBackend::slotSendData(), где он только логируется.', 'Post calls LoadGenerator::sendData(); signalSendData(package) copies the package through the queue into GeneratorBackend::slotSendData(), where it is only logged.'),
+              actor: 'GeneratorBackend', nodeId: 'generator-backend', thread: 'main', transfer: 'data', signature: 'signalSendData(DataPackage) → slotSendData() → qDebug()'
+            }
+          ]
+        }
+      ];
+
+      function escapeXml(value) {
+        return String(value)
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&apos;');
+      }
+
+      function anchor(node, side) {
+        if (side === 'top') return [node.x + node.w / 2, node.y];
+        if (side === 'bottom') return [node.x + node.w / 2, node.y + node.h];
+        if (side === 'left') return [node.x, node.y + node.h / 2];
+        return [node.x + node.w, node.y + node.h / 2];
+      }
+
+      function edgePoints(edge) {
+        return [anchor(nodeById.get(edge.source), edge.from || 'right')]
+          .concat(edge.via || [])
+          .concat([anchor(nodeById.get(edge.target), edge.to || 'left')]);
+      }
+
+      function pathFromPoints(points) {
+        return points.map((point, index) => (index === 0 ? 'M' : 'L') + ' ' + point[0] + ' ' + point[1]).join(' ');
+      }
+
+      function nodeDisplayName(node, language) {
+        return t(node.name, language);
+      }
+
+      function nodeBaseText(node, language) {
+        return node.extendsBase ? ui[language].extends + t(node.base, language) : t(node.base, language);
+      }
+
+      function nodeMarkup(node, language) {
+        const name = nodeDisplayName(node, language);
+        const kind = t(node.kind, language);
+        const hint = ui[language].nodeHint;
+        const baseText = nodeBaseText(node, language);
+        const text = node.compact
+          ? '<text x="18" y="24"><tspan class="node-kind">' + escapeXml(kind) + '</tspan><tspan class="node-name" x="18" dy="23">' + escapeXml(name) + '</tspan></text>'
+          : '<text x="18" y="27"><tspan class="node-kind">' + escapeXml(kind) + '</tspan><tspan class="node-name" x="18" dy="23">' + escapeXml(name) + '</tspan><tspan class="node-base" x="18" dy="20">' + escapeXml(baseText) + '</tspan></text>';
+        return '<g class="node layer-' + node.layer + '" data-node-id="' + escapeXml(node.id) + '" transform="translate(' + node.x + ' ' + node.y + ')" role="button" tabindex="0" aria-label="' + escapeXml(name + '. ' + hint) + '">' +
+          '<rect class="node-card" width="' + node.w + '" height="' + node.h + '" rx="14"></rect>' +
+          '<rect class="node-accent" width="' + node.w + '" height="7" rx="4"></rect>' +
+          text +
+          '<g class="expand-icon" transform="translate(' + (node.w - 30) + ' 20)" aria-hidden="true"><circle r="11"></circle><path d="M -5 0 L 5 0"></path><path class="expand-v" d="M 0 -5 L 0 5"></path></g>' +
+          '<title>' + escapeXml(name + ' — ' + hint) + '</title></g>';
+      }
+
+      function edgeTypeLabel(type, language) {
+        const key = {
+          inheritance: 'edgeInheritance',
+          composition: 'edgeComposition',
+          reference: 'edgeReference',
+          signal: 'edgeSignal',
+          lifecycle: 'edgeLifecycle'
+        }[type];
+        return ui[language][key];
+      }
+
+      function edgeMarkup(edge, index, language) {
+        const path = pathFromPoints(edgePoints(edge));
+        const source = nodeDisplayName(nodeById.get(edge.source), language);
+        const target = nodeDisplayName(nodeById.get(edge.target), language);
+        const labelValue = edge.label ? t(edge.label, language) : '';
+        const label = labelValue && edge.labelAt
+          ? '<text class="edge-label" x="' + edge.labelAt[0] + '" y="' + edge.labelAt[1] + '">' + escapeXml(labelValue) + '</text>'
+          : '';
+        const reverseMarker = edge.bidirectional ? ' marker-start="url(#arrow-start)"' : '';
+        const classes = 'edge ' + edge.type + (edge.crosslink ? ' crosslink' : ' tree-edge');
+        const bridges = (edge.bridges || []).map(point =>
+          '<circle class="edge-bridge" cx="' + point[0] + '" cy="' + point[1] + '" r="8"></circle>'
+        ).join('');
+        return '<g class="' + classes + '" data-edge-index="' + index + '" data-source="' + escapeXml(edge.source) + '" data-target="' + escapeXml(edge.target) + '">' +
+          '<path d="' + path + '"' + reverseMarker + '></path>' + bridges + label +
+          '<title>' + escapeXml(source + ' → ' + target + ' · ' + edgeTypeLabel(edge.type, language) + (labelValue ? ' · ' + labelValue : '')) + '</title></g>';
+      }
+
+      function buildSvgMarkup(language = currentLanguage) {
+        const styles = '<style>' +
+          '.diagram-svg{background:#f7f9fd;cursor:grab}.canvas-bg{fill:#f7f9fd}.diagram-svg.is-dragging{cursor:grabbing}' +
+          '.cluster rect{stroke-width:1.5;vector-effect:non-scaling-stroke}.cluster text{fill:#293752;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:17px;font-weight:750;letter-spacing:.025em}' +
+          '.cluster-ui rect{fill:#f0f1ff;stroke:#b8bdf0}.cluster-db rect{fill:#edf8f4;stroke:#a7d8c8}.cluster-gen rect{fill:#fff6e9;stroke:#e9c79e}.cluster-noise rect{fill:#edf8fc;stroke:#a5d5e6}.cluster-peak rect{fill:#fbf0f7;stroke:#dfb5d2}' +
+          '.edge{color:#8290a7;transition:opacity 140ms ease}.edge path{fill:none;stroke:currentColor;stroke-width:1.9;vector-effect:non-scaling-stroke;marker-end:url(#arrow)}' +
+          '.edge.tree-edge{color:#68778f}.edge.crosslink{opacity:.6}.diagram-svg.hide-crosslinks .edge.crosslink:not(.is-active):not(.is-scenario-edge){opacity:0;pointer-events:none}.edge.inheritance{color:#52637e}.edge.inheritance path{marker-end:url(#triangle)}' +
+          '.edge.composition{color:#34435f}.edge.composition path{stroke-width:2.45;marker-start:url(#diamond);marker-end:none}.edge.reference path{stroke-dasharray:10 7}.edge.signal path{stroke-dasharray:3 7}.edge.lifecycle path{stroke-dasharray:14 6 3 6}' +
+          '.edge-bridge{fill:#f7f9fd;stroke:none}.edge-label{fill:#65738a;stroke:#f7f9fd;stroke-width:8px;paint-order:stroke;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:12.5px;font-weight:700;text-anchor:middle}' +
+          '.node{cursor:pointer;transition:opacity 140ms ease}.node:focus{outline:none}.node-card{fill:#fff;stroke:#d5deea;stroke-width:1.5;vector-effect:non-scaling-stroke;filter:url(#node-shadow);transition:stroke-width 140ms ease}' +
+          '.node:hover .node-card,.node:focus .node-card{stroke:#4057d6;stroke-width:2.4}.node text{font-family:Inter,ui-sans-serif,system-ui,sans-serif;pointer-events:none}.node-kind{font-size:11.8px;font-weight:750;letter-spacing:.045em;text-transform:uppercase}.node-name{fill:#152037;font-size:16.8px;font-weight:750}.node-base{fill:#6a778e;font-size:11.8px}' +
+          '.expand-icon circle{fill:#f5f7fc;stroke:#c9d3e3;stroke-width:1.3}.expand-icon path{fill:none;stroke:#65738a;stroke-width:1.7;stroke-linecap:round}.node.is-open .expand-v{opacity:0}' +
+          '.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#334155}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#4f5fd1}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#168167}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#c87016}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#087da8}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#a8498d}' +
+          '.node.is-scenario-node .node-card{stroke:#d97706;stroke-width:3;stroke-dasharray:8 4}.edge.is-scenario-edge{color:#d97706;opacity:1}.edge.is-scenario-edge path{stroke-width:3}' +
+          '.node.is-selected .node-card{stroke:#4057d6;stroke-width:4;stroke-dasharray:none}.node.is-related .node-card{stroke:#6679df;stroke-width:2.5}.node.is-dimmed:not(.is-scenario-node),.edge.is-dimmed:not(.is-scenario-edge){opacity:.075}.edge.is-active{color:#4057d6;opacity:1}.edge.is-active path{stroke-width:3.35}' +
+          '@media(prefers-color-scheme:dark){.diagram-svg{background:#0d1422}.canvas-bg{fill:#0d1422}.cluster text{fill:#dce4f3}.cluster-ui rect{fill:#191b38;stroke:#4c5087}.cluster-db rect{fill:#102b28;stroke:#2d695c}.cluster-gen rect{fill:#302318;stroke:#785633}.cluster-noise rect{fill:#102630;stroke:#2d6072}.cluster-peak rect{fill:#2c192e;stroke:#704768}.edge{color:#65728b}.edge.tree-edge{color:#8492aa}.edge.inheritance{color:#8a99b2}.edge.composition{color:#abb7cb}.edge-bridge{fill:#0d1422}.edge-label{fill:#9ba8be;stroke:#0d1422}.node-card{fill:#151e31;stroke:#2b3852}.node-name{fill:#edf2fb}.node-base{fill:#9ba8be}.expand-icon circle{fill:#1c2740;stroke:#3a4965}.expand-icon path{stroke:#aab6ca}.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#cbd5e1}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#918aff}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#4bd3ad}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#ffad55}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#4bc4ea}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#ec88cc}.node.is-scenario-node .node-card{stroke:#fbbf24}.edge.is-scenario-edge{color:#fbbf24}.node.is-selected .node-card,.node.is-related .node-card{stroke:#a29cff}.edge.is-active{color:#a29cff}}' +
+          '@media print{.diagram-svg{background:#fff}.canvas-bg{fill:#fff}.cluster text{fill:#293752}.cluster-ui rect{fill:#f0f1ff;stroke:#b8bdf0}.cluster-db rect{fill:#edf8f4;stroke:#a7d8c8}.cluster-gen rect{fill:#fff6e9;stroke:#e9c79e}.cluster-noise rect{fill:#edf8fc;stroke:#a5d5e6}.cluster-peak rect{fill:#fbf0f7;stroke:#dfb5d2}.edge{color:#8290a7}.edge.tree-edge{color:#68778f}.edge.inheritance{color:#52637e}.edge.composition{color:#34435f}.edge-bridge{fill:#fff}.edge-label{fill:#65738a;stroke:#fff}.node-card{fill:#fff;stroke:#d5deea}.node-name{fill:#152037}.node-base{fill:#6a778e}.expand-icon circle{fill:#f5f7fc;stroke:#c9d3e3}.expand-icon path{stroke:#65738a}.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#334155}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#4f5fd1}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#168167}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#c87016}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#087da8}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#a8498d}.node.is-scenario-node .node-card{stroke:#d97706}.edge.is-scenario-edge{color:#d97706}.node.is-selected .node-card,.node.is-related .node-card{stroke:#4057d6}.edge.is-active{color:#4057d6}}' +
+          '</style>';
+        const defs = '<defs>' +
+          '<filter id="node-shadow" x="-15%" y="-20%" width="130%" height="150%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0b1020" flood-opacity=".12"></feDropShadow></filter>' +
+          '<marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 1 1 L 11 6 L 1 11 z" fill="#8290a7"></path></marker>' +
+          '<marker id="arrow-start" viewBox="0 0 12 12" refX="2" refY="6" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 11 1 L 1 6 L 11 11 z" fill="#8290a7"></path></marker>' +
+          '<marker id="triangle" viewBox="0 0 14 14" refX="13" refY="7" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M 1 1 L 13 7 L 1 13 z" fill="#fff" stroke="#52637e" stroke-width="1.5"></path></marker>' +
+          '<marker id="diamond" viewBox="0 0 16 12" refX="2" refY="6" markerWidth="12" markerHeight="10" orient="auto-start-reverse"><path d="M 1 6 L 7 1 L 13 6 L 7 11 z" fill="#34435f"></path></marker>' +
+          '</defs>';
+        const clusterMarkup = clusters.map(cluster =>
+          '<g class="cluster cluster-' + cluster.id + '"><rect x="' + cluster.x + '" y="' + cluster.y + '" width="' + cluster.w + '" height="' + cluster.h + '" rx="24"></rect><text x="' + (cluster.x + 22) + '" y="' + (cluster.y + 34) + '">' + escapeXml(t(cluster.label, language)) + '</text></g>'
+        ).join('');
+        return '<title id="diagram-title">' + escapeXml(ui[language].diagramTitle) + '</title>' +
+          '<desc id="diagram-description">' + escapeXml(ui[language].diagramDescription) + '</desc>' +
+          styles + defs +
+          '<rect class="canvas-bg" x="0" y="0" width="' + WIDTH + '" height="' + HEIGHT + '"></rect>' +
+          '<g class="clusters">' + clusterMarkup + '</g>' +
+          '<g class="edges">' + edges.map((edge, index) => edgeMarkup(edge, index, language)).join('') + '</g>' +
+          '<g class="nodes">' + nodes.map(node => nodeMarkup(node, language)).join('') + '</g>';
+      }
+
+      globalThis.__classDiagramModel = { width: WIDTH, height: HEIGHT, clusters, nodes, edges, scenarios, scenarioThreadMeta, scenarioTransferMeta, buildSvgMarkup };
+      if (typeof document === 'undefined') return;
+
+      const svg = document.getElementById('class-diagram');
+      const picker = document.getElementById('class-picker');
+      const detailCard = document.getElementById('detail-card');
+      const detailKicker = document.getElementById('detail-kicker');
+      const detailName = document.getElementById('detail-name');
+      const detailPurpose = document.getElementById('detail-purpose');
+      const detailLayer = document.getElementById('detail-layer');
+      const detailFile = document.getElementById('detail-file');
+      const detailThread = document.getElementById('detail-thread');
+      const overviewGuide = document.getElementById('overview-guide');
+      const memberPanel = document.getElementById('member-panel');
+      const collapseButton = document.getElementById('collapse-detail');
+      const fieldsTitle = document.getElementById('fields-title');
+      const methodsTitle = document.getElementById('methods-title');
+      const relationsTitle = document.getElementById('relations-title');
+      const fieldsCount = document.getElementById('fields-count');
+      const methodsCount = document.getElementById('methods-count');
+      const relationsCount = document.getElementById('relations-count');
+      const fieldsList = document.getElementById('fields-list');
+      const methodsList = document.getElementById('methods-list');
+      const relationsList = document.getElementById('relations-list');
+      const sourceNote = document.getElementById('source-note');
+      const accessLegend = document.getElementById('access-legend');
+      const implementationNote = document.getElementById('implementation-note');
+      const implementationNoteTitle = document.getElementById('implementation-note-title');
+      const implementationNoteCopy = document.getElementById('implementation-note-copy');
+      const status = document.getElementById('status');
+      const secondaryButton = document.getElementById('toggle-secondary');
+      const scenarioSwitcher = document.getElementById('scenario-switcher');
+      const scenarioKicker = document.getElementById('scenario-kicker');
+      const scenarioName = document.getElementById('scenario-name');
+      const scenarioSummary = document.getElementById('scenario-summary');
+      const scenarioTrigger = document.getElementById('scenario-trigger');
+      const scenarioRoute = document.getElementById('scenario-route');
+      const scenarioSteps = document.getElementById('scenario-steps');
+      const scenarioOutcome = document.getElementById('scenario-outcome');
+      const scenarioBoundary = document.getElementById('scenario-boundary');
+      const scenarioStatus = document.getElementById('scenario-status');
+      const highlightScenarioButton = document.getElementById('highlight-scenario');
+      const scenarioById = new Map(scenarios.map(scenario => [scenario.id, scenario]));
+      const defaultViewBox = { x: 0, y: 0, w: WIDTH, h: HEIGHT };
+      let viewBox = { ...defaultViewBox };
+      let selectedId = null;
+      let detailsExpanded = false;
+      let crosslinksVisible = false;
+      let dragState = null;
+      let currentScenarioId = 'db-connect';
+      let scenarioHighlightActive = false;
+
+      const accessMeta = {
+        public: { symbol: '+', key: 'accessPublic' },
+        protected: { symbol: '#', key: 'accessProtected' },
+        private: { symbol: '−', key: 'accessPrivate' },
+        local: { symbol: '•', key: 'accessLocal' },
+        signal: { symbol: '⚡', key: 'accessSignal' },
+        slot: { symbol: '↳', key: 'accessSlot' },
+        inherited: { symbol: '↥', key: 'accessInherited' }
+      };
+
+      function applyViewBox() {
+        svg.setAttribute('viewBox', viewBox.x + ' ' + viewBox.y + ' ' + viewBox.w + ' ' + viewBox.h);
+      }
+
+      function renderDiagram() {
+        svg.innerHTML = buildSvgMarkup(currentLanguage);
+        svg.classList.toggle('hide-crosslinks', !crosslinksVisible);
+        applyViewBox();
+      }
+
+      function updateSecondaryButton() {
+        secondaryButton.textContent = crosslinksVisible ? ui[currentLanguage].hideSecondary : ui[currentLanguage].showSecondary;
+        secondaryButton.setAttribute('aria-pressed', String(crosslinksVisible));
+      }
+
+      function populatePicker() {
+        const options = nodes.slice().sort((a, b) => nodeDisplayName(a, currentLanguage).localeCompare(nodeDisplayName(b, currentLanguage), currentLanguage));
+        picker.innerHTML = '<option value="">' + escapeXml(ui[currentLanguage].allOption) + '</option>' +
+          options.map(node => '<option value="' + escapeXml(node.id) + '">' + escapeXml(nodeDisplayName(node, currentLanguage)) + '</option>').join('');
+        picker.value = selectedId || '';
+      }
+
+      function uiTemplate(key, values) {
+        return Object.entries(values).reduce(
+          (copy, [name, value]) => copy.replace('{' + name + '}', String(value)),
+          ui[currentLanguage][key]
+        );
+      }
+
+      function scenarioClassButton(label, nodeId, className) {
+        const aria = uiTemplate('scenarioClassAria', { name: label });
+        return '<button type="button" class="' + className + '" data-scenario-node-id="' + escapeXml(nodeId) + '" aria-label="' + escapeXml(aria) + '">' + escapeXml(label) + '</button>';
+      }
+
+      function renderScenarioSwitcher() {
+        scenarioSwitcher.innerHTML = scenarios.map((scenario, index) =>
+          '<button type="button" class="scenario-tab" data-scenario-id="' + escapeXml(scenario.id) + '" aria-pressed="' + String(scenario.id === currentScenarioId) + '">' +
+            '<span class="scenario-tab-number">' + String(index + 1).padStart(2, '0') + '</span>' +
+            '<span class="scenario-tab-title">' + escapeXml(t(scenario.title)) + '</span>' +
+            '<span class="scenario-tab-copy">' + escapeXml(t(scenario.tabCopy)) + '</span>' +
+          '</button>'
+        ).join('');
+      }
+
+      function updateScenarioSwitcherState() {
+        scenarioSwitcher.querySelectorAll('[data-scenario-id]').forEach(button => {
+          button.setAttribute('aria-pressed', String(button.dataset.scenarioId === currentScenarioId));
+        });
+      }
+
+      function scenarioActorMarkup(item) {
+        const label = t(item.label);
+        return item.nodeId
+          ? scenarioClassButton(label, item.nodeId, 'route-actor')
+          : '<span class="route-actor">' + escapeXml(label) + '</span>';
+      }
+
+      function renderScenarioRoute(scenario) {
+        return scenario.route.map((item, index) => {
+          const actor = scenarioActorMarkup(item);
+          if (index === 0) return actor;
+          const transfer = item.transfer || 'direct';
+          const meta = scenarioTransferMeta[transfer] || scenarioTransferMeta.direct;
+          const connector = '<span class="route-connector" data-transfer="' + escapeXml(transfer) + '"><span>' + escapeXml(t(meta.label)) + '</span></span>';
+          return '<span class="route-hop">' + connector + actor + '</span>';
+        }).join('');
+      }
+
+      function renderScenarioStep(step, index) {
+        const thread = scenarioThreadMeta[step.thread] || scenarioThreadMeta.main;
+        const transfer = scenarioTransferMeta[step.transfer] || scenarioTransferMeta.direct;
+        const actor = t(step.actor);
+        const actorMarkup = step.nodeId
+          ? scenarioClassButton(actor, step.nodeId, 'class-link')
+          : '<span class="class-link">' + escapeXml(actor) + '</span>';
+        return '<li class="scenario-step" data-thread="' + escapeXml(step.thread) + '" data-transfer="' + escapeXml(step.transfer) + '">' +
+          '<div class="step-rail"><span class="step-number">' + String(index + 1).padStart(2, '0') + '</span></div>' +
+          '<div class="step-card">' +
+            '<div class="step-heading"><h4>' + escapeXml(t(step.title)) + '</h4>' +
+              '<div class="step-badges"><span class="thread-badge" data-thread="' + escapeXml(step.thread) + '">' + escapeXml(t(thread.label)) + '</span>' +
+              '<span class="transfer-badge" data-transfer="' + escapeXml(step.transfer) + '">' + escapeXml(t(transfer.label)) + '</span></div>' +
+            '</div>' +
+            '<p class="step-copy">' + escapeXml(t(step.copy)) + '</p>' +
+            '<div class="step-evidence">' + actorMarkup + '<code>' + escapeXml(step.signature) + '</code></div>' +
+          '</div>' +
+        '</li>';
+      }
+
+      function updateScenarioHighlightControl() {
+        highlightScenarioButton.textContent = scenarioHighlightActive ? ui[currentLanguage].scenarioUnhighlight : ui[currentLanguage].scenarioHighlight;
+        highlightScenarioButton.setAttribute('aria-pressed', String(scenarioHighlightActive));
+      }
+
+      function renderScenario() {
+        const scenario = scenarioById.get(currentScenarioId) || scenarios[0];
+        const index = scenarios.indexOf(scenario);
+        scenarioKicker.textContent = uiTemplate('scenarioNumber', { current: index + 1, total: scenarios.length });
+        scenarioName.textContent = t(scenario.title);
+        scenarioSummary.textContent = t(scenario.summary);
+        scenarioTrigger.textContent = t(scenario.trigger);
+        scenarioRoute.innerHTML = renderScenarioRoute(scenario);
+        scenarioSteps.innerHTML = scenario.steps.map(renderScenarioStep).join('');
+        scenarioOutcome.textContent = t(scenario.outcome);
+        scenarioBoundary.textContent = t(scenario.boundary);
+        document.getElementById('scenario-stage').dataset.scenarioId = scenario.id;
+        updateScenarioHighlightControl();
+      }
+
+      function setScenario(id, announce = true) {
+        const scenario = scenarioById.get(id);
+        if (!scenario) return;
+        currentScenarioId = id;
+        updateScenarioSwitcherState();
+        renderScenario();
+        applySelectionVisuals();
+        if (announce) scenarioStatus.textContent = uiTemplate('scenarioSelected', { name: t(scenario.title) });
+      }
+
+      function scenarioNodeIds(scenario) {
+        const ids = new Set();
+        scenario.route.forEach(item => { if (item.nodeId) ids.add(item.nodeId); });
+        scenario.steps.forEach(step => { if (step.nodeId) ids.add(step.nodeId); });
+        scenario.edgePairs.forEach(pair => pair.forEach(id => ids.add(id)));
+        return ids;
+      }
+
+      function scenarioEdgeMatches(edge, scenario) {
+        return scenario.edgePairs.some(pair =>
+          (edge.source === pair[0] && edge.target === pair[1]) ||
+          (edge.source === pair[1] && edge.target === pair[0])
+        );
+      }
+
+      function scrollToElement(element) {
+        if (!element || typeof element.scrollIntoView !== 'function') return;
+        const reduced = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        element.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      }
+
+      function layerPill(node) {
+        const meta = layerMeta[node.layer];
+        detailLayer.innerHTML = '<span class="pill-dot" style="--dot: ' + meta.color + '"></span>' + escapeXml(t(meta.label));
+        detailCard.style.setProperty('--detail-color', meta.color);
+      }
+
+      function memberMarkup(member) {
+        const meta = accessMeta[member.access] || accessMeta.public;
+        return '<li><span class="access" title="' + escapeXml(ui[currentLanguage][meta.key]) + '">' + escapeXml(meta.symbol) + '</span>' +
+          '<div class="member-copy"><code>' + escapeXml(member.signature) + '</code><span>' + escapeXml(t(member.note)) + '</span></div></li>';
+      }
+
+      function relationPhrase(edge, outgoing) {
+        const phrases = currentLanguage === 'ru'
+          ? {
+              composition: outgoing ? 'владеет объектом' : 'создаётся и хранится внутри',
+              inheritance: outgoing ? 'наследует базовый тип' : 'служит базовым типом',
+              lifecycle: outgoing ? 'создаёт и управляет жизненным циклом' : 'создаётся и управляется',
+              reference: outgoing ? 'использует или создаёт' : 'используется или создаётся',
+              signal: edge.bidirectional ? 'обменивается сигналами и данными' : (outgoing ? 'передаёт сигнал или данные' : 'получает сигнал или данные')
+            }
+          : {
+              composition: outgoing ? 'owns the object' : 'is created and stored inside',
+              inheritance: outgoing ? 'extends the base type' : 'serves as a base type',
+              lifecycle: outgoing ? 'creates and manages the lifecycle' : 'is created and managed by',
+              reference: outgoing ? 'uses or creates' : 'is used or created by',
+              signal: edge.bidirectional ? 'exchanges signals and data' : (outgoing ? 'sends a signal or data' : 'receives a signal or data')
+            };
+        const label = edge.label ? t(edge.label) : '';
+        const labelCopy = label
+          ? (/^(1|0\.\.1|0\.\.\*)$/.test(label)
+              ? (currentLanguage === 'ru' ? ' · кратность ' : ' · multiplicity ') + label
+              : ' · ' + label)
+          : '';
+        return phrases[edge.type] + labelCopy;
+      }
+
+      function relationMarkup(edge, node) {
+        const outgoing = edge.source === node.id;
+        const other = nodeById.get(outgoing ? edge.target : edge.source);
+        const arrow = outgoing ? '→' : '←';
+        return '<div class="relation-item"><span class="relation-arrow">' + arrow + '</span><div>' +
+          '<span class="relation-title">' + escapeXml(nodeDisplayName(other, currentLanguage)) + '</span>' +
+          '<span class="relation-note">' + escapeXml(relationPhrase(edge, outgoing)) + '</span></div></div>';
+      }
+
+      function renderMembers(node) {
+        const relatedEdges = edges.filter(edge => edge.source === node.id || edge.target === node.id);
+        fieldsTitle.textContent = ui[currentLanguage].fields;
+        methodsTitle.textContent = ui[currentLanguage].methods;
+        relationsTitle.textContent = ui[currentLanguage].relations;
+        fieldsCount.textContent = String(node.fields.length);
+        methodsCount.textContent = String(node.methods.length);
+        relationsCount.textContent = String(relatedEdges.length);
+        fieldsList.innerHTML = node.fields.map(memberMarkup).join('');
+        methodsList.innerHTML = node.methods.length
+          ? node.methods.map(memberMarkup).join('')
+          : '<li class="empty-member">' + escapeXml(ui[currentLanguage].noOwnMethods) + '</li>';
+        relationsList.innerHTML = relatedEdges.map(edge => relationMarkup(edge, node)).join('');
+        sourceNote.textContent = ui[currentLanguage].sourceChecked + ' ' + node.file;
+        accessLegend.innerHTML = ['accessPublic', 'accessProtected', 'accessPrivate', 'accessSignal', 'accessSlot']
+          .map(key => '<span>' + escapeXml(ui[currentLanguage][key]) + '</span>')
+          .join('');
+        const note = implementationNotes[node.id];
+        implementationNote.hidden = !note;
+        implementationNoteTitle.textContent = ui[currentLanguage].implementationNote;
+        implementationNoteCopy.textContent = note ? t(note) : '';
+      }
+
+      function renderOverview() {
+        const copy = currentLanguage === 'ru'
+          ? [
+              ['Начните с main()', 'Верхний узел создаёт два QML-входа: ConnectionBackend и GeneratorBackend.'],
+              ['Идите по цветным веткам', 'Интерфейс редактирует настройки; ветки базы данных и генерации выполняют работу в отдельных потоках.'],
+              ['Смотрите на тип линии', 'Ромб — владение, треугольник — наследование. Дополнительный пунктир появляется по клику или общей кнопке.'],
+              ['Проверяйте границу системы', 'DataPackage возвращается в GeneratorBackend и сейчас не попадает в PostgreSQL.']
+            ]
+          : [
+              ['Start with main()', 'The top node creates two QML entries: ConnectionBackend and GeneratorBackend.'],
+              ['Follow colored branches', 'UI edits settings; Database and Generation execute work in separate threads.'],
+              ['Read the line style', 'Diamond means ownership and triangle means inheritance. Additional dashed links appear on click or through the global toggle.'],
+              ['Check the system boundary', 'DataPackage returns to GeneratorBackend and currently does not reach PostgreSQL.']
+            ];
+        overviewGuide.innerHTML = copy.map((step, index) =>
+          '<div class="guide-step"><span class="guide-number">' + (index + 1) + '</span><strong>' + escapeXml(step[0]) + '</strong><span>' + escapeXml(step[1]) + '</span></div>'
+        ).join('');
+      }
+
+      function renderOverviewDetails() {
+        detailCard.classList.remove('is-expanded');
+        detailCard.style.setProperty('--detail-color', layerMeta.entry.color);
+        detailKicker.textContent = ui[currentLanguage].overviewKicker;
+        detailName.textContent = ui[currentLanguage].overviewName;
+        detailPurpose.textContent = ui[currentLanguage].overviewPurpose;
+        detailLayer.textContent = ui[currentLanguage].overviewLayer;
+        detailFile.textContent = ui[currentLanguage].overviewFile;
+        detailThread.textContent = ui[currentLanguage].overviewThread;
+        overviewGuide.hidden = false;
+        memberPanel.hidden = true;
+        collapseButton.hidden = true;
+        renderOverview();
+      }
+
+      function renderSelectedDetails(node) {
+        detailKicker.textContent = ui[currentLanguage].expandedKicker;
+        detailName.textContent = nodeDisplayName(node, currentLanguage);
+        detailPurpose.textContent = t(node.purpose);
+        layerPill(node);
+        detailFile.textContent = node.file;
+        detailThread.textContent = t(node.thread);
+        overviewGuide.hidden = true;
+        memberPanel.hidden = !detailsExpanded;
+        collapseButton.hidden = !detailsExpanded;
+        collapseButton.textContent = ui[currentLanguage].collapse;
+        detailCard.classList.toggle('is-expanded', detailsExpanded);
+        renderMembers(node);
+      }
+
+      function applySelectionVisuals() {
+        const related = new Set();
+        const highlightedScenario = scenarioHighlightActive ? scenarioById.get(currentScenarioId) : null;
+        const highlightedNodes = highlightedScenario ? scenarioNodeIds(highlightedScenario) : new Set();
+        if (selectedId) {
+          edges.forEach(edge => {
+            if (edge.source === selectedId) related.add(edge.target);
+            if (edge.target === selectedId) related.add(edge.source);
+          });
+        }
+        svg.querySelectorAll('.node').forEach(element => {
+          const id = element.dataset.nodeId;
+          element.classList.toggle('is-selected', id === selectedId);
+          element.classList.toggle('is-open', id === selectedId && detailsExpanded);
+          element.classList.toggle('is-related', Boolean(selectedId) && related.has(id));
+          element.classList.toggle('is-dimmed', Boolean(selectedId) && id !== selectedId && !related.has(id));
+          element.classList.toggle('is-scenario-node', highlightedNodes.has(id));
+        });
+        svg.querySelectorAll('.edge').forEach(element => {
+          const active = selectedId && (element.dataset.source === selectedId || element.dataset.target === selectedId);
+          const edge = edges[Number(element.dataset.edgeIndex)];
+          const scenarioEdge = Boolean(highlightedScenario && edge && scenarioEdgeMatches(edge, highlightedScenario));
+          element.classList.toggle('is-active', Boolean(active));
+          element.classList.toggle('is-dimmed', Boolean(selectedId) && !active);
+          element.classList.toggle('is-scenario-edge', scenarioEdge);
+        });
+      }
+
+      function selectedStatus(node, count) {
+        return ui[currentLanguage].selectedStatus
+          .replace('{name}', nodeDisplayName(node, currentLanguage))
+          .replace('{count}', String(count));
+      }
+
+      function setSelection(id, announce = true, expand = true) {
+        const node = nodeById.get(id);
+        if (!node) return;
+        selectedId = id;
+        detailsExpanded = expand;
+        picker.value = id;
+        applySelectionVisuals();
+        renderSelectedDetails(node);
+        if (announce) {
+          const related = new Set();
+          edges.forEach(edge => {
+            if (edge.source === id) related.add(edge.target);
+            if (edge.target === id) related.add(edge.source);
+          });
+          status.textContent = selectedStatus(node, related.size);
+        }
+      }
+
+      function showWholeDiagram(announce = true) {
+        selectedId = null;
+        detailsExpanded = false;
+        scenarioHighlightActive = false;
+        picker.value = '';
+        viewBox = { ...defaultViewBox };
+        applyViewBox();
+        applySelectionVisuals();
+        updateScenarioHighlightControl();
+        renderOverviewDetails();
+        if (announce) status.textContent = ui[currentLanguage].overviewStatus;
+      }
+
+      function collapseDetails() {
+        if (!selectedId) return;
+        detailsExpanded = false;
+        renderSelectedDetails(nodeById.get(selectedId));
+        applySelectionVisuals();
+        status.textContent = ui[currentLanguage].detailsCollapsed;
+      }
+
+      function applyLanguage(language) {
+        currentLanguage = language;
+        document.documentElement.lang = language;
+        document.title = ui[language].pageTitle;
+        document.querySelectorAll('[data-i18n]').forEach(element => {
+          element.textContent = ui[language][element.dataset.i18n];
+        });
+        document.querySelectorAll('[data-i18n-aria]').forEach(element => {
+          element.setAttribute('aria-label', ui[language][element.dataset.i18nAria]);
+        });
+        document.querySelectorAll('[data-language]').forEach(button => {
+          button.setAttribute('aria-pressed', String(button.dataset.language === language));
+        });
+        updateSecondaryButton();
+        renderDiagram();
+        populatePicker();
+        renderScenarioSwitcher();
+        renderScenario();
+        scenarioStatus.textContent = uiTemplate('scenarioSelected', { name: t(scenarioById.get(currentScenarioId).title) });
+        applySelectionVisuals();
+        if (selectedId) {
+          const node = nodeById.get(selectedId);
+          renderSelectedDetails(node);
+          const related = new Set();
+          edges.forEach(edge => {
+            if (edge.source === selectedId) related.add(edge.target);
+            if (edge.target === selectedId) related.add(edge.source);
+          });
+          status.textContent = selectedStatus(node, related.size);
+        } else {
+          renderOverviewDetails();
+          status.textContent = ui[language].overviewStatus;
+        }
+      }
+
+      function zoom(factor, centerX = viewBox.x + viewBox.w / 2, centerY = viewBox.y + viewBox.h / 2) {
+        const nextW = Math.max(620, Math.min(WIDTH * 1.25, viewBox.w * factor));
+        const nextH = nextW * HEIGHT / WIDTH;
+        const ratioX = (centerX - viewBox.x) / viewBox.w;
+        const ratioY = (centerY - viewBox.y) / viewBox.h;
+        viewBox = {
+          x: centerX - nextW * ratioX,
+          y: centerY - nextH * ratioY,
+          w: nextW,
+          h: nextH
+        };
+        applyViewBox();
+      }
+
+      function cleanExportClone() {
+        const clone = svg.cloneNode(true);
+        clone.removeAttribute('id');
+        clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        clone.setAttribute('width', String(WIDTH));
+        clone.setAttribute('height', String(HEIGHT));
+        clone.setAttribute('viewBox', '0 0 ' + WIDTH + ' ' + HEIGHT);
+        clone.classList.remove('is-dragging');
+        clone.classList.remove('hide-crosslinks');
+        clone.querySelectorAll('.is-selected, .is-related, .is-open, .is-active, .is-dimmed, .is-scenario-node, .is-scenario-edge').forEach(element => {
+          element.classList.remove('is-selected', 'is-related', 'is-open', 'is-active', 'is-dimmed', 'is-scenario-node', 'is-scenario-edge');
+        });
+        return clone;
+      }
+
+      function svgBlob() {
+        const clone = cleanExportClone();
+        const source = '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(clone);
+        return new Blob([source], { type: 'image/svg+xml;charset=utf-8' });
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      svg.addEventListener('click', event => {
+        const nodeElement = event.target.closest('.node');
+        if (!nodeElement) return;
+        const id = nodeElement.dataset.nodeId;
+        if (selectedId === id && detailsExpanded) collapseDetails();
+        else setSelection(id);
+      });
+
+      svg.addEventListener('keydown', event => {
+        const nodeElement = event.target.closest('.node');
+        if (!nodeElement || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        const id = nodeElement.dataset.nodeId;
+        if (selectedId === id && detailsExpanded) collapseDetails();
+        else setSelection(id);
+      });
+
+      svg.addEventListener('pointerdown', event => {
+        if (event.target.closest('.node')) return;
+        svg.setPointerCapture(event.pointerId);
+        dragState = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, box: { ...viewBox } };
+        svg.classList.add('is-dragging');
+      });
+
+      svg.addEventListener('pointermove', event => {
+        if (!dragState || dragState.pointerId !== event.pointerId) return;
+        const rect = svg.getBoundingClientRect();
+        viewBox.x = dragState.box.x - (event.clientX - dragState.startX) / rect.width * dragState.box.w;
+        viewBox.y = dragState.box.y - (event.clientY - dragState.startY) / rect.height * dragState.box.h;
+        applyViewBox();
+      });
+
+      function endDrag(event) {
+        if (!dragState || dragState.pointerId !== event.pointerId) return;
+        dragState = null;
+        svg.classList.remove('is-dragging');
+      }
+
+      svg.addEventListener('pointerup', endDrag);
+      svg.addEventListener('pointercancel', endDrag);
+      picker.addEventListener('change', () => picker.value ? setSelection(picker.value) : showWholeDiagram());
+      collapseButton.addEventListener('click', collapseDetails);
+      scenarioSwitcher.addEventListener('click', event => {
+        const button = event.target.closest('[data-scenario-id]');
+        if (button) setScenario(button.dataset.scenarioId);
+      });
+      document.getElementById('work-scenarios').addEventListener('click', event => {
+        const button = event.target.closest('[data-scenario-node-id]');
+        if (!button) return;
+        setSelection(button.dataset.scenarioNodeId, true, true);
+        collapseButton.focus({ preventScroll: true });
+        scrollToElement(detailCard);
+      });
+      highlightScenarioButton.addEventListener('click', () => {
+        scenarioHighlightActive = !scenarioHighlightActive;
+        applySelectionVisuals();
+        updateScenarioHighlightControl();
+        const scenario = scenarioById.get(currentScenarioId);
+        scenarioStatus.textContent = scenarioHighlightActive
+          ? uiTemplate('scenarioHighlighted', { name: t(scenario.title) })
+          : ui[currentLanguage].scenarioHighlightCleared;
+        if (scenarioHighlightActive) scrollToElement(document.querySelector('.workspace'));
+      });
+      document.querySelectorAll('[data-language]').forEach(button => {
+        button.addEventListener('click', () => applyLanguage(button.dataset.language));
+      });
+      document.getElementById('zoom-in').addEventListener('click', () => zoom(0.82));
+      document.getElementById('zoom-out').addEventListener('click', () => zoom(1.2));
+      document.getElementById('zoom-fit').addEventListener('click', () => showWholeDiagram());
+      secondaryButton.addEventListener('click', () => {
+        crosslinksVisible = !crosslinksVisible;
+        svg.classList.toggle('hide-crosslinks', !crosslinksVisible);
+        updateSecondaryButton();
+        status.textContent = crosslinksVisible ? ui[currentLanguage].secondaryShown : ui[currentLanguage].secondaryHidden;
+      });
+
+      document.getElementById('download-svg').addEventListener('click', () => {
+        downloadBlob(svgBlob(), 'myconvolution-class-diagram-' + currentLanguage + '.svg');
+        status.textContent = ui[currentLanguage].svgSaved;
+      });
+
+      document.getElementById('download-png').addEventListener('click', () => {
+        const blob = svgBlob();
+        const url = URL.createObjectURL(blob);
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = WIDTH * 2;
+          canvas.height = HEIGHT * 2;
+          const context = canvas.getContext('2d');
+          context.scale(2, 2);
+          context.drawImage(image, 0, 0, WIDTH, HEIGHT);
+          URL.revokeObjectURL(url);
+          canvas.toBlob(png => {
+            if (png) downloadBlob(png, 'myconvolution-class-diagram-' + currentLanguage + '.png');
+          }, 'image/png');
+          status.textContent = ui[currentLanguage].pngSaved;
+        };
+        image.src = url;
+      });
+
+      document.getElementById('share-svg').addEventListener('click', async () => {
+        const blob = svgBlob();
+        const file = new File([blob], 'myconvolution-class-diagram-' + currentLanguage + '.svg', { type: 'image/svg+xml' });
+        try {
+          if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+            await navigator.share({ title: ui[currentLanguage].shareTitle, text: ui[currentLanguage].shareText, files: [file] });
+            status.textContent = ui[currentLanguage].shared;
+          } else {
+            downloadBlob(blob, file.name);
+            status.textContent = ui[currentLanguage].shareFallback;
+          }
+        } catch (error) {
+          if (error && error.name !== 'AbortError') {
+            downloadBlob(blob, file.name);
+            status.textContent = ui[currentLanguage].shareError;
+          }
+        }
+      });
+
+      document.getElementById('print-diagram').addEventListener('click', () => window.print());
+      applyLanguage('ru');
+    })();
+  </script>
+</body>
+</html>
