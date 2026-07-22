@@ -1,6 +1,7 @@
 #include <cmath>
 #include "peak.h"
 
+
 AbstractPeak::PeakConfig::PeakConfig(double const &center, double const &amplitude) :
     center(center),
     amplitude(amplitude)

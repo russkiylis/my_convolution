@@ -62,3 +62,9 @@ target_link_libraries(myConvolution
 set_target_properties(myConvolution PROPERTIES
     MACOSX_BUNDLE TRUE
 )
+
+target_compile_options(myConvolution PRIVATE
+        -Wall
+        -Wextra
+        -Wimplicit-fallthrough
+)

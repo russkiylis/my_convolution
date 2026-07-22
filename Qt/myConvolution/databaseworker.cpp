@@ -103,6 +103,7 @@ void DatabaseWorker::slotInitialize()
     }
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", _config.connectionName); // Создали подключение к БД
+    // FIXME: мы валидность делаем даже если нет драйверов
     _valid = true;
 
     qDebug().noquote().nospace() << "Создан объект подключения \""
@@ -123,6 +124,7 @@ void DatabaseWorker::slotOpenConnection()
         _lastError = "[!] Объект подключения не валиден. Невозможно открыть соединение.";
         qDebug().noquote().nospace() << _lastError;
         _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
     if (_connected) {
@@ -164,6 +166,7 @@ void DatabaseWorker::slotCloseConnection() {
         _lastError = "[!] Объект подключения не валиден. Невозможно закрыть соединение.";
         qDebug().noquote().nospace() << _lastError;
         _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
     if (!_connected) {
@@ -192,6 +195,7 @@ void DatabaseWorker::slotCloseConnection() {
 
 void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
 {
+    // FIXME: Мб тут тоже что то нужно попроверять
     _busy = true;
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
@@ -201,6 +205,8 @@ void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
                      + ": объект подключения не валиден. "
                      + "Невозможно изменить параметры подключения.";
         qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
     if (_connected) {
@@ -209,6 +215,8 @@ void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
                      + ": невозможно изменить параметры "
                      + "открытого соединения.";
         qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
 
@@ -219,5 +227,3 @@ void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
     _lastError = "Ошибок нет.";
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
-
-

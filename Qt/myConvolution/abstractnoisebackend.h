@@ -17,5 +17,5 @@ public:
 
     // virtual std::unique_ptr<AbstractNoise::NoiseConfig> setNoiseConfig() = 0;
 
-    virtual void emits() = 0;
+    virtual void qmlUpdate() = 0;
 };

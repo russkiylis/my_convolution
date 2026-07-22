@@ -78,6 +78,8 @@ bool GeneratorBackend::generatorEnabled() const
 
 void GeneratorBackend::setGeneratorEnabled(const bool generatorEnabled)
 {
+    if (m_generatorEnabled == generatorEnabled)
+        return;
     m_generatorEnabled = generatorEnabled;
     emit generatorEnabledChanged(generatorEnabled);
 }

@@ -11,7 +11,7 @@ class UniformNoiseBackend final: public AbstractNoiseBackend {
 public:
     UniformNoiseBackend(std::vector<LoadGenerator::PostConfig> &config, int &postIndex, QObject *parent = nullptr);
 
-    void emits() override;
+    void qmlUpdate() override;
 
     // Получить текущее среднее значение
     QString currentMin() const;

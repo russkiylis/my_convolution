@@ -7,7 +7,7 @@ int ConnectionBackend::dbStatus() const {
 
 QString ConnectionBackend::lastError() const
 {
-    return m_db.lastError();
+    return m_lastError;
 }
 
 QString ConnectionBackend::hostName() const {
@@ -15,6 +15,9 @@ QString ConnectionBackend::hostName() const {
 }
 
 void ConnectionBackend::setHostName(const QString &host_name) {
+    if (m_hostName == host_name)
+        return;
+
     m_hostName = host_name;
     emit hostNameChanged(m_hostName);
 }
@@ -24,6 +27,9 @@ QString ConnectionBackend::port() const {
 }
 
 void ConnectionBackend::setPort(const QString &port) {
+    if (m_port == port)
+        return;
+
     m_port = port;
     emit portChanged(m_port);
 }
@@ -33,6 +39,9 @@ QString ConnectionBackend::userName() const {
 }
 
 void ConnectionBackend::setUserName(const QString &user_name) {
+    if (m_userName == user_name)
+        return;
+
     m_userName = user_name;
     emit userNameChanged(m_userName);
 }
@@ -42,6 +51,9 @@ QString ConnectionBackend::password() const {
 }
 
 void ConnectionBackend::setPassword(const QString &password) {
+    if (m_password == password)
+        return;
+
     m_password = password;
     emit passwordChanged(m_password);
 }
@@ -51,6 +63,9 @@ QString ConnectionBackend::databaseName() const {
 }
 
 void ConnectionBackend::setDatabaseName(const QString &database_name) {
+    if (m_databaseName == database_name)
+        return;
+
     m_databaseName = database_name;
     emit databaseNameChanged(m_databaseName);
 }
@@ -60,11 +75,17 @@ QString ConnectionBackend::connectOptions() const {
 }
 
 void ConnectionBackend::setConnectOptions(const QString &connect_options) {
+    if (m_connectOptions == connect_options)
+        return;
+
     m_connectOptions = connect_options;
     emit connectOptionsChanged(m_connectOptions);
 }
 
 void ConnectionBackend::setDbStatus(int const &dbStatus) {
+    if (dbStatus < 0 || dbStatus > 2)
+        throw std::logic_error("Сомнительный db_status!");
+
     if (m_dbStatus == dbStatus)
         return;
     m_dbStatus = dbStatus;
@@ -92,6 +113,7 @@ void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString po
     qDebug() << "Кнопка подключения нажата.";
 
     if (m_dbStatus != 2) {
+        // FIXME: Тут вообще числа на адекватность не проверяются, мы просто не подключаемся
         // Если не БД не подключена, то подключаем
         if (hostName == "")
             hostName = "127.0.0.1";

@@ -142,6 +142,14 @@ void LoadGenerator::Post::call(TimePoint const &now) {
                 m_data.convV.push_back(valueV);
             }
 
+            // Взятие свёрток по модулю IDK: возможно брать модуль не надо
+            for (auto & value : m_data.convV) {
+                value = std::abs(value);
+            }
+            for (auto & value : m_data.convH) {
+                value = std::abs(value);
+            }
+
             // Нормировка горизонтальной свёртки и запись качества и направления
             const auto maxItH = std::max_element(m_data.convH.begin(), m_data.convH.end());
             const double maxValueH = *maxItH;
@@ -220,6 +228,7 @@ void LoadGenerator::setPostConfigs(const std::vector<PostConfig> &postConfigs)
 }
 
 void LoadGenerator::load() {
+    // FIXME: тут бы тоже почекать что мы в конфигах натворили
     m_posts.clear();
     for (const auto & postConfig : m_postConfigs) {
         m_posts.emplace_back(postConfig, this);    // Закидываем в вектор Posts, инициализованные postConfig

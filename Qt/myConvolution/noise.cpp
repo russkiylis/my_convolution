@@ -194,4 +194,3 @@ double UniformNoise::max() const {
 void UniformNoise::setMax(double const &max) {
     m_max = max;
 }
-

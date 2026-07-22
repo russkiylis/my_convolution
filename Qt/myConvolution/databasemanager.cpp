@@ -29,6 +29,9 @@ DatabaseManager::DatabaseManager(ConnectionBackend *backend,
         + "/" + m_dbName),
     m_connectOptions(connectOptions)
 {
+    if (backend == nullptr)
+        throw std::logic_error("Backend это nullptr!");
+
     const auto dbConfig = DatabaseConfiguration(connectionName, hostName, dbName, userName, password, port,
                                                            connectOptions);
 
@@ -223,11 +226,15 @@ void DatabaseManager::setFullConnectionName() {
 
 void DatabaseManager::openConnection() {
     if (!m_valid) {
-        QString errorText = "[!] "
+        const QString errorText = "[!] "
                             + m_fullConnectionName
                             + ": объект подключения не валиден. "
                             + "Невозможно открыть соединение.";
         qDebug().noquote().nospace()  << errorText;
+
+        m_lastError = errorText;
+        m_backend->setLastError(m_lastError);
+        return;
     }
 
     // В рабочий поток посылаем команду установить соединение
@@ -236,11 +243,14 @@ void DatabaseManager::openConnection() {
 
 void DatabaseManager::closeConnection() {
     if (!m_valid) {
-        QString errorText = "[!] "
+        const QString errorText = "[!] "
                             + m_fullConnectionName
                             + ": объект подключения не валиден. "
                             + "Невозможно закрыть соединение.";
         qDebug().noquote().nospace()  << errorText;
+        m_lastError = errorText;
+        m_backend->setLastError(m_lastError);
+        return;
     }
 
     // В рабочий поток посылаем команду закрыть соединение

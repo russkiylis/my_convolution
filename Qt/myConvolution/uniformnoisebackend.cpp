@@ -10,7 +10,7 @@ UniformNoiseBackend::UniformNoiseBackend(std::vector<LoadGenerator::PostConfig> 
     qDebug() << "UniformNoiseBackend прогружен.";
 }
 
-void UniformNoiseBackend::emits() {
+void UniformNoiseBackend::qmlUpdate() {
     emit currentMinChanged(currentMin());
     emit currentMaxChanged(currentMax());
 }
@@ -21,8 +21,24 @@ QString UniformNoiseBackend::currentMin() const {
 
 void UniformNoiseBackend::setCurrentMin(const QString &currentMin)
 {
-    m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(currentMin.toDouble(), currentMax().toDouble());
-    emit currentMinChanged(this->currentMin());
+    if (double min = currentMin.toDouble(); min < std::numeric_limits<float>::min()) {
+        min = std::numeric_limits<float>::min();
+        if (min == currentMin.toDouble())
+            return;
+        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(min, currentMax().toDouble());
+        emit currentMinChanged(QString::number(min));
+    } else if (min > std::numeric_limits<float>::max() - 1) {
+        min = std::numeric_limits<float>::max() - 1;
+        if (min == currentMin.toDouble())
+            return;
+        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(min, currentMax().toDouble());
+        emit currentMinChanged(QString::number(min));
+    } else {
+        if (min == currentMin.toDouble())
+            return;
+        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(min, currentMax().toDouble());
+        emit currentMinChanged(currentMin);
+    }
 }
 
 QString UniformNoiseBackend::currentMax() const {
@@ -31,6 +47,22 @@ QString UniformNoiseBackend::currentMax() const {
 
 void UniformNoiseBackend::setCurrentMax(const QString &currentMax)
 {
-    m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(currentMin().toDouble(), currentMax.toDouble());
-    emit currentMaxChanged(this->currentMax());
+    if (double max = currentMax.toDouble(); max < std::numeric_limits<float>::max()) {
+        max = std::numeric_limits<float>::max();
+        if (max == currentMax.toDouble())
+            return;
+        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(currentMin().toDouble(), max);
+        emit currentMaxChanged(QString::number(max));
+    } else if (max > std::numeric_limits<float>::max() - 1) {
+        max = std::numeric_limits<float>::max() - 1;
+        if (max == currentMax.toDouble())
+            return;
+        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(currentMin().toDouble(), max);
+        emit currentMaxChanged(QString::number(max));
+    } else {
+        if (max == currentMax.toDouble())
+            return;
+        m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(currentMin().toDouble(), max);
+        emit currentMaxChanged(currentMax);
+    }
 }

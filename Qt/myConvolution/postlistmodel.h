@@ -83,7 +83,7 @@ public:
     QString currentFrequency() const;
 
     // Установить частоту по текущему индексу
-    void setCurrentFrequency(const QString &frequency);
+    void setCurrentFrequency(const QString &currentFrequency);
 
     // Выдать средний уровень по текущему индексу
     QString currentLevel() const;
@@ -194,7 +194,7 @@ private:
     };
 
     // В одной функции все нужные емиты
-    void emits();
+    void qmlUpdate();
 
     // Объект класса бекенда шума
     std::unique_ptr<AbstractNoiseBackend> m_noiseBackend;

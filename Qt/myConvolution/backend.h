@@ -15,8 +15,8 @@ public:
 
 private:
     Q_OBJECT
-    Q_PROPERTY(int dbStatus READ dbStatus WRITE setDbStatus NOTIFY dbStatusChanged)
-    Q_PROPERTY(QString lastError READ lastError WRITE setLastError NOTIFY lastErrorChanged)
+    Q_PROPERTY(int dbStatus READ dbStatus NOTIFY dbStatusChanged)
+    Q_PROPERTY(QString lastError READ lastError NOTIFY lastErrorChanged)
     Q_PROPERTY(QString hostName READ hostName WRITE setHostName NOTIFY hostNameChanged)
     Q_PROPERTY(QString port READ port WRITE setPort NOTIFY portChanged)
     Q_PROPERTY(QString userName READ userName WRITE setUserName NOTIFY userNameChanged)

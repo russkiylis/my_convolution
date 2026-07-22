@@ -12,7 +12,7 @@ class NormalNoiseBackend : public AbstractNoiseBackend {
 public:
     NormalNoiseBackend(std::vector<LoadGenerator::PostConfig> &config, int &postIndex, QObject *parent = nullptr);
 
-    void emits() override;
+    void qmlUpdate() override;
 
     // Получить текущее среднее значение
     QString currentMean() const;

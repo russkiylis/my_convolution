@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.15
 import QtQuick.Controls 2.15
 
 // Окошко с интерфейсом подключения к БД
+// FIXME: Поля совершенно не проверяют что в них суют
 Item {
 
     Rectangle {
@@ -156,6 +157,7 @@ Item {
             if (connectionBackend.dbStatus === 2) return "Отключиться"
             return "Подключиться"
         }
+        // FIXME: Очень некрасивая передача значений
         onClicked: connectionBackend.onDbConnectionButtonClicked(
             dbHostName.text,
             dbPort.text,

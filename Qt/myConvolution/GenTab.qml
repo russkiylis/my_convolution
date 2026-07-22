@@ -148,6 +148,7 @@ Item {
             clip: true
             contentWidth: availableWidth
 
+            // FIXME: строчки позволяют запихивать всё что угодно
             ColumnLayout {
                 width: postEditScrollView.availableWidth
                 spacing: 40
@@ -443,7 +444,6 @@ Item {
                     }
                 }
 
-                // TODO: Реализовать интерфейс шума
                 ComboBox {
                     id: noiseTypeComboBox
                     background: TextFieldBackground {}
