@@ -19,6 +19,8 @@ void PostListModel::setPostIndex(const int postIndex)
         return;
 
     m_postIndex = postIndex;
+    m_peakListModelH.setPeakConfig(m_config[m_postIndex].peakConfigsH);
+    m_peakListModelV.setPeakConfig(m_config[m_postIndex].peakConfigsV);
     qmlUpdate();
 }
 
@@ -446,13 +448,16 @@ PostListModel::PostListModel(GeneratorBackend *generatorBackend, std::vector<Loa
     QAbstractListModel {parent},
     m_config(config),
     m_fallbackConfig(config),
-    m_generatorBackend(generatorBackend)
+    m_generatorBackend(generatorBackend),
+    m_peakListModelH(m_config[m_postIndex].peakConfigsH),
+    m_peakListModelV(m_config[m_postIndex].peakConfigsV)
 {
 }
 
 int PostListModel::rowCount(const QModelIndex &parent) const {
-    if (!parent.isValid())
-        return -1;
+    if (parent.isValid()) {
+        return 0;
+    }
     return static_cast<int>(m_config.size());
 }
 
@@ -549,6 +554,7 @@ void PostListModel::postUpdate() {
     m_fallbackPostIndex = postIndex();
 }
 
+// FIXME: Оно сломано. Каким то чудом спавнит новые пики (?!)
 int PostListModel::fallback() {
     beginResetModel();
     m_config = m_fallbackConfig; // Отменяем все изменения
@@ -586,4 +592,16 @@ void PostListModel::qmlUpdate() {
     emit currentNoiseTypeChanged(currentNoiseType());
 
     m_noiseBackend->qmlUpdate();
+    m_peakListModelH.qmlUpdate();
+    m_peakListModelV.qmlUpdate();
+}
+
+PeakListModel *PostListModel::peakListModelH()
+{
+    return &m_peakListModelH;
+}
+
+PeakListModel *PostListModel::peakListModelV()
+{
+    return &m_peakListModelV;
 }

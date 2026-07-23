@@ -3,55 +3,61 @@
 #include "noise.h"
 #include "peak.h"
 //#include <cstdio>
+std::vector<LoadGenerator::PostConfig> GeneratorBackend::createInitialConfig()
+{
+    LoadGenerator::PostConfig cfg;
+
+    cfg.enabled = true;
+    cfg.latitude = 60;
+    cfg.longitude = 30;
+    cfg.frequency = 100000000;
+    cfg.level = 10;
+    cfg.levelSigma = 1;
+
+    cfg.minAngleH = 0;
+    cfg.maxAngleH = 360;
+    cfg.minAngleV = -45;
+    cfg.maxAngleV = 45;
+
+    cfg.stepH = 0.1;
+    cfg.stepV = 0.1;
+
+    cfg.minPeriod = std::chrono::milliseconds(1000);
+    cfg.maxPeriod = std::chrono::milliseconds(5000);
+
+    cfg.postName = "Пост 1";
+    cfg.noiseConfig =
+        std::make_unique<NormalNoise::NormalNoiseConfig>(0, 2);
+
+    // cfg.peakConfigsH.push_back(
+    //     std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 5));
+    //
+    // cfg.peakConfigsV.push_back(
+    //     std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 5));
+
+    std::vector<LoadGenerator::PostConfig> result;
+
+    result.push_back(cfg);
+
+    cfg.peakConfigsV.push_back(
+        std::make_unique<RectanglePeak::RectanglePeakConfig>(30, 50, 10));
+    cfg.postName = "Пост 2";
+    result.push_back(cfg);
+
+    cfg.peakConfigsV.push_back(
+        std::make_unique<TrianglePeak::TrianglePeakConfig>(-30, 50, 10));
+    cfg.postName = "Пост 3";
+    result.push_back(cfg);
+
+    return result;
+}
 
 GeneratorBackend::GeneratorBackend(QObject *parent)
     : QObject{parent},
+    m_cfg{createInitialConfig()},
     m_postListModel(this, m_cfg)
 {
-    // Лямбда для создания начального конфига нагрузки
-    auto initialConfig = []() -> std::vector<LoadGenerator::PostConfig>
-    {
-        LoadGenerator::PostConfig cfg;
 
-        // Это нужно чтобы можно было легко поменять начальный конфиг
-        // Потом оно всё уйдет в комменты или вообще исчезнет
-        cfg.enabled = true;
-        cfg.latitude = 60;
-        cfg.longitude = 30;
-        cfg.frequency = 100000000;
-        cfg.level = 10;
-        cfg.levelSigma = 1;
-        cfg.minAngleH = 0;
-        cfg.minAngleV = -45;
-        cfg.maxAngleH = 360;
-        cfg.maxAngleV = 45;
-        cfg.stepH = 0.1;
-        cfg.stepV = 0.1;
-        cfg.minPeriod = std::chrono::milliseconds(1000);
-        cfg.maxPeriod = std::chrono::milliseconds(5000);
-        cfg.postName = "Пост 1";
-        cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 2);
-        // cfg.noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(-10, 20);
-        cfg.peakConfigsH.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 5));
-        cfg.peakConfigsV.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 5));
-
-        std::vector<LoadGenerator::PostConfig> result;
-        result.push_back(cfg);
-        cfg.peakConfigsV.push_back(std::make_unique<RectanglePeak::RectanglePeakConfig>(30, 50, 10));
-        cfg.postName = "Пост 2";
-        result.push_back(cfg);
-        cfg.peakConfigsV.push_back(std::make_unique<TrianglePeak::TrianglePeakConfig>(-30, 50, 10));
-        cfg.postName = "Пост 3";
-        result.push_back(cfg);
-        cfg.noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(0, 3);
-        // for (int i = 4; i < 101; i++) {
-        //     cfg.postName = "Пост " + QString::number(i);
-        //     cfg.enabled = i % 2;
-        //     result.push_back(cfg);
-        // }
-        return result;
-    };
-    m_cfg = initialConfig();
     m_postListModel.setFallbackConfig(m_cfg);
     // Создаём генератор нагрузки и засовываем его в отдельный поток
     auto *loadGenerator = new LoadGenerator(m_cfg);

@@ -6,6 +6,7 @@
 #include "loadgenerator.h"
 #include "abstractnoisebackend.h"
 #include "normalnoisebackend.h"
+#include "peaklistmodel.h"
 #include "uniformnoisebackend.h"
 
 class GeneratorBackend;
@@ -42,6 +43,8 @@ class PostListModel : public QAbstractListModel
     Q_PROPERTY(int currentNoiseType READ currentNoiseType WRITE setCurrentNoiseType NOTIFY currentNoiseTypeChanged)
 
     Q_PROPERTY(AbstractNoiseBackend *noiseBackend READ noiseBackend NOTIFY noiseBackendChanged)
+    Q_PROPERTY(PeakListModel *peakListModelH READ peakListModelH CONSTANT)
+    Q_PROPERTY(PeakListModel *peakListModelV READ peakListModelV CONSTANT)
 
     std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
     std::vector<LoadGenerator::PostConfig> m_fallbackConfig;   // Вектор конфигов, к которому мы сможем откатиться
@@ -198,6 +201,17 @@ private:
 
     // Объект класса бекенда шума
     std::unique_ptr<AbstractNoiseBackend> m_noiseBackend;
+
+    // Модель листа с пиками по горизонтали
+    PeakListModel m_peakListModelH;
+
+public:
+    [[nodiscard]] PeakListModel *peakListModelH();
+    [[nodiscard]] PeakListModel *peakListModelV();
+
+private:
+    // Модель листа с пиками по вертикали
+    PeakListModel m_peakListModelV;
 
 signals:
     void postIndexChanged(int newPostIndex);

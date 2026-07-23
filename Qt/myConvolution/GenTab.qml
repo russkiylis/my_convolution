@@ -6,7 +6,7 @@ Item {
 
     Rectangle {
         id: postListField
-        width: parent.width/4 - 30
+        width: parent.width / 4 - 30
         height: parent.height - generationToggleButton.height - 90
         // height: 100
         border.color: main.borderColor
@@ -30,9 +30,10 @@ Item {
         Button {
             id: postAddButton
             text: "+"
-            width: parent.width/2 - 5
+            width: parent.width / 2 - 5
             height: 25
-            background: ButtonBackground {}
+            background: ButtonBackground {
+            }
 
             anchors.top: parent.bottom
             anchors.left: parent.left
@@ -49,9 +50,10 @@ Item {
         Button {
             id: postDeleteButton
             text: "-"
-            width: parent.width/2 - 5
+            width: parent.width / 2 - 5
             height: 25
-            background: ButtonBackground {}
+            background: ButtonBackground {
+            }
 
             anchors.top: parent.bottom
             anchors.left: postAddButton.right
@@ -81,7 +83,8 @@ Item {
             delegate: ItemDelegate {
                 width: postListView.width
                 height: 60
-                background: ListViewItemBackground {}
+                background: ListViewItemBackground {
+                }
                 highlighted: ListView.isCurrentItem
 
                 onClicked: {
@@ -133,7 +136,7 @@ Item {
         radius: 5
 
         anchors.top: parent.top
-        anchors.left:  postListField.right
+        anchors.left: postListField.right
         anchors.right: parent.right
         anchors.topMargin: 20
         anchors.leftMargin: 10
@@ -166,7 +169,8 @@ Item {
 
                 TextField {
                     id: postNameTextField
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
                     placeholderText: "Мой пост"
                     text: generatorBackend.postListModel.currentPostName
                     selectByMouse: true
@@ -184,7 +188,8 @@ Item {
 
                 TextField {
                     id: latitudeTextField
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
                     placeholderText: "60"
                     text: generatorBackend.postListModel.currentLatitude
                     selectByMouse: true
@@ -201,7 +206,8 @@ Item {
 
                     TextField {
                         id: longitudeTextField
-                        background: TextFieldBackground {}
+                        background: TextFieldBackground {
+                        }
                         placeholderText: "30"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
@@ -222,7 +228,8 @@ Item {
 
                 TextField {
                     id: frequencyTextField
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
                     placeholderText: "100000000"
                     text: generatorBackend.postListModel.currentFrequency
                     selectByMouse: true
@@ -240,7 +247,8 @@ Item {
 
                 TextField {
                     id: levelTextField
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
                     placeholderText: "10"
                     text: generatorBackend.postListModel.currentLevel
                     selectByMouse: true
@@ -257,7 +265,8 @@ Item {
 
                     TextField {
                         id: levelSigmaTextField
-                        background: TextFieldBackground {}
+                        background: TextFieldBackground {
+                        }
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
@@ -278,7 +287,8 @@ Item {
 
                 TextField {
                     id: minAngleHTextField
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
                     placeholderText: "10"
                     text: generatorBackend.postListModel.currentMinAngleH
                     selectByMouse: true
@@ -295,7 +305,8 @@ Item {
 
                     TextField {
                         id: maxAngleHTextField
-                        background: TextFieldBackground {}
+                        background: TextFieldBackground {
+                        }
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
@@ -314,7 +325,8 @@ Item {
 
                         ComboBox {
                             id: stepHComboBox
-                            background: TextFieldBackground {}
+                            background: TextFieldBackground {
+                            }
                             // placeholderText: "5"
                             anchors.left: parent.right
                             anchors.leftMargin: 20
@@ -343,7 +355,8 @@ Item {
 
                 TextField {
                     id: minAngleVTextField
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
                     placeholderText: "10"
                     text: generatorBackend.postListModel.currentMinAngleV
                     selectByMouse: true
@@ -360,7 +373,8 @@ Item {
 
                     TextField {
                         id: maxAngleVTextField
-                        background: TextFieldBackground {}
+                        background: TextFieldBackground {
+                        }
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
@@ -379,7 +393,8 @@ Item {
 
                         ComboBox {
                             id: stepVComboBox
-                            background: TextFieldBackground {}
+                            background: TextFieldBackground {
+                            }
                             // placeholderText: "5"
                             anchors.left: parent.right
                             anchors.leftMargin: 20
@@ -408,7 +423,8 @@ Item {
 
                 TextField {
                     id: minPeriodField
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
                     placeholderText: "10"
                     text: generatorBackend.postListModel.currentMinPeriod
                     selectByMouse: true
@@ -425,7 +441,8 @@ Item {
 
                     TextField {
                         id: maxPeriodTextField
-                        background: TextFieldBackground {}
+                        background: TextFieldBackground {
+                        }
                         placeholderText: "5"
                         anchors.left: parent.right
                         anchors.leftMargin: 20
@@ -446,7 +463,8 @@ Item {
 
                 ComboBox {
                     id: noiseTypeComboBox
-                    background: TextFieldBackground {}
+                    background: TextFieldBackground {
+                    }
 
                     model: [
                         "Нормальный",
@@ -487,7 +505,8 @@ Item {
                             spacing: 20
                             TextField {
                                 id: meanNormalNoiseTextField
-                                background: TextFieldBackground {}
+                                background: TextFieldBackground {
+                                }
                                 placeholderText: "0"
                                 selectByMouse: true
                                 text: generatorBackend.postListModel.noiseBackend.currentMean
@@ -505,7 +524,8 @@ Item {
 
                             TextField {
                                 id: sigmaNormalNoiseTextField
-                                background: TextFieldBackground {}
+                                background: TextFieldBackground {
+                                }
                                 placeholderText: "2"
                                 selectByMouse: true
                                 text: generatorBackend.postListModel.noiseBackend.currentSigma
@@ -530,11 +550,11 @@ Item {
                             spacing: 20
                             TextField {
                                 id: minUniformNoiseTextField
-                                background: TextFieldBackground {}
+                                background: TextFieldBackground {
+                                }
                                 placeholderText: "-10"
                                 selectByMouse: true
                                 text: generatorBackend.postListModel.noiseBackend.currentMin
-
 
 
                                 onTextEdited: {
@@ -550,7 +570,8 @@ Item {
 
                             TextField {
                                 id: maxUniformNoiseTextField
-                                background: TextFieldBackground {}
+                                background: TextFieldBackground {
+                                }
                                 placeholderText: "20"
                                 selectByMouse: true
                                 text: generatorBackend.postListModel.noiseBackend.currentMax
@@ -568,6 +589,381 @@ Item {
                         }
                     }
                 }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    RowLayout {
+                        spacing: 20
+                        Button {
+                            Layout.fillWidth: true
+                            background: ButtonBackground {}
+                            text: "+"
+                            Label {
+                                text: "Пики (азимутальные)"
+                                anchors.bottom: parent.top
+                                anchors.bottomMargin: 5
+                            }
+
+                            //TODO: Плюсик должен нажиматься
+                            onClicked: {
+
+                            }
+                        }
+                        Button {
+                            Layout.fillWidth: true
+                            background: ButtonBackground {}
+                            text: "-"
+
+                            //TODO: Минусик должен нажиматься
+                            onClicked: {
+
+                            }
+                        }
+                    }
+                    ListView {
+                        id: peakHListView
+                        interactive: false
+                        clip: true
+                        spacing: 10
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: contentHeight
+
+                        model: generatorBackend.postListModel.peakListModelH
+
+                        delegate: ItemDelegate {
+                            id: peakHListViewDelegate
+                            width: peakHListView.width
+                            height: 70
+                            background: ListViewItemBackground {}
+                            highlighted: ListView.isCurrentItem
+
+                            property int rowIndex: index
+                            property int peakTypeValue: model.peakType
+                            property double centerValue: model.center
+                            property double amplitudeValue: model.amplitude
+                            property double sigmaValue: model.sigma
+                            property double halfWidthValue: model.halfWidth
+
+                            onClicked: {
+                                peakHListView.currentIndex = index
+                                // generatorBackend.postListModel.postUpdate()
+                                // generatorBackend.postListModel.setPostIndex(index)
+                            }
+
+                            ComboBox {
+                                id: peakHTypeComboBox
+                                background: TextFieldBackground {
+                                }
+                                anchors.left: parent.left
+                                anchors.bottom: parent.bottom
+                                anchors.leftMargin: 10
+                                anchors.bottomMargin: 10
+                                currentIndex: peakHListViewDelegate.peakTypeValue
+
+                                onActivated: {
+                                    generatorBackend.postListModel.peakListModelH.setPeakType(peakHListViewDelegate.rowIndex, currentIndex)
+                                }
+
+                                model: [
+                                    "Гауссовский",
+                                    "Треугольный",
+                                    "Прямоугольный"
+                                ]
+
+                                Label {
+                                    text: "Тип пика"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakHCenterTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "180"
+                                text: peakHListViewDelegate.centerValue
+                                selectByMouse: true
+
+                                anchors.left: peakHTypeComboBox.right
+                                anchors.bottom: peakHTypeComboBox.bottom
+                                anchors.leftMargin: 20
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelH.setCenter(peakHListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "Координата вершины"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakHAmplitudeTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "10"
+                                text: peakHListViewDelegate.amplitudeValue
+                                selectByMouse: true
+
+                                anchors.left: peakHCenterTextField.right
+                                anchors.bottom: peakHCenterTextField.bottom
+                                anchors.leftMargin: 20
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelH.setAmplitude(peakHListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "Амплитуда"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakHSigmaTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "10"
+                                text: peakHListViewDelegate.sigmaValue
+                                selectByMouse: true
+
+                                anchors.left: peakHAmplitudeTextField.right
+                                anchors.bottom: peakHAmplitudeTextField.bottom
+                                anchors.leftMargin: 20
+                                visible: peakHTypeComboBox.currentIndex === 0
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelH.setSigma(peakHListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "СКО"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakHHalfWidthTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "25"
+                                text: peakHListViewDelegate.halfWidthValue
+                                selectByMouse: true
+
+                                anchors.left: peakHAmplitudeTextField.right
+                                anchors.bottom: peakHAmplitudeTextField.bottom
+                                anchors.leftMargin: 20
+                                visible: peakHTypeComboBox.currentIndex === 1
+                                    || peakHTypeComboBox.currentIndex === 2
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelH.setHalfWidth(peakHListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "Полуширина"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    RowLayout {
+                        spacing: 20
+                        Button {
+                            Layout.fillWidth: true
+                            background: ButtonBackground {}
+                            text: "+"
+                            Label {
+                                text: "Пики (угломестные)"
+                                anchors.bottom: parent.top
+                                anchors.bottomMargin: 5
+                            }
+
+                            //TODO: Плюсик должен нажиматься
+                            onClicked: {
+
+                            }
+                        }
+                        Button {
+                            Layout.fillWidth: true
+                            background: ButtonBackground {}
+                            text: "-"
+
+                            //TODO: Минусик должен нажиматься
+                            onClicked: {
+
+                            }
+                        }
+                    }
+                    ListView {
+                        id: peakVListView
+                        interactive: false
+                        clip: true
+                        spacing: 10
+
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: contentHeight
+
+                        model: generatorBackend.postListModel.peakListModelV
+
+                        delegate: ItemDelegate {
+                            id: peakVListViewDelegate
+                            width: peakHListView.width
+                            height: 70
+                            background: ListViewItemBackground {
+                            }
+                            highlighted: ListView.isCurrentItem
+
+                            property int rowIndex: index
+                            property int peakTypeValue: model.peakType
+                            property double centerValue: model.center
+                            property double amplitudeValue: model.amplitude
+                            property double sigmaValue: model.sigma
+                            property double halfWidthValue: model.halfWidth
+
+                            onClicked: {
+                                peakHListView.currentIndex = index
+                                // generatorBackend.postListModel.postUpdate()
+                                // generatorBackend.postListModel.setPostIndex(index)
+                            }
+
+                            ComboBox {
+                                id: peakVTypeComboBox
+                                background: TextFieldBackground {
+                                }
+                                anchors.left: parent.left
+                                anchors.bottom: parent.bottom
+                                anchors.leftMargin: 10
+                                anchors.bottomMargin: 10
+                                currentIndex: peakVListViewDelegate.peakTypeValue
+
+                                onActivated: {
+                                    generatorBackend.postListModel.peakListModelV.setPeakType(peakVListViewDelegate.rowIndex, currentIndex)
+                                }
+
+                                model: [
+                                    "Гауссовский",
+                                    "Треугольный",
+                                    "Прямоугольный"
+                                ]
+
+                                Label {
+                                    text: "Тип пика"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakVCenterTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "180"
+                                text: peakVListViewDelegate.centerValue
+                                selectByMouse: true
+
+                                anchors.left: peakVTypeComboBox.right
+                                anchors.bottom: peakVTypeComboBox.bottom
+                                anchors.leftMargin: 20
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelV.setCenter(peakVListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "Координата вершины"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakVAmplitudeTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "10"
+                                text: peakVListViewDelegate.amplitudeValue
+                                selectByMouse: true
+
+                                anchors.left: peakVCenterTextField.right
+                                anchors.bottom: peakVCenterTextField.bottom
+                                anchors.leftMargin: 20
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelV.setAmplitude(peakVListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "Амплитуда"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakVSigmaTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "5"
+                                text: peakVListViewDelegate.sigmaValue
+                                selectByMouse: true
+
+                                anchors.left: peakVAmplitudeTextField.right
+                                anchors.bottom: peakVAmplitudeTextField.bottom
+                                anchors.leftMargin: 20
+                                visible: peakVTypeComboBox.currentIndex === 0
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelV.setSigma(peakVListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "СКО"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+
+                            TextField {
+                                id: peakVHalfWidthTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "25"
+                                text: peakVListViewDelegate.halfWidthValue
+                                selectByMouse: true
+
+                                anchors.left: peakVAmplitudeTextField.right
+                                anchors.bottom: peakVAmplitudeTextField.bottom
+                                anchors.leftMargin: 20
+                                visible: peakVTypeComboBox.currentIndex === 1 || peakVTypeComboBox.currentIndex === 2
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModelV.setHalfWidth(peakVListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "Полуширина"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
     }
@@ -578,9 +974,10 @@ Item {
         anchors.right: postEditField.right
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
-        background: ButtonBackground {}
+        background: ButtonBackground {
+        }
 
-        text : generatorBackend.generatorEnabled ? "Остановить генератор нагрузки" : "Запустить генератор нагрузки"
+        text: generatorBackend.generatorEnabled ? "Остановить генератор нагрузки" : "Запустить генератор нагрузки"
 
         onClicked: generatorBackend.onGeneratorEnabledButtonClicked()
     }
@@ -592,9 +989,10 @@ Item {
         anchors.rightMargin: 20
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
-        background: ButtonBackground {}
+        background: ButtonBackground {
+        }
 
-        text : "Сохранить изменения"
+        text: "Сохранить изменения"
 
         onClicked: generatorBackend.postListModel.postUpdate()
     }
@@ -606,13 +1004,14 @@ Item {
         anchors.rightMargin: 20
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
-        background: ButtonBackground {}
+        background: ButtonBackground {
+        }
 
-        text : "Отмена изменений"
+        text: "Отмена изменений"
 
         onClicked: {
             postListView.currentIndex = generatorBackend.postListModel.fallback()
         }
     }
-
 }
+

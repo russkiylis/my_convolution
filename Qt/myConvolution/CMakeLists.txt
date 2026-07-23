@@ -22,31 +22,23 @@ set(PROJECT_SOURCES
     main.cpp
     qml.qrc
 
-    backend.h
-    backend.cpp
-
-    databasemanager.h
-    databasemanager.cpp
-
-    databaseworker.h
-    databaseworker.cpp
+    backend.h backend.cpp
+    databasemanager.h databasemanager.cpp
+    databaseworker.h databaseworker.cpp
 
     peak.h peak.cpp
     noise.h noise.cpp
-
     loadgenerator.h loadgenerator.cpp
     generatorbackend.h generatorbackend.cpp
-        abstractnoisebackend.cpp
-        abstractnoisebackend.h
-        normalnoisebackend.cpp
-        normalnoisebackend.h
-        uniformnoisebackend.cpp
-        uniformnoisebackend.h
+    abstractnoisebackend.h abstractnoisebackend.cpp
+    normalnoisebackend.h normalnoisebackend.cpp
+    uniformnoisebackend.h uniformnoisebackend.cpp
+    peaklistmodel.h peaklistmodel.cpp
+    postlistmodel.h postlistmodel.cpp
 )
 
 add_executable(myConvolution
     ${PROJECT_SOURCES}
-    postlistmodel.h postlistmodel.cpp
 )
 
 target_link_libraries(myConvolution

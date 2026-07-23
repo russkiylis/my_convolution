@@ -20,6 +20,8 @@ public:
 
         virtual PeakType type() const = 0;
 
+        virtual QString typeStr() const = 0;
+
         virtual std::unique_ptr<PeakConfig> clone() const = 0;
 
         virtual std::unique_ptr<AbstractPeak> createPeak() const = 0;
@@ -71,6 +73,8 @@ public:
 
         PeakType type() const override;
 
+        QString typeStr() const override;
+
         double sigma;   // СКО
     };
 
@@ -108,6 +112,8 @@ public:
         std::unique_ptr<AbstractPeak> createPeak() const override;
 
         PeakType type() const override;
+
+        QString typeStr() const override;
 
         std::unique_ptr<PeakConfig> clone() const override;
 
@@ -149,6 +155,8 @@ public:
         std::unique_ptr<AbstractPeak> createPeak() const override;
 
         PeakType type() const override;
+
+        QString typeStr() const override;
 
         std::unique_ptr<PeakConfig> clone() const override;
 

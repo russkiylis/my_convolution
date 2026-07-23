@@ -11,6 +11,7 @@ class GeneratorBackend : public QObject
     Q_PROPERTY(PostListModel *postListModel READ postListModel CONSTANT)
     Q_PROPERTY(bool generatorEnabled READ generatorEnabled WRITE setGeneratorEnabled NOTIFY generatorEnabledChanged)
 public:
+    static std::vector<LoadGenerator::PostConfig> createInitialConfig();
     explicit GeneratorBackend(QObject *parent = nullptr);
     ~GeneratorBackend() override;
 

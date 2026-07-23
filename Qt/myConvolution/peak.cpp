@@ -59,6 +59,10 @@ AbstractPeak::PeakType GaussPeak::GaussPeakConfig::type() const {
     return PeakType::Gauss;
 }
 
+QString GaussPeak::GaussPeakConfig::typeStr() const {
+    return "Гауссовский";
+}
+
 GaussPeak::GaussPeak(double const &center, double const &amplitude, double const &sigma) :
     AbstractPeak(center, amplitude),
     m_sigma(sigma)
@@ -114,6 +118,10 @@ std::unique_ptr<AbstractPeak> TrianglePeak::TrianglePeakConfig::createPeak() con
 
 AbstractPeak::PeakType TrianglePeak::TrianglePeakConfig::type() const {
     return PeakType::Triangle;
+}
+
+QString TrianglePeak::TrianglePeakConfig::typeStr() const {
+    return "Треугольный";
 }
 
 std::unique_ptr<AbstractPeak::PeakConfig> TrianglePeak::TrianglePeakConfig::clone() const {
@@ -174,6 +182,10 @@ std::unique_ptr<AbstractPeak> RectanglePeak::RectanglePeakConfig::createPeak() c
 
 AbstractPeak::PeakType RectanglePeak::RectanglePeakConfig::type() const {
     return PeakType::Rectangle;
+}
+
+QString RectanglePeak::RectanglePeakConfig::typeStr() const {
+    return "Прямоугольный";
 }
 
 std::unique_ptr<AbstractPeak::PeakConfig> RectanglePeak::RectanglePeakConfig::clone() const {
