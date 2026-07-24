@@ -74,13 +74,42 @@ void PostListModel::setCurrentLatitude(const QString &currentLatitude) {
     bool ok = false;
     const double parsedLatitude = currentLatitude.toDouble(&ok);
 
-    // Если вместо числа мусор, то ничего не трогаем
-    if (!ok || !std::isfinite(parsedLatitude))
+    // Если строка пустая
+    if (currentLatitude.trimmed().isEmpty()) {
+        m_config[m_postIndex].latitude = 0.0;
         return;
-    const double latitude = std::clamp(parsedLatitude, -90.0, 90.0);
+    }
 
-    if (latitude == m_config[m_postIndex].latitude)
+    // Если строчка состоит из единственного минуса, то не меняем её и тупо ждём
+    if (currentLatitude == "-")
         return;
+
+
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedLatitude)) {
+        emit currentLatitudeChanged(doubleToString(m_config[m_postIndex].latitude, 6));
+        return;
+    }
+
+    // Если в конце точка, то ждем дальнейших цифр
+    if (currentLatitude.endsWith('.'))
+        return;
+
+    const double latitude = std::clamp(parsedLatitude, -90.0, 90.0);
+    if (parsedLatitude > latitude) {
+        m_config[m_postIndex].latitude = latitude;
+        emit currentLatitudeChanged("90");
+        return;
+    }
+    if (parsedLatitude < latitude) {
+        m_config[m_postIndex].latitude = latitude;
+        emit currentLatitudeChanged("-90");
+        return;
+    }
+
+    if (latitude == m_config[m_postIndex].latitude) {
+        return;
+    }
 
     m_config[m_postIndex].latitude = latitude;
     emit currentLatitudeChanged(doubleToString(latitude, 6));
@@ -117,7 +146,6 @@ void PostListModel::setCurrentFrequency(const QString &currentFrequency) {
     // Если строка пустая
     if (currentFrequency.trimmed().isEmpty()) {
         m_config[m_postIndex].frequency = 0.0;
-        emit currentFrequencyChanged("0");
         return;
     }
 
