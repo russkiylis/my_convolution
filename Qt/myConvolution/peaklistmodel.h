@@ -18,8 +18,8 @@ public:
     // Передаём данные в зависимости от индекса
     [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
 
-    // Обновляем поля в QML (не модель, а именно поля)
-    void qmlUpdate();
+    // // Обновляем поля в QML (не модель, а именно поля) (не пригодилось)
+    // void qmlUpdate();
 
 private:
     enum Roles

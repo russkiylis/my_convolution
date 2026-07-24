@@ -1,6 +1,23 @@
 #include "postlistmodel.h"
 #include "generatorbackend.h"
 
+QString doubleToString(double value, int precision = 10)
+{
+    QString result = QString::number(value, 'f', precision);
+
+    if (result.contains('.')) {
+        while (result.endsWith('0')) {
+            result.chop(1);
+        }
+
+        if (result.endsWith('.')) {
+            result.chop(1);
+        }
+    }
+
+    return result;
+}
+
 void PostListModel::setFallbackConfig(const std::vector<LoadGenerator::PostConfig> &fallbackConfig)
 {
     m_fallbackConfig.clear();
@@ -30,7 +47,7 @@ QString PostListModel::currentPostName() const {
 }
 
 void PostListModel::setCurrentPostName(const QString &currentPostName) {
-    QString postName = currentPostName;
+    const QString& postName = currentPostName;
     // Сий мусор не давал полностью удалить строчку. Такую гадость надо добавить в postUpdate
     // if (currentPostName.trimmed().isEmpty()) {
     //     postName = QStringLiteral("Пост %1").arg(postIndex() + 1);
@@ -44,7 +61,7 @@ void PostListModel::setCurrentPostName(const QString &currentPostName) {
 }
 
 QString PostListModel::currentLatitude() const {
-    return QString::number(m_config[m_postIndex].latitude);
+    return doubleToString(m_config[m_postIndex].latitude, 6);
 }
 
 void PostListModel::setCurrentLatitude(const QString &currentLatitude) {
@@ -60,11 +77,11 @@ void PostListModel::setCurrentLatitude(const QString &currentLatitude) {
         return;
 
     m_config[m_postIndex].latitude = latitude;
-    emit currentLatitudeChanged(QString::number(latitude));
+    emit currentLatitudeChanged(doubleToString(latitude, 6));
 }
 
 QString PostListModel::currentLongitude() const {
-    return QString::number(m_config[m_postIndex].longitude);
+    return doubleToString(m_config[m_postIndex].longitude, 6);
 }
 
 void PostListModel::setCurrentLongitude(const QString &currentLongitude) {
@@ -80,31 +97,56 @@ void PostListModel::setCurrentLongitude(const QString &currentLongitude) {
         return;
 
     m_config[m_postIndex].longitude = longitude;
-    emit currentLongitudeChanged(QString::number(longitude));
+    emit currentLongitudeChanged(doubleToString(longitude, 6));
 }
 
 QString PostListModel::currentFrequency() const {
-    return QString::number(m_config[m_postIndex].frequency);
+    return doubleToString(m_config[m_postIndex].frequency, 2);
 }
 
 void PostListModel::setCurrentFrequency(const QString &currentFrequency) {
     bool ok = false;
     const double parsedFrequency = currentFrequency.toDouble(&ok);
 
-    // Если вместо числа мусор, то ничего не трогаем
-    if (!ok || !std::isfinite(parsedFrequency))
+    // Если строка пустая
+    if (currentFrequency.trimmed().isEmpty()) {
+        m_config[m_postIndex].frequency = 0.0;
+        emit currentFrequencyChanged("0");
         return;
-    const double frequency = std::clamp(parsedFrequency, 0.0, static_cast<double>(std::numeric_limits<float>::max())); // IDK: Сколько минимум ГЦ?
+    }
 
-    if (frequency == m_config[m_postIndex].frequency)
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedFrequency)) {
+        emit currentFrequencyChanged(doubleToString(m_config[m_postIndex].frequency, 2));
         return;
+    }
+
+    // Если в конце точка, то ждем дальнейших цифр
+    if (currentFrequency.endsWith('.'))
+        return;
+
+    const double frequency = std::clamp(parsedFrequency, 0.0, 1000000000000.0); // IDK: Сколько минимум ГЦ?
+    if (parsedFrequency > frequency) {
+        m_config[m_postIndex].frequency = frequency;
+        emit currentFrequencyChanged("1000000000000");
+        return;
+    }
+    if (parsedFrequency < frequency) {
+        m_config[m_postIndex].frequency = frequency;
+        emit currentFrequencyChanged("0");
+        return;
+    }
+
+    if (frequency == m_config[m_postIndex].frequency) {
+        return;
+    }
 
     m_config[m_postIndex].frequency = frequency;
-    emit currentFrequencyChanged(QString::number(frequency));
+    emit currentFrequencyChanged(doubleToString(frequency, 2));
 }
 
 QString PostListModel::currentLevel() const {
-    return QString::number(m_config[m_postIndex].level);
+    return doubleToString(m_config[m_postIndex].level, 3);
 }
 
 void PostListModel::setCurrentLevel(const QString &currentLevel) {
@@ -126,11 +168,11 @@ void PostListModel::setCurrentLevel(const QString &currentLevel) {
         return;
 
     m_config[m_postIndex].level = level;
-    emit currentLevelChanged(QString::number(level));
+    emit currentLevelChanged(QString::number(level, 'f', 3));
 }
 
 QString PostListModel::currentLevelSigma() const {
-    return QString::number(m_config[m_postIndex].levelSigma);
+    return QString::number(m_config[m_postIndex].levelSigma, 'f', 3);
 }
 
 void PostListModel::setCurrentLevelSigma(const QString &currentLevelSigma) {
@@ -151,7 +193,7 @@ void PostListModel::setCurrentLevelSigma(const QString &currentLevelSigma) {
         return;
 
     m_config[m_postIndex].levelSigma = levelSigma;
-    emit currentLevelSigmaChanged(QString::number(levelSigma));
+    emit currentLevelSigmaChanged(QString::number(levelSigma, 'f', 3));
 }
 
 QString PostListModel::currentMinAngleH() const {
@@ -602,8 +644,8 @@ void PostListModel::qmlUpdate() {
     emit currentNoiseTypeChanged(currentNoiseType());
 
     m_noiseBackend->qmlUpdate();
-    m_peakListModelH.qmlUpdate();
-    m_peakListModelV.qmlUpdate();
+    // m_peakListModelH.qmlUpdate();
+    // m_peakListModelV.qmlUpdate();
 }
 
 PeakListModel *PostListModel::peakListModelH()

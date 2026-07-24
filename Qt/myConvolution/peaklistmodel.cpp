@@ -54,9 +54,8 @@ QVariant PeakListModel::data(const QModelIndex &index, const int role) const {
     }
 }
 
-void PeakListModel::qmlUpdate() {
-    //TODO: емиты и тд
-}
+// void PeakListModel::qmlUpdate() {
+// }
 
 std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> &PeakListModel::peakConfig() const
 {
@@ -68,7 +67,6 @@ void PeakListModel::setPeakConfig(std::vector<std::unique_ptr<AbstractPeak::Peak
     beginResetModel();
     m_peakConfig = &peakConfig;
     endResetModel();
-    qmlUpdate();
 }
 
 void PeakListModel::setPeakType(const int row, const int peakType) {

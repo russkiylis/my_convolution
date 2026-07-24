@@ -115,11 +115,11 @@ void GeneratorBackend::setCfg(const std::vector<LoadGenerator::PostConfig> &cfg)
 void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {
     // freopen("log.txt", "a", stdout);
     // freopen("log.txt", "a", stderr);
-    qDebug().noquote().nospace()
-    << "post=" << package.postName
-    << "\tlevel=" << package.level
-    << "\tconvV=" << package.timestamp
-    << "\tconvV=" << package.convV;
+    // qDebug().noquote().nospace()
+    // << "post=" << package.postName
+    // << "\tlevel=" << package.level
+    // << "\ttimestamp=" << package.timestamp
+    // << "\tconvH=" << package.convH;
 }
 
 void GeneratorBackend::slotPostCallToggle(const bool toggle) {
