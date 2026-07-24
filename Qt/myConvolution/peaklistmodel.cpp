@@ -71,24 +71,24 @@ void PeakListModel::setPeakConfig(std::vector<std::unique_ptr<AbstractPeak::Peak
     qmlUpdate();
 }
 
-void PeakListModel::setPeakType(const int index, const int peakType) {
+void PeakListModel::setPeakType(const int row, const int peakType) {
     // Проверка на адекватность значений
-    if (m_peakConfig == nullptr || index >= static_cast<int>(m_peakConfig->size()) || index < 0)
+    if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
         throw std::logic_error("Неадекватный индекс модели пиков!");
 
-    if ((*m_peakConfig)[index]->type() == static_cast<AbstractPeak::PeakType>(peakType))
+    if ((*m_peakConfig)[row]->type() == static_cast<AbstractPeak::PeakType>(peakType))
         return;
 
     beginResetModel();
     switch (static_cast<AbstractPeak::PeakType>(peakType)) {
         case AbstractPeak::PeakType::Gauss:
-            (*m_peakConfig)[index] = std::make_unique<GaussPeak::GaussPeakConfig>(180, 10, 5);
+            (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>(180, 10, 5);
             break;
         case AbstractPeak::PeakType::Triangle:
-            (*m_peakConfig)[index] = std::make_unique<TrianglePeak::TrianglePeakConfig>(180, 10, 25);
+            (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>(180, 10, 25);
             break;
         case AbstractPeak::PeakType::Rectangle:
-            (*m_peakConfig)[index] = std::make_unique<RectanglePeak::RectanglePeakConfig>(180, 10, 5);
+            (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>(180, 10, 5);
             break;
         default:
             throw std::logic_error("Неадекватный тип пика!");
@@ -96,71 +96,70 @@ void PeakListModel::setPeakType(const int index, const int peakType) {
     endResetModel();
 }
 
-void PeakListModel::setCenter(const int index, const double center) {
+void PeakListModel::setCenter(const int row, const double center) {
     // Проверка на адекватность значений
-    if (m_peakConfig == nullptr || index >= static_cast<int>(m_peakConfig->size()) || index < 0)
+    if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
         throw std::logic_error("Неадекватный индекс модели пиков!");
-    if ((*m_peakConfig)[index]->center == center)
+    if ((*m_peakConfig)[row]->center == center)
         return;
 
-    // FIXME: Скорее всего из-за ресета программа не даёт "плавно" ввести текст
-    beginResetModel();
-    auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[index].get());
-    auto * configTriangle = dynamic_cast<TrianglePeak::TrianglePeakConfig *>((*m_peakConfig)[index].get());
-    auto * configRectangle = dynamic_cast<RectanglePeak::RectanglePeakConfig *>((*m_peakConfig)[index].get());
+    auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[row].get());
+    auto * configTriangle = dynamic_cast<TrianglePeak::TrianglePeakConfig *>((*m_peakConfig)[row].get());
+    auto * configRectangle = dynamic_cast<RectanglePeak::RectanglePeakConfig *>((*m_peakConfig)[row].get());
 
-    switch ((*m_peakConfig)[index]->type()) {
+    switch ((*m_peakConfig)[row]->type()) {
     case AbstractPeak::PeakType::Gauss:
-        (*m_peakConfig)[index] = std::make_unique<GaussPeak::GaussPeakConfig>(center, configGauss->amplitude, configGauss->sigma);
+        (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>(center, configGauss->amplitude, configGauss->sigma);
         break;
     case AbstractPeak::PeakType::Triangle:
-        (*m_peakConfig)[index] = std::make_unique<TrianglePeak::TrianglePeakConfig>(center, configTriangle->amplitude, configTriangle->halfWidth);
+        (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>(center, configTriangle->amplitude, configTriangle->halfWidth);
         break;
     case AbstractPeak::PeakType::Rectangle:
-        (*m_peakConfig)[index] = std::make_unique<RectanglePeak::RectanglePeakConfig>(center, configRectangle->amplitude, configRectangle->halfWidth);
+        (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>(center, configRectangle->amplitude, configRectangle->halfWidth);
         break;
     default:
         throw std::logic_error("Неадекватный тип пика!");
     }
-    endResetModel();
+    const QModelIndex changedIndex = index(row, 0);
 
+    emit dataChanged(changedIndex, changedIndex, {CenterRole});
 }
 
-void PeakListModel::setAmplitude(const int index, const double amplitude) {
+void PeakListModel::setAmplitude(const int row, const double amplitude) {
     // Проверка на адекватность значений
-    if (m_peakConfig == nullptr || index >= static_cast<int>(m_peakConfig->size()) || index < 0)
+    if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
         throw std::logic_error("Неадекватный индекс модели пиков!");
-    if ((*m_peakConfig)[index]->amplitude == amplitude)
+    if ((*m_peakConfig)[row]->amplitude == amplitude)
         return;
 
-    // FIXME: Скорее всего из-за ресета программа не даёт "плавно" ввести текст
-    beginResetModel();
-    auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[index].get());
-    auto * configTriangle = dynamic_cast<TrianglePeak::TrianglePeakConfig *>((*m_peakConfig)[index].get());
-    auto * configRectangle = dynamic_cast<RectanglePeak::RectanglePeakConfig *>((*m_peakConfig)[index].get());
+    auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[row].get());
+    auto * configTriangle = dynamic_cast<TrianglePeak::TrianglePeakConfig *>((*m_peakConfig)[row].get());
+    auto * configRectangle = dynamic_cast<RectanglePeak::RectanglePeakConfig *>((*m_peakConfig)[row].get());
 
-    switch ((*m_peakConfig)[index]->type()) {
+    switch ((*m_peakConfig)[row]->type()) {
     case AbstractPeak::PeakType::Gauss:
-        (*m_peakConfig)[index] = std::make_unique<GaussPeak::GaussPeakConfig>(configGauss->center, amplitude, configGauss->sigma);
+        (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>(configGauss->center, amplitude, configGauss->sigma);
         break;
     case AbstractPeak::PeakType::Triangle:
-        (*m_peakConfig)[index] = std::make_unique<TrianglePeak::TrianglePeakConfig>(configTriangle->center, amplitude, configTriangle->halfWidth);
+        (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>(configTriangle->center, amplitude, configTriangle->halfWidth);
         break;
     case AbstractPeak::PeakType::Rectangle:
-        (*m_peakConfig)[index] = std::make_unique<RectanglePeak::RectanglePeakConfig>(configRectangle->center, amplitude, configRectangle->halfWidth);
+        (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>(configRectangle->center, amplitude, configRectangle->halfWidth);
         break;
     default:
         throw std::logic_error("Неадекватный тип пика!");
     }
-    endResetModel();
+    const QModelIndex changedIndex = index(row, 0);
+
+    emit dataChanged(changedIndex, changedIndex, {AmplitudeRole});
 }
 
-void PeakListModel::setSigma(const int index, const double sigma) {
+void PeakListModel::setSigma(const int row, const double sigma) {
     // Проверка на адекватность значений
-    if (m_peakConfig == nullptr || index >= static_cast<int>(m_peakConfig->size()) || index < 0)
+    if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
         throw std::logic_error("Неадекватный индекс модели пиков!");
 
-    auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[index].get());
+    auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[row].get());
 
     if (configGauss == nullptr)
         return;
@@ -168,33 +167,34 @@ void PeakListModel::setSigma(const int index, const double sigma) {
     if (configGauss->sigma == sigma)
         return;
 
-    // FIXME: Скорее всего из-за ресета программа не даёт "плавно" ввести текст
-    beginResetModel();
-    (*m_peakConfig)[index] = std::make_unique<GaussPeak::GaussPeakConfig>(configGauss->center, configGauss->amplitude, sigma);
-    endResetModel();
+    (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>(configGauss->center, configGauss->amplitude, sigma);
+
+    const QModelIndex changedIndex = index(row, 0);
+    emit dataChanged(changedIndex, changedIndex, {SigmaRole});
 }
 
-void PeakListModel::setHalfWidth(const int index, const double halfWidth) {
+void PeakListModel::setHalfWidth(const int row, const double halfWidth) {
     // Проверка на адекватность значений
-    if (m_peakConfig == nullptr || index >= static_cast<int>(m_peakConfig->size()) || index < 0)
+    if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
         throw std::logic_error("Неадекватный индекс модели пиков!");
 
-    auto * configTriangle = dynamic_cast<TrianglePeak::TrianglePeakConfig *>((*m_peakConfig)[index].get());
-    auto * configRectangle = dynamic_cast<RectanglePeak::RectanglePeakConfig *>((*m_peakConfig)[index].get());
+    auto * configTriangle = dynamic_cast<TrianglePeak::TrianglePeakConfig *>((*m_peakConfig)[row].get());
+    auto * configRectangle = dynamic_cast<RectanglePeak::RectanglePeakConfig *>((*m_peakConfig)[row].get());
 
-    // FIXME: Скорее всего из-за ресета программа не даёт "плавно" ввести текст
     if (configTriangle != nullptr) {
         if (configTriangle->halfWidth == halfWidth)
             return;
-        beginResetModel();
-        (*m_peakConfig)[index] = std::make_unique<TrianglePeak::TrianglePeakConfig>(configTriangle->center, configTriangle->amplitude, halfWidth);
-        endResetModel();
+        (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>(configTriangle->center, configTriangle->amplitude, halfWidth);
+
+        const QModelIndex changedIndex = index(row, 0);
+        emit dataChanged(changedIndex, changedIndex, {HalfWidthRole});
 
     } else if (configRectangle != nullptr) {
         if (configRectangle->halfWidth == halfWidth)
             return;
-        beginResetModel();
-        (*m_peakConfig)[index] = std::make_unique<RectanglePeak::RectanglePeakConfig>(configRectangle->center, configRectangle->amplitude, halfWidth);
-        endResetModel();
+        (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>(configRectangle->center, configRectangle->amplitude, halfWidth);
+
+        const QModelIndex changedIndex = index(row, 0);
+        emit dataChanged(changedIndex, changedIndex, {HalfWidthRole});
     }
 }

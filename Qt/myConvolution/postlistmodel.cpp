@@ -30,9 +30,10 @@ QString PostListModel::currentPostName() const {
 
 void PostListModel::setCurrentPostName(const QString &currentPostName) {
     QString postName = currentPostName;
-    if (currentPostName.trimmed().isEmpty()) {
-        postName = QStringLiteral("Пост %1").arg(postIndex() + 1);
-    }
+    // Сий мусор не давал полностью удалить строчку. Такую гадость надо добавить в postUpdate
+    // if (currentPostName.trimmed().isEmpty()) {
+    //     postName = QStringLiteral("Пост %1").arg(postIndex() + 1);
+    // }
 
     if (postName == m_config[m_postIndex].postName)
         return;
@@ -547,6 +548,15 @@ int PostListModel::removePost(const int index) {
 }
 
 void PostListModel::postUpdate() {
+
+    // Проверка на пустоту имени (происхдит только при сохранении, т.к. иначе просто не давали удалить строчку даже на время)
+    for (auto & cfg : m_config) {
+        if (cfg.postName.trimmed().isEmpty()) {
+            cfg.postName = QStringLiteral("Пост %1").arg(postIndex() + 1);
+            emit currentPostNameChanged(cfg.postName);
+        }
+    }
+
     beginResetModel();
     m_generatorBackend->signalPostConfigUpdate(m_config);   // Подаём в loadgenerator сигнал обновить посты
     endResetModel();

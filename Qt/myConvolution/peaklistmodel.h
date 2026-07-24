@@ -40,9 +40,9 @@ public:
     // Задать конфиг пиков (вызывать всегда при смене PostIndex или изменении размера вектора постов)
     void setPeakConfig(std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> &peakConfig);
 
-    Q_INVOKABLE void setPeakType(int index, int peakType);
-    Q_INVOKABLE void setCenter(int index, double center);
-    Q_INVOKABLE void setAmplitude(int index, double amplitude);
-    Q_INVOKABLE void setSigma(int index, double sigma);
-    Q_INVOKABLE void setHalfWidth(int index, double halfWidth);
+    Q_INVOKABLE void setPeakType(int row, int peakType);
+    Q_INVOKABLE void setCenter(int row, double center);
+    Q_INVOKABLE void setAmplitude(int row, double amplitude);
+    Q_INVOKABLE void setSigma(int row, double sigma);
+    Q_INVOKABLE void setHalfWidth(int row, double halfWidth);
 };
