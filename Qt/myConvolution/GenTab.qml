@@ -625,19 +625,18 @@ Item {
                                 color: main.textColor
                             }
 
-                            //TODO: Плюсик должен нажиматься
                             onClicked: {
-
+                                peakHListView.currentIndex = generatorBackend.postListModel.peakListModelH.addPeak()
                             }
                         }
                         Button {
                             Layout.fillWidth: true
                             background: ButtonBackground {}
                             text: "-"
+                            enabled: peakHListView.currentIndex !== -1
 
-                            //TODO: Минусик должен нажиматься
                             onClicked: {
-
+                                peakHListView.currentIndex = generatorBackend.postListModel.peakListModelH.removePeak(peakHListView.currentIndex)
                             }
                         }
                     }
@@ -818,19 +817,18 @@ Item {
                                 color: main.textColor
                             }
 
-                            //TODO: Плюсик должен нажиматься
                             onClicked: {
-
+                                peakVListView.currentIndex = generatorBackend.postListModel.peakListModelV.addPeak()
                             }
                         }
                         Button {
                             Layout.fillWidth: true
                             background: ButtonBackground {}
                             text: "-"
+                            enabled: peakVListView.currentIndex !== -1
 
-                            //TODO: Минусик должен нажиматься
                             onClicked: {
-
+                                peakVListView.currentIndex = generatorBackend.postListModel.peakListModelV.removePeak(peakVListView.currentIndex)
                             }
                         }
                     }
@@ -861,7 +859,7 @@ Item {
                             property double halfWidthValue: model.halfWidth
 
                             onClicked: {
-                                peakHListView.currentIndex = index
+                                peakVListView.currentIndex = index
                                 // generatorBackend.postListModel.postUpdate()
                                 // generatorBackend.postListModel.setPostIndex(index)
                             }

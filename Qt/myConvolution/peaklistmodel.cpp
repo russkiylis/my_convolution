@@ -198,3 +198,34 @@ void PeakListModel::setHalfWidth(const int row, const double halfWidth) {
         emit dataChanged(changedIndex, changedIndex, {HalfWidthRole});
     }
 }
+
+int PeakListModel::addPeak() {
+    const int newRowIndex = static_cast<int>(m_peakConfig->size());
+
+    beginInsertRows(QModelIndex(), newRowIndex, newRowIndex);
+    m_peakConfig->push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 10));
+    endInsertRows();
+
+    return newRowIndex;
+}
+
+int PeakListModel::removePeak(const int row) {
+    if (const int oldSize = static_cast<int>(m_peakConfig->size()); row >= oldSize)
+        return -1;
+
+    beginRemoveRows(QModelIndex(), row, row);
+    m_peakConfig->erase(m_peakConfig->begin() + row);
+    endRemoveRows();
+
+    const int newSize = static_cast<int>(m_peakConfig->size());
+
+    // Если удалили все элементы
+    if (newSize == 0)
+        return -1;
+
+    // Если удалили последний элемент
+    if (row >= newSize)
+        return newSize - 1;
+
+    return row;
+}

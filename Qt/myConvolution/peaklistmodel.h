@@ -45,4 +45,6 @@ public:
     Q_INVOKABLE void setAmplitude(int row, double amplitude);
     Q_INVOKABLE void setSigma(int row, double sigma);
     Q_INVOKABLE void setHalfWidth(int row, double halfWidth);
+    Q_INVOKABLE int addPeak();
+    Q_INVOKABLE int removePeak(int row);
 };

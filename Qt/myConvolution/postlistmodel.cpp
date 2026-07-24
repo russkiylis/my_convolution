@@ -509,7 +509,6 @@ int PostListModel::addPost() {
 
     beginInsertRows(QModelIndex(), newIndex, newIndex);     // Начинаем вставлять
     m_config.push_back(std::move(newConfig)); // Засовываем в m_config новый конфиг
-    // m_generatorBackend->signalPostConfigUpdate(m_config);   // Подаём в loadgenerator сигнал обновить посты
     endInsertRows();    // Заканчиваем вставлять
 
     setPostIndex(newIndex);
@@ -523,7 +522,6 @@ int PostListModel::removePost(const int index) {
 
     beginRemoveRows(QModelIndex(), index, index);
     m_config.erase(m_config.begin() + index);
-    // m_generatorBackend->signalPostConfigUpdate(m_config);
     endRemoveRows();
 
     const int newSize = static_cast<int>(m_config.size());
