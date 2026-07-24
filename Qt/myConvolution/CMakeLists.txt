@@ -35,6 +35,8 @@ set(PROJECT_SOURCES
     uniformnoisebackend.h uniformnoisebackend.cpp
     peaklistmodel.h peaklistmodel.cpp
     postlistmodel.h postlistmodel.cpp
+        utils.cpp
+        utils.h
 )
 
 add_executable(myConvolution

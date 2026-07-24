@@ -1,22 +1,6 @@
 #include "postlistmodel.h"
 #include "generatorbackend.h"
-
-QString doubleToString(double value, int precision = 10)
-{
-    QString result = QString::number(value, 'f', precision);
-
-    if (result.contains('.')) {
-        while (result.endsWith('0')) {
-            result.chop(1);
-        }
-
-        if (result.endsWith('.')) {
-            result.chop(1);
-        }
-    }
-
-    return result;
-}
+#include "utils.h"
 
 void PostListModel::setFallbackConfig(const std::vector<LoadGenerator::PostConfig> &fallbackConfig)
 {
@@ -67,7 +51,7 @@ void PostListModel::setCurrentPostName(const QString &currentPostName) {
 }
 
 QString PostListModel::currentLatitude() const {
-    return doubleToString(m_config[m_postIndex].latitude, 6);
+    return Utils::doubleToString(m_config[m_postIndex].latitude, 6);
 }
 
 void PostListModel::setCurrentLatitude(const QString &currentLatitude) {
@@ -87,7 +71,7 @@ void PostListModel::setCurrentLatitude(const QString &currentLatitude) {
 
     // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
     if (!ok || !std::isfinite(parsedLatitude)) {
-        emit currentLatitudeChanged(doubleToString(m_config[m_postIndex].latitude, 6));
+        emit currentLatitudeChanged(Utils::doubleToString(m_config[m_postIndex].latitude, 6));
         return;
     }
 
@@ -112,11 +96,11 @@ void PostListModel::setCurrentLatitude(const QString &currentLatitude) {
     }
 
     m_config[m_postIndex].latitude = latitude;
-    emit currentLatitudeChanged(doubleToString(latitude, 6));
+    emit currentLatitudeChanged(Utils::doubleToString(latitude, 6));
 }
 
 QString PostListModel::currentLongitude() const {
-    return doubleToString(m_config[m_postIndex].longitude, 6);
+    return Utils::doubleToString(m_config[m_postIndex].longitude, 6);
 }
 
 void PostListModel::setCurrentLongitude(const QString &currentLongitude) {
@@ -136,7 +120,7 @@ void PostListModel::setCurrentLongitude(const QString &currentLongitude) {
 
     // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
     if (!ok || !std::isfinite(parsedLongitude)) {
-        emit currentLongitudeChanged(doubleToString(m_config[m_postIndex].longitude, 6));
+        emit currentLongitudeChanged(Utils::doubleToString(m_config[m_postIndex].longitude, 6));
         return;
     }
 
@@ -161,11 +145,11 @@ void PostListModel::setCurrentLongitude(const QString &currentLongitude) {
     }
 
     m_config[m_postIndex].longitude = longitude;
-    emit currentLongitudeChanged(doubleToString(longitude, 6));
+    emit currentLongitudeChanged(Utils::doubleToString(longitude, 6));
 }
 
 QString PostListModel::currentFrequency() const {
-    return doubleToString(m_config[m_postIndex].frequency, 2);
+    return Utils::doubleToString(m_config[m_postIndex].frequency, 2);
 }
 
 void PostListModel::setCurrentFrequency(const QString &currentFrequency) {
@@ -180,7 +164,7 @@ void PostListModel::setCurrentFrequency(const QString &currentFrequency) {
 
     // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
     if (!ok || !std::isfinite(parsedFrequency)) {
-        emit currentFrequencyChanged(doubleToString(m_config[m_postIndex].frequency, 2));
+        emit currentFrequencyChanged(Utils::doubleToString(m_config[m_postIndex].frequency, 2));
         return;
     }
 
@@ -205,33 +189,55 @@ void PostListModel::setCurrentFrequency(const QString &currentFrequency) {
     }
 
     m_config[m_postIndex].frequency = frequency;
-    emit currentFrequencyChanged(doubleToString(frequency, 2));
+    emit currentFrequencyChanged(Utils::doubleToString(frequency, 2));
 }
 
 QString PostListModel::currentLevel() const {
-    return doubleToString(m_config[m_postIndex].level, 3);
+    return Utils::doubleToString(m_config[m_postIndex].level, 3);
 }
 
 void PostListModel::setCurrentLevel(const QString &currentLevel) {
     bool ok = false;
     const double parsedLevel = currentLevel.toDouble(&ok);
 
-    // Если вместо числа мусор, то ничего не трогаем
-    if (!ok || !std::isfinite(parsedLevel))
+    // Если строка пустая
+    if (currentLevel.trimmed().isEmpty()) {
+        m_config[m_postIndex].level = 0.0;
+        return;
+    }
+
+    // Если строчка состоит из единственного минуса, то не меняем её и тупо ждём
+    if (currentLevel == "-")
         return;
 
-    // IDK: Какой минимум/максимум у уровня?
-    const double level = std::clamp(
-        parsedLevel,
-        static_cast<double>(std::numeric_limits<float>::lowest()),
-        static_cast<double>(std::numeric_limits<float>::max())
-    );
-
-    if (level == m_config[m_postIndex].level)
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedLevel)) {
+        emit currentLevelChanged(Utils::doubleToString(m_config[m_postIndex].level, 2));
         return;
+    }
+
+    // Если в конце точка, то ждем дальнейших цифр
+    if (currentLevel.endsWith('.'))
+        return;
+
+    const double level = std::clamp(parsedLevel, -1000.0, 1000.0);  // IDK: Какой минимум/максимум у уровня?
+    if (parsedLevel > level) {
+        m_config[m_postIndex].level = level;
+        emit currentLevelChanged("1000");
+        return;
+    }
+    if (parsedLevel < level) {
+        m_config[m_postIndex].level = level;
+        emit currentLevelChanged("-1000");
+        return;
+    }
+
+    if (level == m_config[m_postIndex].level) {
+        return;
+    }
 
     m_config[m_postIndex].level = level;
-    emit currentLevelChanged(QString::number(level, 'f', 3));
+    emit currentLevelChanged(Utils::doubleToString(level, 3));
 }
 
 QString PostListModel::currentLevelSigma() const {
