@@ -3,6 +3,7 @@
 
 void PostListModel::setFallbackConfig(const std::vector<LoadGenerator::PostConfig> &fallbackConfig)
 {
+    m_fallbackConfig.clear();
     m_fallbackConfig = fallbackConfig;
 }
 
@@ -448,7 +449,6 @@ void PostListModel::setCurrentPostEnabled(const bool currentPostEnabled) {
 PostListModel::PostListModel(GeneratorBackend *generatorBackend, std::vector<LoadGenerator::PostConfig> &config, QObject *parent) :
     QAbstractListModel {parent},
     m_config(config),
-    m_fallbackConfig(config),
     m_generatorBackend(generatorBackend),
     m_peakListModelH(m_config[m_postIndex].peakConfigsH),
     m_peakListModelV(m_config[m_postIndex].peakConfigsV)
@@ -560,13 +560,14 @@ void PostListModel::postUpdate() {
     beginResetModel();
     m_generatorBackend->signalPostConfigUpdate(m_config);   // Подаём в loadgenerator сигнал обновить посты
     endResetModel();
-    m_fallbackConfig = m_config;    // Теперь будем откатываться до этого состояния
+    setFallbackConfig(m_config);    // Теперь будем откатываться до этого состояния
     m_fallbackPostIndex = postIndex();
 }
 
 // FIXME: Оно сломано. Каким то чудом спавнит новые пики (?!)
 int PostListModel::fallback() {
     beginResetModel();
+    m_config.clear();
     m_config = m_fallbackConfig; // Отменяем все изменения
     endResetModel();
     if (postIndex() >= static_cast<int>(m_fallbackConfig.size())) {
