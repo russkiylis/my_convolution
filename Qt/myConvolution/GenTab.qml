@@ -43,7 +43,8 @@ Item {
                 let newIndex = generatorBackend.postListModel.addPost()
                 if (newIndex >= 0) {
                     postListView.currentIndex = newIndex
-                    // generatorBackend.postListModel.postUpdate()
+                    peakHListView.currentIndex = 0
+                    peakVListView.currentIndex = 0
                 }
             }
         }
@@ -63,7 +64,8 @@ Item {
             onClicked: {
                 let newIndex = generatorBackend.postListModel.removePost(postListView.currentIndex)
                 postListView.currentIndex = newIndex
-                // generatorBackend.postListModel.postUpdate()
+                peakHListView.currentIndex = 0
+                peakVListView.currentIndex = 0
             }
 
             enabled: postListView.count > 1
@@ -89,8 +91,11 @@ Item {
 
                 onClicked: {
                     postListView.currentIndex = index
-                    // generatorBackend.postListModel.postUpdate()
                     generatorBackend.postListModel.setPostIndex(index)
+
+                    // FIXME: Это откровенный костыль. Если мы переключимся на пост где не будет пиков то кнопка - все равно будет гореть
+                    peakHListView.currentIndex = 0
+                    peakVListView.currentIndex = 0
                 }
 
                 Text {
@@ -1040,6 +1045,8 @@ Item {
 
         onClicked: {
             postListView.currentIndex = generatorBackend.postListModel.fallback()
+            peakHListView.currentIndex = 0
+            peakVListView.currentIndex = 0
         }
     }
 }

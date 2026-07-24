@@ -566,10 +566,12 @@ int PostListModel::fallback() {
     beginResetModel();
     m_config.clear();
     m_config = m_fallbackConfig; // Отменяем все изменения
-    endResetModel();
     if (postIndex() >= static_cast<int>(m_fallbackConfig.size())) {
         setPostIndex(m_fallbackPostIndex);
     }
+    peakListModelH()->setPeakConfig(m_config[postIndex()].peakConfigsH);
+    peakListModelV()->setPeakConfig(m_config[postIndex()].peakConfigsV);
+    endResetModel();
     qDebug() << "Изменения сброшены.";
     return postIndex();
 }
