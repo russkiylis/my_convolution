@@ -123,13 +123,42 @@ void PostListModel::setCurrentLongitude(const QString &currentLongitude) {
     bool ok = false;
     const double parsedLongitude = currentLongitude.toDouble(&ok);
 
-    // Если вместо числа мусор, то ничего не трогаем
-    if (!ok || !std::isfinite(parsedLongitude))
+    // Если строка пустая
+    if (currentLongitude.trimmed().isEmpty()) {
+        m_config[m_postIndex].longitude = 0.0;
         return;
-    const double longitude = std::clamp(parsedLongitude, -180.0, 180.0);
+    }
 
-    if (longitude == m_config[m_postIndex].longitude)
+    // Если строчка состоит из единственного минуса, то не меняем её и тупо ждём
+    if (currentLongitude == "-")
         return;
+
+
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedLongitude)) {
+        emit currentLongitudeChanged(doubleToString(m_config[m_postIndex].longitude, 6));
+        return;
+    }
+
+    // Если в конце точка, то ждем дальнейших цифр
+    if (currentLongitude.endsWith('.'))
+        return;
+
+    const double longitude = std::clamp(parsedLongitude, -180.0, 180.0);
+    if (parsedLongitude > longitude) {
+        m_config[m_postIndex].longitude = longitude;
+        emit currentLongitudeChanged("180");
+        return;
+    }
+    if (parsedLongitude < longitude) {
+        m_config[m_postIndex].longitude = longitude;
+        emit currentLongitudeChanged("-180");
+        return;
+    }
+
+    if (longitude == m_config[m_postIndex].longitude) {
+        return;
+    }
 
     m_config[m_postIndex].longitude = longitude;
     emit currentLongitudeChanged(doubleToString(longitude, 6));
