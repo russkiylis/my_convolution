@@ -344,7 +344,7 @@ void PostListModel::setCurrentMaxAngleH(const QString &currentMaxAngleH) {
 
     // Если строка пустая
     if (currentMaxAngleH.trimmed().isEmpty()) {
-        m_config[m_postIndex].minAngleH = allowedLowerBound;
+        m_config[m_postIndex].maxAngleH = allowedLowerBound;
         return;
     }
 
@@ -419,27 +419,6 @@ QString PostListModel::currentMinAngleV() const {
 }
 
 void PostListModel::setCurrentMinAngleV(const QString &currentMinAngleV) {
-    // bool ok = false;
-    // const int parsedMinAngleV = currentMinAngleV.toInt(&ok);
-    //
-    // if (!ok)
-    //     return;
-    //
-    // constexpr int lowerBound = -45;
-    // constexpr int upperBound = 44;
-    // const int currentMaxAngleV = m_config[m_postIndex].maxAngleV;
-    // const int allowedUpperBound = std::min(upperBound, currentMaxAngleV - 1);
-    //
-    // if (allowedUpperBound < lowerBound)
-    //     return;
-    //
-    // const int minAngleV = std::clamp(parsedMinAngleV, lowerBound, allowedUpperBound);
-    //
-    // if (minAngleV == m_config[m_postIndex].minAngleV)
-    //     return;
-    //
-    // m_config[m_postIndex].minAngleV = minAngleV;
-    // emit currentMinAngleVChanged(QString::number(minAngleV));
     constexpr int lowerBound = -45;
     constexpr int upperBound = 44;
 
@@ -492,27 +471,6 @@ QString PostListModel::currentMaxAngleV() const {
 }
 
 void PostListModel::setCurrentMaxAngleV(const QString &currentMaxAngleV) {
-    // bool ok = false;
-    // const int parsedMaxAngleV = currentMaxAngleV.toInt(&ok);
-    //
-    // if (!ok)
-    //     return;
-    //
-    // constexpr int lowerBound = -44;
-    // constexpr int upperBound = 45;
-    // const int currentMinAngleV = m_config[m_postIndex].minAngleV;
-    // const int allowedLowerBound = std::max(lowerBound, currentMinAngleV + 1);
-    //
-    // if (allowedLowerBound > upperBound)
-    //     return;
-    //
-    // const int maxAngleV = std::clamp(parsedMaxAngleV, allowedLowerBound, upperBound);
-    //
-    // if (maxAngleV == m_config[m_postIndex].maxAngleV)
-    //     return;
-    //
-    // m_config[m_postIndex].maxAngleV = maxAngleV;
-    // emit currentMaxAngleVChanged(QString::number(maxAngleV));
     constexpr int lowerBound = -44;
     constexpr int upperBound = 45;
     const int currentMinAngleV = m_config[m_postIndex].minAngleV;
@@ -520,7 +478,7 @@ void PostListModel::setCurrentMaxAngleV(const QString &currentMaxAngleV) {
 
     // Если строка пустая
     if (currentMaxAngleV.trimmed().isEmpty()) {
-        m_config[m_postIndex].minAngleH = allowedLowerBound;
+        m_config[m_postIndex].maxAngleV = allowedLowerBound;
         return;
     }
 
@@ -599,21 +557,62 @@ QString PostListModel::currentMinPeriod() const {
 }
 
 void PostListModel::setCurrentMinPeriod(const QString &currentMinPeriod) {
+    // bool ok = false;
+    // const int parsedMinPeriod = currentMinPeriod.toInt(&ok);
+    //
+    // if (!ok)
+    //     return;
+    //
+    // constexpr int lowerBound = 10;
+    // constexpr int upperBound = std::numeric_limits<short>::max();
+    // const int currentMaxPeriod = static_cast<int>(m_config[m_postIndex].maxPeriod.count());
+    // const int allowedUpperBound = std::min(upperBound, currentMaxPeriod);
+    //
+    // if (allowedUpperBound < lowerBound)
+    //     return;
+    //
+    // const int minPeriod = std::clamp(parsedMinPeriod, lowerBound, allowedUpperBound);
+    //
+    // if (minPeriod == m_config[m_postIndex].minPeriod.count())
+    //     return;
+    //
+    // m_config[m_postIndex].minPeriod = std::chrono::milliseconds(minPeriod);
+    // emit currentMinPeriodChanged(QString::number(minPeriod));
+    constexpr int lowerBound = 10;
+    constexpr int upperBound = 3600000 - 1;     // IDK: А я не знаю каков максимум
+
+    // Если строка пустая
+    if (currentMinPeriod.trimmed().isEmpty()) {
+        m_config[m_postIndex].minPeriod = std::chrono::milliseconds(lowerBound);
+        return;
+    }
+
     bool ok = false;
     const int parsedMinPeriod = currentMinPeriod.toInt(&ok);
 
-    if (!ok)
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedMinPeriod)) {
+        emit currentMinPeriodChanged(QString::number(m_config[m_postIndex].minPeriod.count()));
         return;
+    }
 
-    constexpr int lowerBound = 10;
-    constexpr int upperBound = std::numeric_limits<short>::max();   // IDK: А я не знаю каков максимум
     const int currentMaxPeriod = static_cast<int>(m_config[m_postIndex].maxPeriod.count());
-    const int allowedUpperBound = std::min(upperBound, currentMaxPeriod);
+    const int allowedUpperBound = std::min(upperBound, currentMaxPeriod - 1);
 
     if (allowedUpperBound < lowerBound)
         return;
 
     const int minPeriod = std::clamp(parsedMinPeriod, lowerBound, allowedUpperBound);
+    if (parsedMinPeriod > minPeriod) {
+        m_config[m_postIndex].minPeriod = std::chrono::milliseconds(minPeriod);
+        emit currentMinPeriodChanged(QString::number(allowedUpperBound));
+        return;
+    }
+    if (parsedMinPeriod < minPeriod) {
+        m_config[m_postIndex].minPeriod = std::chrono::milliseconds(minPeriod);
+        emit currentMinPeriodChanged(QString::number(lowerBound));
+        return;
+    }
 
     if (minPeriod == m_config[m_postIndex].minPeriod.count())
         return;
@@ -627,21 +626,61 @@ QString PostListModel::currentMaxPeriod() const {
 }
 
 void PostListModel::setCurrentMaxPeriod(const QString &currentMaxPeriod) {
+    // bool ok = false;
+    // const int parsedMaxPeriod = currentMaxPeriod.toInt(&ok);
+    //
+    // if (!ok)
+    //     return;
+    //
+    // constexpr int lowerBound = 10;
+    // constexpr int upperBound = std::numeric_limits<short>::max();   // IDK:  я не знаю каков максимум
+    // const int currentMinPeriod = static_cast<int>(m_config[m_postIndex].minPeriod.count());
+    // const int allowedLowerBound = std::max(lowerBound, currentMinPeriod);
+    //
+    // if (allowedLowerBound > upperBound)
+    //     return;
+    //
+    // const int maxPeriod = std::clamp(parsedMaxPeriod, allowedLowerBound, upperBound);
+    //
+    // if (maxPeriod == m_config[m_postIndex].maxPeriod.count())
+    //     return;
+    //
+    // m_config[m_postIndex].maxPeriod = std::chrono::milliseconds(maxPeriod);
+    // emit currentMaxPeriodChanged(QString::number(maxPeriod));
+    constexpr int lowerBound = 11;
+    constexpr int upperBound = 3600000;
+    const int currentMinPeriod = static_cast<int>(m_config[m_postIndex].minPeriod.count());
+    const int allowedLowerBound = std::max(lowerBound, currentMinPeriod + 1);
+
+    // Если строка пустая
+    if (currentMaxPeriod.trimmed().isEmpty()) {
+        m_config[m_postIndex].maxPeriod = std::chrono::milliseconds(allowedLowerBound);
+        return;
+    }
+
     bool ok = false;
     const int parsedMaxPeriod = currentMaxPeriod.toInt(&ok);
 
-    if (!ok)
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedMaxPeriod)) {
+        emit currentMaxPeriodChanged(QString::number(m_config[m_postIndex].maxPeriod.count()));
         return;
-
-    constexpr int lowerBound = 10;
-    constexpr int upperBound = std::numeric_limits<short>::max();   // IDK:  я не знаю каков максимум
-    const int currentMinPeriod = static_cast<int>(m_config[m_postIndex].minPeriod.count());
-    const int allowedLowerBound = std::max(lowerBound, currentMinPeriod);
+    }
 
     if (allowedLowerBound > upperBound)
         return;
 
     const int maxPeriod = std::clamp(parsedMaxPeriod, allowedLowerBound, upperBound);
+    if (parsedMaxPeriod > maxPeriod) {
+        m_config[m_postIndex].maxPeriod = std::chrono::milliseconds(maxPeriod);
+        emit currentMaxPeriodChanged(QString::number(upperBound));
+        return;
+    }
+    if (parsedMaxPeriod < maxPeriod) {
+        m_config[m_postIndex].maxPeriod = std::chrono::milliseconds(maxPeriod);
+        emit currentMaxPeriodChanged(QString::number(allowedLowerBound));
+        return;
+    }
 
     if (maxPeriod == m_config[m_postIndex].maxPeriod.count())
         return;
