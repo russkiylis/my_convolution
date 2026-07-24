@@ -564,7 +564,6 @@ void PostListModel::postUpdate() {
     m_fallbackPostIndex = postIndex();
 }
 
-// FIXME: Оно сломано. Каким то чудом спавнит новые пики (?!)
 int PostListModel::fallback() {
     beginResetModel();
     m_config.clear();

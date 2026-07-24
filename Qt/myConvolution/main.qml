@@ -17,22 +17,29 @@ import QtQuick.Layouts 1.15
 // #1A0F00
 
 // Основное окно программы
-Window {
+ApplicationWindow {
     id: main
 
     // Блок с переменными
-    property string backgroundColor: "#FFFCFA"
-    property string activeColor: "#FFEACA"
-    property string borderColor: "#FFD79A"
-    property string textColorInactive: "#FFB03A"
-    property string textColor: "#1A0F00"
-    property string textColorFieldInactive: "#B1B0AF"
-    property string pressColor: "#FFF3E2"
+    // property string backgroundColor: "#FFFCFA"
+    // property string activeColor: "#FFEACA"
+    // property string borderColor: "#FFD79A"
+    // property string textColorInactive: "#FFB03A"
+    // property string textColor: "#1A0F00"
+    // property string textColorFieldInactive: "#B1B0AF"
+    // property string pressColor: "#FFF3E2"
+    //
+    // property string borderColor2: "#CBCBCB"
+    // property string backgroundColor2: "#F7F7F7"
+    // property string pressColor2: "#EDEDED"
+    // property string textColorInactive2: "#979797"
 
-    property string borderColor2: "#CBCBCB"
-    property string backgroundColor2: "#F7F7F7"
-    property string pressColor2: "#EDEDED"
-    property string textColorInactive2: "#979797"
+    property string backgroundColor: "#FFFFFF"; property string activeColor: "#E8F0EA"
+    property string borderColor: "#B2C2B5"; property string textColorInactive: "#7A8A7D"
+    property string textColor: "#2C362E"; property string textColorFieldInactive: "#9CAAA0"
+    property string pressColor: "#DFE8E1"
+    property string borderColor2: "#C6D1C9"; property string backgroundColor2: "#F4F7F5"
+    property string pressColor2: "#E8F0EA"; property string textColorInactive2: "#7A8A7D"
 
     width: 1280
     height: 720

@@ -183,6 +183,7 @@ Item {
                         text: "Имя поста"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
                 }
 
@@ -202,6 +203,7 @@ Item {
                         text: "Широта (град.)"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
 
                     TextField {
@@ -222,6 +224,7 @@ Item {
                             text: "Долгота (град.)"
                             anchors.bottom: parent.top
                             anchors.bottomMargin: 5
+                            color: main.textColor
                         }
                     }
                 }
@@ -242,6 +245,7 @@ Item {
                         text: "Частота (Гц)"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
                 }
 
@@ -261,6 +265,7 @@ Item {
                         text: "Уровень (дБ)"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
 
                     TextField {
@@ -281,6 +286,7 @@ Item {
                             text: "СКО уровня"
                             anchors.bottom: parent.top
                             anchors.bottomMargin: 5
+                            color: main.textColor
                         }
                     }
                 }
@@ -301,6 +307,7 @@ Item {
                         text: "Мин. гор. угол (град.)"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
 
                     TextField {
@@ -321,6 +328,7 @@ Item {
                             text: "Макс. гор. угол (град.)"
                             anchors.bottom: parent.top
                             anchors.bottomMargin: 5
+                            color: main.textColor
                         }
 
                         ComboBox {
@@ -348,6 +356,7 @@ Item {
                                 text: "Шаг гор. угла (град.)"
                                 anchors.bottom: parent.top
                                 anchors.bottomMargin: 5
+                                color: main.textColor
                             }
                         }
                     }
@@ -369,6 +378,7 @@ Item {
                         text: "Мин. верт. угол (град.)"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
 
                     TextField {
@@ -389,6 +399,7 @@ Item {
                             text: "Макс. верт. угол (град.)"
                             anchors.bottom: parent.top
                             anchors.bottomMargin: 5
+                            color: main.textColor
                         }
 
                         ComboBox {
@@ -416,6 +427,7 @@ Item {
                                 text: "Шаг верт. угла (град.)"
                                 anchors.bottom: parent.top
                                 anchors.bottomMargin: 5
+                                color: main.textColor
                             }
                         }
                     }
@@ -437,6 +449,7 @@ Item {
                         text: "Мин. период генерации (мс)"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
 
                     TextField {
@@ -457,6 +470,7 @@ Item {
                             text: "Макс. период генерации (мс)"
                             anchors.bottom: parent.top
                             anchors.bottomMargin: 5
+                            color: main.textColor
                         }
                     }
                 }
@@ -475,6 +489,7 @@ Item {
                         text: "Тип шума"
                         anchors.bottom: parent.top
                         anchors.bottomMargin: 5
+                        color: main.textColor
                     }
                     currentIndex: generatorBackend.postListModel.currentNoiseType
 
@@ -519,6 +534,7 @@ Item {
                                     text: "Мат. ожидание шума"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -538,6 +554,7 @@ Item {
                                     text: "СКО шума"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
                         }
@@ -565,6 +582,7 @@ Item {
                                     text: "Мин. значение шума"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -584,6 +602,7 @@ Item {
                                     text: "Макс. значение шума"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
                         }
@@ -603,6 +622,7 @@ Item {
                                 text: "Пики (азимутальные)"
                                 anchors.bottom: parent.top
                                 anchors.bottomMargin: 5
+                                color: main.textColor
                             }
 
                             //TODO: Плюсик должен нажиматься
@@ -676,6 +696,7 @@ Item {
                                     text: "Тип пика"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -699,6 +720,7 @@ Item {
                                     text: "Координата вершины"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -722,6 +744,7 @@ Item {
                                     text: "Амплитуда"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -746,6 +769,7 @@ Item {
                                     text: "СКО"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -771,6 +795,7 @@ Item {
                                     text: "Полуширина"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
                         }
@@ -790,6 +815,7 @@ Item {
                                 text: "Пики (угломестные)"
                                 anchors.bottom: parent.top
                                 anchors.bottomMargin: 5
+                                color: main.textColor
                             }
 
                             //TODO: Плюсик должен нажиматься
@@ -864,6 +890,7 @@ Item {
                                     text: "Тип пика"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -887,6 +914,7 @@ Item {
                                     text: "Координата вершины"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -910,6 +938,7 @@ Item {
                                     text: "Амплитуда"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -934,6 +963,7 @@ Item {
                                     text: "СКО"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
 
@@ -958,6 +988,7 @@ Item {
                                     text: "Полуширина"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
+                                    color: main.textColor
                                 }
                             }
                         }
