@@ -47,11 +47,17 @@ QString PostListModel::currentPostName() const {
 }
 
 void PostListModel::setCurrentPostName(const QString &currentPostName) {
-    const QString& postName = currentPostName;
+    QString postName = currentPostName;
     // Сий мусор не давал полностью удалить строчку. Такую гадость надо добавить в postUpdate
     // if (currentPostName.trimmed().isEmpty()) {
     //     postName = QStringLiteral("Пост %1").arg(postIndex() + 1);
     // }
+    if (currentPostName.length() >= 25) {
+        postName = currentPostName.left(25);
+        m_config[m_postIndex].postName = postName;
+        emit currentPostNameChanged(postName);
+        return;
+    }
 
     if (postName == m_config[m_postIndex].postName)
         return;
