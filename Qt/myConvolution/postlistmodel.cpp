@@ -212,7 +212,7 @@ void PostListModel::setCurrentLevel(const QString &currentLevel) {
 
     // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
     if (!ok || !std::isfinite(parsedLevel)) {
-        emit currentLevelChanged(Utils::doubleToString(m_config[m_postIndex].level, 2));
+        emit currentLevelChanged(Utils::doubleToString(m_config[m_postIndex].level, 3));
         return;
     }
 
@@ -241,28 +241,65 @@ void PostListModel::setCurrentLevel(const QString &currentLevel) {
 }
 
 QString PostListModel::currentLevelSigma() const {
-    return QString::number(m_config[m_postIndex].levelSigma, 'f', 3);
+    return Utils::doubleToString(m_config[m_postIndex].levelSigma, 3);
 }
 
 void PostListModel::setCurrentLevelSigma(const QString &currentLevelSigma) {
+    // bool ok = false;
+    // const double parsedLevelSigma = currentLevelSigma.toDouble(&ok);
+    //
+    // if (!ok || !std::isfinite(parsedLevelSigma))
+    //     return;
+    //
+    // // IDK: Каков разброс?
+    // const double levelSigma = std::clamp(
+    //     parsedLevelSigma,
+    //     static_cast<double>(std::numeric_limits<float>::min()),
+    //     static_cast<double>(std::numeric_limits<float>::max())
+    // );
+    //
+    // if (levelSigma == m_config[m_postIndex].levelSigma)
+    //     return;
+    //
+    // m_config[m_postIndex].levelSigma = levelSigma;
+    // emit currentLevelSigmaChanged(QString::number(levelSigma, 'f', 3));
     bool ok = false;
     const double parsedLevelSigma = currentLevelSigma.toDouble(&ok);
 
-    if (!ok || !std::isfinite(parsedLevelSigma))
+    // Если строка пустая
+    if (currentLevelSigma.trimmed().isEmpty()) {
+        m_config[m_postIndex].levelSigma = 0.0;
+        return;
+    }
+
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedLevelSigma)) {
+        emit currentLevelSigmaChanged(Utils::doubleToString(m_config[m_postIndex].levelSigma, 3));
+        return;
+    }
+
+    // Если в конце точка, то ждем дальнейших цифр
+    if (currentLevelSigma.endsWith('.'))
         return;
 
-    // IDK: Каков разброс?
-    const double levelSigma = std::clamp(
-        parsedLevelSigma,
-        static_cast<double>(std::numeric_limits<float>::min()),
-        static_cast<double>(std::numeric_limits<float>::max())
-    );
-
-    if (levelSigma == m_config[m_postIndex].levelSigma)
+    const double levelSigma = std::clamp(parsedLevelSigma, 0.0, 1000.0); // IDK: Каков разброс уровня?
+    if (parsedLevelSigma > levelSigma) {
+        m_config[m_postIndex].levelSigma = levelSigma;
+        emit currentLevelSigmaChanged("1000000000000");
         return;
+    }
+    if (parsedLevelSigma < levelSigma) {
+        m_config[m_postIndex].levelSigma = levelSigma;
+        emit currentLevelSigmaChanged("0");
+        return;
+    }
+
+    if (levelSigma == m_config[m_postIndex].levelSigma) {
+        return;
+    }
 
     m_config[m_postIndex].levelSigma = levelSigma;
-    emit currentLevelSigmaChanged(QString::number(levelSigma, 'f', 3));
+    emit currentLevelSigmaChanged(Utils::doubleToString(levelSigma, 3));
 }
 
 QString PostListModel::currentMinAngleH() const {
