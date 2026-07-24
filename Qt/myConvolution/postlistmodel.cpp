@@ -245,24 +245,6 @@ QString PostListModel::currentLevelSigma() const {
 }
 
 void PostListModel::setCurrentLevelSigma(const QString &currentLevelSigma) {
-    // bool ok = false;
-    // const double parsedLevelSigma = currentLevelSigma.toDouble(&ok);
-    //
-    // if (!ok || !std::isfinite(parsedLevelSigma))
-    //     return;
-    //
-    // // IDK: Каков разброс?
-    // const double levelSigma = std::clamp(
-    //     parsedLevelSigma,
-    //     static_cast<double>(std::numeric_limits<float>::min()),
-    //     static_cast<double>(std::numeric_limits<float>::max())
-    // );
-    //
-    // if (levelSigma == m_config[m_postIndex].levelSigma)
-    //     return;
-    //
-    // m_config[m_postIndex].levelSigma = levelSigma;
-    // emit currentLevelSigmaChanged(QString::number(levelSigma, 'f', 3));
     bool ok = false;
     const double parsedLevelSigma = currentLevelSigma.toDouble(&ok);
 
@@ -307,14 +289,24 @@ QString PostListModel::currentMinAngleH() const {
 }
 
 void PostListModel::setCurrentMinAngleH(const QString &currentMinAngleH) {
+    constexpr int lowerBound = 0;
+    constexpr int upperBound = 359;
+
+    // Если строка пустая
+    if (currentMinAngleH.trimmed().isEmpty()) {
+        m_config[m_postIndex].minAngleH = lowerBound;
+        return;
+    }
+
     bool ok = false;
     const int parsedMinAngleH = currentMinAngleH.toInt(&ok);
 
-    if (!ok)
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedMinAngleH)) {
+        emit currentMinAngleHChanged(QString::number(m_config[m_postIndex].minAngleH));
         return;
+    }
 
-    constexpr int lowerBound = 0;
-    constexpr int upperBound = 359;
     const int currentMaxAngleH = m_config[m_postIndex].maxAngleH;
     const int allowedUpperBound = std::min(upperBound, currentMaxAngleH - 1);
 
@@ -322,6 +314,16 @@ void PostListModel::setCurrentMinAngleH(const QString &currentMinAngleH) {
         return;
 
     const int minAngleH = std::clamp(parsedMinAngleH, lowerBound, allowedUpperBound);
+    if (parsedMinAngleH > minAngleH) {
+        m_config[m_postIndex].minAngleH = minAngleH;
+        emit currentMinAngleHChanged(QString::number(allowedUpperBound));
+        return;
+    }
+    if (parsedMinAngleH < minAngleH) {
+        m_config[m_postIndex].minAngleH = minAngleH;
+        emit currentMinAngleHChanged(QString::number(lowerBound));
+        return;
+    }
 
     if (minAngleH == m_config[m_postIndex].minAngleH)
         return;
@@ -335,21 +337,40 @@ QString PostListModel::currentMaxAngleH() const {
 }
 
 void PostListModel::setCurrentMaxAngleH(const QString &currentMaxAngleH) {
-    bool ok = false;
-    const int parsedMaxAngleH = currentMaxAngleH.toInt(&ok);
-
-    if (!ok)
-        return;
-
     constexpr int lowerBound = 1;
     constexpr int upperBound = 360;
     const int currentMinAngleH = m_config[m_postIndex].minAngleH;
     const int allowedLowerBound = std::max(lowerBound, currentMinAngleH + 1);
 
+    // Если строка пустая
+    if (currentMaxAngleH.trimmed().isEmpty()) {
+        m_config[m_postIndex].minAngleH = allowedLowerBound;
+        return;
+    }
+
+    bool ok = false;
+    const int parsedMaxAngleH = currentMaxAngleH.toInt(&ok);
+
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedMaxAngleH)) {
+        emit currentMaxAngleHChanged(QString::number(m_config[m_postIndex].maxAngleH));
+        return;
+    }
+
     if (allowedLowerBound > upperBound)
         return;
 
     const int maxAngleH = std::clamp(parsedMaxAngleH, allowedLowerBound, upperBound);
+    if (parsedMaxAngleH > maxAngleH) {
+        m_config[m_postIndex].maxAngleH = maxAngleH;
+        emit currentMaxAngleHChanged(QString::number(upperBound));
+        return;
+    }
+    if (parsedMaxAngleH < maxAngleH) {
+        m_config[m_postIndex].maxAngleH = maxAngleH;
+        emit currentMaxAngleHChanged(QString::number(allowedLowerBound));
+        return;
+    }
 
     if (maxAngleH == m_config[m_postIndex].maxAngleH)
         return;
@@ -398,14 +419,49 @@ QString PostListModel::currentMinAngleV() const {
 }
 
 void PostListModel::setCurrentMinAngleV(const QString &currentMinAngleV) {
+    // bool ok = false;
+    // const int parsedMinAngleV = currentMinAngleV.toInt(&ok);
+    //
+    // if (!ok)
+    //     return;
+    //
+    // constexpr int lowerBound = -45;
+    // constexpr int upperBound = 44;
+    // const int currentMaxAngleV = m_config[m_postIndex].maxAngleV;
+    // const int allowedUpperBound = std::min(upperBound, currentMaxAngleV - 1);
+    //
+    // if (allowedUpperBound < lowerBound)
+    //     return;
+    //
+    // const int minAngleV = std::clamp(parsedMinAngleV, lowerBound, allowedUpperBound);
+    //
+    // if (minAngleV == m_config[m_postIndex].minAngleV)
+    //     return;
+    //
+    // m_config[m_postIndex].minAngleV = minAngleV;
+    // emit currentMinAngleVChanged(QString::number(minAngleV));
+    constexpr int lowerBound = -45;
+    constexpr int upperBound = 44;
+
+    // Если строка пустая
+    if (currentMinAngleV.trimmed().isEmpty()) {
+        m_config[m_postIndex].minAngleV = lowerBound;
+        return;
+    }
+
+    // Если строчка состоит из единственного минуса, то не меняем её и тупо ждём
+    if (currentMinAngleV == "-")
+        return;
+
     bool ok = false;
     const int parsedMinAngleV = currentMinAngleV.toInt(&ok);
 
-    if (!ok)
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedMinAngleV)) {
+        emit currentMinAngleVChanged(QString::number(m_config[m_postIndex].minAngleV));
         return;
+    }
 
-    constexpr int lowerBound = -45;
-    constexpr int upperBound = 44;
     const int currentMaxAngleV = m_config[m_postIndex].maxAngleV;
     const int allowedUpperBound = std::min(upperBound, currentMaxAngleV - 1);
 
@@ -413,6 +469,16 @@ void PostListModel::setCurrentMinAngleV(const QString &currentMinAngleV) {
         return;
 
     const int minAngleV = std::clamp(parsedMinAngleV, lowerBound, allowedUpperBound);
+    if (parsedMinAngleV > minAngleV) {
+        m_config[m_postIndex].minAngleV = minAngleV;
+        emit currentMinAngleVChanged(QString::number(allowedUpperBound));
+        return;
+    }
+    if (parsedMinAngleV < minAngleV) {
+        m_config[m_postIndex].minAngleV = minAngleV;
+        emit currentMinAngleVChanged(QString::number(lowerBound));
+        return;
+    }
 
     if (minAngleV == m_config[m_postIndex].minAngleV)
         return;
@@ -426,21 +492,65 @@ QString PostListModel::currentMaxAngleV() const {
 }
 
 void PostListModel::setCurrentMaxAngleV(const QString &currentMaxAngleV) {
-    bool ok = false;
-    const int parsedMaxAngleV = currentMaxAngleV.toInt(&ok);
-
-    if (!ok)
-        return;
-
+    // bool ok = false;
+    // const int parsedMaxAngleV = currentMaxAngleV.toInt(&ok);
+    //
+    // if (!ok)
+    //     return;
+    //
+    // constexpr int lowerBound = -44;
+    // constexpr int upperBound = 45;
+    // const int currentMinAngleV = m_config[m_postIndex].minAngleV;
+    // const int allowedLowerBound = std::max(lowerBound, currentMinAngleV + 1);
+    //
+    // if (allowedLowerBound > upperBound)
+    //     return;
+    //
+    // const int maxAngleV = std::clamp(parsedMaxAngleV, allowedLowerBound, upperBound);
+    //
+    // if (maxAngleV == m_config[m_postIndex].maxAngleV)
+    //     return;
+    //
+    // m_config[m_postIndex].maxAngleV = maxAngleV;
+    // emit currentMaxAngleVChanged(QString::number(maxAngleV));
     constexpr int lowerBound = -44;
     constexpr int upperBound = 45;
     const int currentMinAngleV = m_config[m_postIndex].minAngleV;
     const int allowedLowerBound = std::max(lowerBound, currentMinAngleV + 1);
 
+    // Если строка пустая
+    if (currentMaxAngleV.trimmed().isEmpty()) {
+        m_config[m_postIndex].minAngleH = allowedLowerBound;
+        return;
+    }
+
+    // Если строчка состоит из единственного минуса, то не меняем её и тупо ждём
+    if (currentMaxAngleV == "-")
+        return;
+
+    bool ok = false;
+    const int parsedMaxAngleV = currentMaxAngleV.toInt(&ok);
+
+    // Если вместо числа мусор, то ничего не трогаем и не позволяем трогать
+    if (!ok || !std::isfinite(parsedMaxAngleV)) {
+        emit currentMaxAngleVChanged(QString::number(m_config[m_postIndex].maxAngleV));
+        return;
+    }
+
     if (allowedLowerBound > upperBound)
         return;
 
     const int maxAngleV = std::clamp(parsedMaxAngleV, allowedLowerBound, upperBound);
+    if (parsedMaxAngleV > maxAngleV) {
+        m_config[m_postIndex].maxAngleV = maxAngleV;
+        emit currentMaxAngleVChanged(QString::number(upperBound));
+        return;
+    }
+    if (parsedMaxAngleV < maxAngleV) {
+        m_config[m_postIndex].maxAngleV = maxAngleV;
+        emit currentMaxAngleVChanged(QString::number(allowedLowerBound));
+        return;
+    }
 
     if (maxAngleV == m_config[m_postIndex].maxAngleV)
         return;
