@@ -1,0 +1,179 @@
+#pragma once
+#include <QObject>
+
+#include "databasemanager.h"
+#include "loadgenerator.h"
+#include "utils.h"
+
+// Пакет данных, свёртка как Int16 (smallint в psql)
+struct DataPackageInt16
+{
+    // Преобразуем обычный DataPackage в DataPackageInt16
+    explicit DataPackageInt16(const LoadGenerator::DataPackage &other) :
+        timestamp(other.timestamp),
+        bearingH(other.bearingH),
+        bearingV(other.bearingV),
+        qualityH(other.qualityH),
+        qualityV(other.qualityV),
+        level(other.level),
+        frequency(other.frequency),
+        coordinate(other.coordinate),
+        postName(other.postName),
+        minAngleH(other.minAngleH),
+        maxAngleH(other.maxAngleH),
+        minAngleV(other.minAngleV),
+        maxAngleV(other.maxAngleV),
+        stepH(other.stepH),
+        stepV(other.stepV)
+    {
+        for (const double value : other.convH) {
+            convH.push_back(Utils::doubleToQint16(value)); // Изначально была нормировка к единице, чтобы хранить в интах, помножим на 30000
+        }
+        for (const double value : other.convV) {
+            convV.push_back(Utils::doubleToQint16(value));
+        }
+    }
+
+    // Преобразуем обычный DataPackage к DataPackageInt16
+    DataPackageInt16 & operator=(const LoadGenerator::DataPackage &other)
+    {
+        timestamp = other.timestamp;
+        bearingH = other.bearingH;
+        bearingV = other.bearingV;
+        qualityH = other.qualityH;
+        qualityV = other.qualityV;
+        level = other.level;
+        frequency = other.frequency;
+        coordinate = other.coordinate;
+        postName = other.postName;
+        minAngleH = other.minAngleH;
+        maxAngleH = other.maxAngleH;
+        minAngleV = other.minAngleV;
+        maxAngleV = other.maxAngleV;
+        stepH = other.stepH;
+        stepV = other.stepV;
+
+        convH.clear();
+        convV.clear();
+        for (const double value : other.convH) {
+            convH.push_back(Utils::doubleToQint16(value));
+        }
+        for (const double value : other.convV) {
+            convV.push_back(Utils::doubleToQint16(value));
+        }
+
+        return *this;
+    }
+
+    QDateTime timestamp;        // Временная метка
+    double bearingH{};            // Направление по горизонтали
+    double bearingV{};            // Направление по вертикали
+    double qualityH{};            // Качество свёртки по горизонтали
+    double qualityV{};            // Качество свёртки по вертикали
+    double level{};               // Мощность
+    double frequency{};           // Частота
+    QGeoCoordinate coordinate;  // Координата
+    QString postName;           // Имя поста
+
+    int minAngleH{};               // Минимальный угол (горизонтальный)
+    int maxAngleH{};               // Максимальный угол (горизонтальный)
+    int minAngleV{};               // Минимамльный угол (вертикальный)
+    int maxAngleV{};               // Максимальный угол (вертикальный)
+    double stepH{};                // Шаг (горизонтальный)
+    double stepV{};                // Шаг (вертикальный)
+
+    std::vector<qint16> convH;   // Свёртка по горизонтали
+    std::vector<qint16> convV;   // Свёртка по вертикали
+};
+
+// Пакет данных, свёртка как Float (real в psql)
+struct DataPackageFloat
+{
+    // Преобразуем обычный DataPackage в DataPackageFloat
+    explicit DataPackageFloat(const LoadGenerator::DataPackage &other) :
+        timestamp(other.timestamp),
+        bearingH(other.bearingH),
+        bearingV(other.bearingV),
+        qualityH(other.qualityH),
+        qualityV(other.qualityV),
+        level(other.level),
+        frequency(other.frequency),
+        coordinate(other.coordinate),
+        postName(other.postName),
+        minAngleH(other.minAngleH),
+        maxAngleH(other.maxAngleH),
+        minAngleV(other.minAngleV),
+        maxAngleV(other.maxAngleV),
+        stepH(other.stepH),
+        stepV(other.stepV)
+    {
+        for (const double value : other.convH) {
+            convH.push_back(static_cast<float>(value));
+        }
+        for (const double value : other.convV) {
+            convV.push_back(static_cast<float>(value));
+        }
+    }
+
+    // Преобразуем обычный DataPackageInt к DataPackage
+    DataPackageFloat & operator=(const LoadGenerator::DataPackage &other)
+    {
+        timestamp = other.timestamp;
+        bearingH = other.bearingH;
+        bearingV = other.bearingV;
+        qualityH = other.qualityH;
+        qualityV = other.qualityV;
+        level = other.level;
+        frequency = other.frequency;
+        coordinate = other.coordinate;
+        postName = other.postName;
+        minAngleH = other.minAngleH;
+        maxAngleH = other.maxAngleH;
+        minAngleV = other.minAngleV;
+        maxAngleV = other.maxAngleV;
+        stepH = other.stepH;
+        stepV = other.stepV;
+
+        convH.clear();
+        convV.clear();
+        for (const double value : other.convH) {
+            convH.push_back(static_cast<float>(value));
+        }
+        for (const double value : other.convV) {
+            convV.push_back(static_cast<float>(value));
+        }
+
+        return *this;
+    }
+
+    QDateTime timestamp;        // Временная метка
+    double bearingH{};            // Направление по горизонтали
+    double bearingV{};            // Направление по вертикали
+    double qualityH{};            // Качество свёртки по горизонтали
+    double qualityV{};            // Качество свёртки по вертикали
+    double level{};               // Мощность
+    double frequency{};           // Частота
+    QGeoCoordinate coordinate;  // Координата
+    QString postName;           // Имя поста
+
+    int minAngleH{};               // Минимальный угол (горизонтальный)
+    int maxAngleH{};               // Максимальный угол (горизонтальный)
+    int minAngleV{};               // Минимамльный угол (вертикальный)
+    int maxAngleV{};               // Максимальный угол (вертикальный)
+    double stepH{};                // Шаг (горизонтальный)
+    double stepV{};                // Шаг (вертикальный)
+
+    std::vector<float> convH;   // Свёртка по горизонтали
+    std::vector<float> convV;   // Свёртка по вертикали
+};
+
+class SaveBackend : public QObject {
+    Q_OBJECT
+public:
+    explicit SaveBackend(DatabaseManager &db, QObject *parent = nullptr);
+
+    void processDataPackage(const LoadGenerator::DataPackage &package);
+
+private:
+    DatabaseManager &m_db;  // Менеджер базы данных
+};

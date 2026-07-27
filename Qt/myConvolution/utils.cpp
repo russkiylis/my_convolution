@@ -18,3 +18,11 @@ QString Utils::doubleToString(const double value, const int precision)
 
     return result;
 }
+
+qint16 Utils::doubleToQint16(const double value) {
+    constexpr double maximum = 30000.0;
+
+    return static_cast<qint16>(
+        std::lround(std::clamp(value, -1.0, 1.0) * maximum)
+    );
+}

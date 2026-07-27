@@ -37,6 +37,8 @@ set(PROJECT_SOURCES
     postlistmodel.h postlistmodel.cpp
         utils.cpp
         utils.h
+        savebackend.cpp
+        savebackend.h
 )
 
 add_executable(myConvolution

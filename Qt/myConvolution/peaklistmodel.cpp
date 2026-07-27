@@ -94,6 +94,7 @@ void PeakListModel::setPeakType(const int row, const int peakType) {
     endResetModel();
 }
 
+// FIXME: добавить адекватную проверку значений
 void PeakListModel::setCenter(const int row, const double center) {
     // Проверка на адекватность значений
     if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
@@ -123,6 +124,7 @@ void PeakListModel::setCenter(const int row, const double center) {
     emit dataChanged(changedIndex, changedIndex, {CenterRole});
 }
 
+// FIXME: добавить адекватную проверку значений
 void PeakListModel::setAmplitude(const int row, const double amplitude) {
     // Проверка на адекватность значений
     if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
@@ -152,6 +154,7 @@ void PeakListModel::setAmplitude(const int row, const double amplitude) {
     emit dataChanged(changedIndex, changedIndex, {AmplitudeRole});
 }
 
+// FIXME: добавить адекватную проверку значений
 void PeakListModel::setSigma(const int row, const double sigma) {
     // Проверка на адекватность значений
     if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
@@ -171,6 +174,7 @@ void PeakListModel::setSigma(const int row, const double sigma) {
     emit dataChanged(changedIndex, changedIndex, {SigmaRole});
 }
 
+// FIXME: добавить адекватную проверку значений
 void PeakListModel::setHalfWidth(const int row, const double halfWidth) {
     // Проверка на адекватность значений
     if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)

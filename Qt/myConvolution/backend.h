@@ -25,6 +25,10 @@ private:
     Q_PROPERTY(QString connectOptions READ connectOptions WRITE setConnectOptions NOTIFY connectOptionsChanged)
 
     DatabaseManager m_db;      // Менеджер базы данных
+public:
+    [[nodiscard]] DatabaseManager &db();
+
+private:
     int m_dbStatus = 0; // Статус базы данных, 0 - не подключена, 1 - готова, 2 - занята
     QString m_lastError = "Ошибок нет."; // Последняя ошибка при работе с БД
 

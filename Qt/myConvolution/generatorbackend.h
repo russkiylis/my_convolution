@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "postlistmodel.h"
+#include "savebackend.h"
 
 class GeneratorBackend : public QObject
 {
@@ -12,7 +13,7 @@ class GeneratorBackend : public QObject
     Q_PROPERTY(bool generatorEnabled READ generatorEnabled WRITE setGeneratorEnabled NOTIFY generatorEnabledChanged)
 public:
     static std::vector<LoadGenerator::PostConfig> createInitialConfig();
-    explicit GeneratorBackend(QObject *parent = nullptr);
+    explicit GeneratorBackend(SaveBackend &saveBackend, QObject *parent = nullptr);
     ~GeneratorBackend() override;
 
     // Включён ли генератор
@@ -32,6 +33,7 @@ private:
     std::vector<LoadGenerator::PostConfig> m_cfg;
     QThread m_loadGeneratorThread;    // Поток генератора
     PostListModel m_postListModel;   // Модель для подключения к списку постов
+    SaveBackend &m_saveBackend;     // Бекенд сохранения в БД
 
     bool m_generatorEnabled = false;     // Включён ли генератор
 
@@ -41,6 +43,6 @@ signals:
     void signalPostConfigUpdate(std::vector<LoadGenerator::PostConfig> newConfig);
 
 public slots:
-    void slotSendData(LoadGenerator::DataPackage const & package);
+    void slotSendData(const LoadGenerator::DataPackage & package);
     void slotPostCallToggle(bool toggle);
 };

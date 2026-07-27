@@ -10,6 +10,11 @@ QString ConnectionBackend::lastError() const
     return m_lastError;
 }
 
+DatabaseManager &ConnectionBackend::db()
+{
+    return m_db;
+}
+
 QString ConnectionBackend::hostName() const {
     return m_hostName;
 }

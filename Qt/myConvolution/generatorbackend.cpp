@@ -52,10 +52,11 @@ std::vector<LoadGenerator::PostConfig> GeneratorBackend::createInitialConfig()
     return result;
 }
 
-GeneratorBackend::GeneratorBackend(QObject *parent)
+GeneratorBackend::GeneratorBackend(SaveBackend &saveBackend, QObject *parent)
     : QObject{parent},
     m_cfg{createInitialConfig()},
-    m_postListModel(this, m_cfg)
+    m_postListModel(this, m_cfg),
+    m_saveBackend(saveBackend)
 {
 
     m_postListModel.setFallbackConfig(m_cfg);
@@ -112,7 +113,7 @@ void GeneratorBackend::setCfg(const std::vector<LoadGenerator::PostConfig> &cfg)
     m_cfg = cfg;
 }
 
-void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {
+void GeneratorBackend::slotSendData(const LoadGenerator::DataPackage &package) {
     // freopen("log.txt", "a", stdout);
     // freopen("log.txt", "a", stderr);
     // qDebug().noquote().nospace()
@@ -120,6 +121,7 @@ void GeneratorBackend::slotSendData(LoadGenerator::DataPackage const &package) {
     // << "\tlevel=" << package.level
     // << "\ttimestamp=" << package.timestamp
     // << "\tconvH=" << package.convH;
+    m_saveBackend.processDataPackage(package);
 }
 
 void GeneratorBackend::slotPostCallToggle(const bool toggle) {

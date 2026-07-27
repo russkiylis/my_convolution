@@ -8,6 +8,7 @@
 #include "generatorbackend.h"
 #include "databasemanager.h"
 #include "loadgenerator.h"
+#include "savebackend.h"
 
 // Точка входа в программу
 int main(int argc, char *argv[])
@@ -23,7 +24,8 @@ int main(int argc, char *argv[])
 
     // Создаём объект классов backendа
     ConnectionBackend connectionBackend;
-    GeneratorBackend generatorBackend;
+    SaveBackend saveBackend(connectionBackend.db());
+    GeneratorBackend generatorBackend(saveBackend);
 
     // Регистрация типа DatabaseConfiguration для передачи через сигналы/слоты
     qRegisterMetaType<DatabaseConfiguration>("DatabaseConfiguration");
