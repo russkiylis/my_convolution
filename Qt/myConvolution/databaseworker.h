@@ -3,6 +3,9 @@
 #include <QObject>
 #include <QString>
 
+#include "loadgenerator.h"
+#include "savebackend.h"
+
 // Класс, непосредственно работающий с базой данных.
 // Сидит в другом потоке чтобы не мешать остальной программе.
 
@@ -41,7 +44,6 @@ struct DatabaseConfiguration {
     QString fullConnectionName;
     QString connectOptions;
 };
-
 Q_DECLARE_METATYPE(DatabaseConfiguration)
 
 class DatabaseWorker : public QObject
@@ -81,6 +83,9 @@ public slots:
     // Обновление конфигурации подключения
     void slotConfigUpdate(const DatabaseConfiguration & new_config);
 
+    void slotInsertDouble(const LoadGenerator::DataPackage &package);
+    void slotInsertFloat(const DataPackageFloat &package);
+    void slotInsertInt16(const DataPackageInt16 &package);
 
 signals:
 

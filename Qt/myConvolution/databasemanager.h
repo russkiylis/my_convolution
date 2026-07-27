@@ -4,6 +4,10 @@
 #include <QString>
 #include <QThread>
 #include "databaseworker.h"
+#include "loadgenerator.h"
+
+struct DataPackageFloat;
+struct DataPackageInt16;
 
 class ConnectionBackend;
 
@@ -124,6 +128,10 @@ public:
     // Закрыть подключение
     void closeConnection();
 
+    void saveDataPackage(LoadGenerator::DataPackage const & package);
+    void saveDataPackage(DataPackageFloat const & package);
+    void saveDataPackage(DataPackageInt16 const & package);
+
 private:
     ConnectionBackend *m_backend;
     QString const m_connectionName;
@@ -158,4 +166,7 @@ signals:
     void signalManagerUpdate();
     void signalConfigUpdate(const DatabaseConfiguration & new_config);
 
+    void signalInsertDouble(const LoadGenerator::DataPackage &package);
+    void signalInsertInt16(const DataPackageInt16 &package);
+    void signalInsertFloat(const DataPackageFloat &package);
 };

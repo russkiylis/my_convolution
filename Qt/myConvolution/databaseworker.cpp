@@ -1,5 +1,6 @@
 #include <QDebug>
 #include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 #include <QSqlError>
 #include <utility>
 #include "databaseworker.h"
@@ -226,4 +227,93 @@ void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
     _busy = false;
     _lastError = "Ошибок нет.";
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+}
+
+void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package) {
+    _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    // Получаем объект для работы с запросами
+    QSqlQuery query(db);
+    QString fileError;
+    QString command;
+
+    if (!_valid) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно записать данные.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно записать данные "
+                     + "в закрытое соединение.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Считываем файл для записи свёртки
+    if (!Utils::fileToString(":sql/insertDoublePrecision.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Подготавливаем и выполняем команду записи свёртки
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    query.bindValue(":min_angle_h", package.minAngleH);
+    query.bindValue(":max_angle_h", package.maxAngleH);
+    query.bindValue(":step_h", package.stepH);
+    query.bindValue(":conv_h_double", Utils::vectorToPgDoubleArray(package.convH));
+    query.bindValue(":min_angle_v", package.minAngleV);
+    query.bindValue(":max_angle_v", package.maxAngleV);
+    query.bindValue(":step_v", package.stepV);
+    query.bindValue(":conv_v_double", Utils::vectorToPgDoubleArray(package.convV));
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    qDebug().noquote().nospace() << "Запись удалась!";
+}
+
+// TODO: Реализовать запись флоатов
+void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
+    // qDebug().noquote().nospace() << "Пакет real попал в рабочий поток: "<< package.postName;
+}
+
+// TODO: Реализовать запись интов
+void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
+    // qDebug().noquote().nospace() << "Пакет smallint попал в рабочий поток: "<< package.postName;
 }

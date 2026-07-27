@@ -1,4 +1,5 @@
 #include "savebackend.h"
+#include "databasemanager.h"
 
 SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
     QObject{parent},
@@ -8,9 +9,19 @@ SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
 }
 
 void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) {
-    //TODO: Обработка дата пекедж
-    // qDebug() << package.postName;
-
+    switch (m_currentDataType) {
+    case doublePrecision:
+        m_db.saveDataPackage(package);
+        break;
+    case real:
+        m_db.saveDataPackage(DataPackageFloat(package));
+        break;
+    case smallint:
+        m_db.saveDataPackage(DataPackageInt16(package));
+        break;
+    default:
+        throw std::logic_error("Сомнительный тип данных!");
+    }
 }
 
 int SaveBackend::currentDataType() const

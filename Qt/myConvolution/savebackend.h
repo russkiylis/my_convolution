@@ -1,13 +1,15 @@
 #pragma once
 #include <QObject>
 
-#include "databasemanager.h"
 #include "loadgenerator.h"
 #include "utils.h"
+
+class DatabaseManager;
 
 // Пакет данных, свёртка как Int16 (smallint в psql)
 struct DataPackageInt16
 {
+    DataPackageInt16() = default;
     // Преобразуем обычный DataPackage в DataPackageInt16
     explicit DataPackageInt16(const LoadGenerator::DataPackage &other) :
         timestamp(other.timestamp),
@@ -85,10 +87,12 @@ struct DataPackageInt16
     std::vector<qint16> convH;   // Свёртка по горизонтали
     std::vector<qint16> convV;   // Свёртка по вертикали
 };
+Q_DECLARE_METATYPE(DataPackageInt16)
 
 // Пакет данных, свёртка как Float (real в psql)
 struct DataPackageFloat
 {
+    DataPackageFloat() = default;
     // Преобразуем обычный DataPackage в DataPackageFloat
     explicit DataPackageFloat(const LoadGenerator::DataPackage &other) :
         timestamp(other.timestamp),
@@ -166,6 +170,7 @@ struct DataPackageFloat
     std::vector<float> convH;   // Свёртка по горизонтали
     std::vector<float> convV;   // Свёртка по вертикали
 };
+Q_DECLARE_METATYPE(DataPackageFloat)
 
 enum DataType
 {

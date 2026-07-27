@@ -3,6 +3,7 @@
 #include "databasemanager.h"
 #include "databaseworker.h"
 #include "backend.h"
+#include "savebackend.h"
 
 DatabaseManager::DatabaseManager(ConnectionBackend *backend,
                                        QString const & connectionName,
@@ -46,6 +47,9 @@ DatabaseManager::DatabaseManager(ConnectionBackend *backend,
     connect(this, &DatabaseManager::signalManagerUpdate, worker, &DatabaseWorker::slotManagerUpdate);
     connect(this, &DatabaseManager::signalInitialize, worker, &DatabaseWorker::slotInitialize);
     connect(worker, &DatabaseWorker::signalManagerUpdate, this, &DatabaseManager::slotManagerUpdate);
+    connect(this, &DatabaseManager::signalInsertDouble, worker, &DatabaseWorker::slotInsertDouble);
+    connect(this, &DatabaseManager::signalInsertFloat, worker, &DatabaseWorker::slotInsertFloat);
+    connect(this, &DatabaseManager::signalInsertInt16, worker, &DatabaseWorker::slotInsertInt16);
     m_workerThread.start();
 
     // Проинициализируем рабочий объект
@@ -255,6 +259,21 @@ void DatabaseManager::closeConnection() {
 
     // В рабочий поток посылаем команду закрыть соединение
     emit signalCloseConnection();
+}
+
+void DatabaseManager::saveDataPackage(LoadGenerator::DataPackage const &package) {
+    qDebug().noquote().nospace() << "Пакет типа double precision: " << package.postName;
+    signalInsertDouble(package);
+}
+
+void DatabaseManager::saveDataPackage(DataPackageFloat const &package) {
+    qDebug().noquote().nospace() << "Пакет типа real: " << package.postName;
+    signalInsertFloat(package);
+}
+
+void DatabaseManager::saveDataPackage(DataPackageInt16 const &package) {
+    qDebug().noquote().nospace() << "Пакет типа smallint: " << package.postName;
+    signalInsertInt16(package);
 }
 
 void DatabaseManager::slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError) {

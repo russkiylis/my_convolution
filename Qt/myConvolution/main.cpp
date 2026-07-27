@@ -36,6 +36,8 @@ int main(int argc, char *argv[])
     qRegisterMetaType<std::vector<LoadGenerator::PostConfig>>("std::vector<LoadGenerator::PostConfig>");
     qRegisterMetaType<LoadGenerator::DataPackage>("LoadGenerator::DataPackage");
     qRegisterMetaType<LoadGenerator::DataPackage>("DataPackage");
+    qRegisterMetaType<DataPackageFloat>("DataPackageFloat");
+    qRegisterMetaType<DataPackageInt16>("DataPackageInt16");
 
     // Создание QML-движка
     QQmlApplicationEngine engine;

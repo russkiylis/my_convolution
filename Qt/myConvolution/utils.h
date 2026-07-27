@@ -8,4 +8,10 @@ public:
 
     // Преобразование double в qint16
     static qint16 doubleToQint16(double value);
+
+    // Вычленение текста из файла
+    static bool fileToString(const QString& fileName, QString& result, QString* errorMessage);
+
+    //Преобразование вектора в массив для PostgreSQL
+    static QString vectorToPgDoubleArray(const std::vector<double> &values);
 };

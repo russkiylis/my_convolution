@@ -8,5 +8,16 @@
         <file>ButtonBackground.qml</file>
         <file>TextFieldBackground.qml</file>
         <file>ListViewItemBackground.qml</file>
+
+        <!-- .sql команды -->
+        <file>sql/CreateDataTypeEnum.sql</file>
+        <file>sql/insertDoublePrecision.sql</file>
+        <file>sql/insertReal.sql</file>
+        <file>sql/insertResult.sql</file>
+        <file>sql/insertSmallint.sql</file>
+        <file>sql/selectDoublePrecision.sql</file>
+        <file>sql/selectReal.sql</file>
+        <file>sql/selectResult.sql</file>
+        <file>sql/selectSmallint.sql</file>
     </qresource>
 </RCC>

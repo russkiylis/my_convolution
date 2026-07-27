@@ -34,8 +34,8 @@ Item {
 
             model: [
                 "double precision (8 байт)",
-                "smallint (2 байта)",
-                "real (4 байта)"
+                "real (4 байта)",
+                "smallint (2 байта)"
             ]
 
             Label {
@@ -58,7 +58,7 @@ Item {
 
         // TODO: Добавить адекватный текст
         // text: generatorBackend.generatorEnabled ? "Остановить генератор нагрузки" : "Запустить генератор нагрузки"
-        text: "мяу"
+        text: "пустая кнопка. Скоро тут будет активация сохранения"
 
         // TODO: Добавить адекватную обработку кликов
         // onClicked: generatorBackend.onGeneratorEnabledButtonClicked()
