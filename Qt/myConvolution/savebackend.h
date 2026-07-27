@@ -167,13 +167,31 @@ struct DataPackageFloat
     std::vector<float> convV;   // Свёртка по вертикали
 };
 
+enum DataType
+{
+    doublePrecision,
+    real,
+    smallint
+};
+
 class SaveBackend : public QObject {
     Q_OBJECT
+
+    Q_PROPERTY(int currentDataType READ currentDataType WRITE setCurrentDataType NOTIFY currentDataTypeChanged)
+
 public:
     explicit SaveBackend(DatabaseManager &db, QObject *parent = nullptr);
 
     void processDataPackage(const LoadGenerator::DataPackage &package);
 
+    [[nodiscard]] int currentDataType() const;
+
+    void setCurrentDataType(int type);
+
 private:
     DatabaseManager &m_db;  // Менеджер базы данных
+    DataType m_currentDataType; // Текущий выбранный тип данных
+
+signals:
+    void currentDataTypeChanged(int type);
 };

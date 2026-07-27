@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
     // QML начнёт видеть Q_PROPERTY и Q_INVOKABLE
     engine.rootContext()->setContextProperty("connectionBackend", &connectionBackend);
     engine.rootContext()->setContextProperty("generatorBackend", &generatorBackend);
+    engine.rootContext()->setContextProperty("saveBackend", &saveBackend);
 
     // Создание адреса QML-файла
     const QUrl url(QStringLiteral("qrc:/main.qml"));
