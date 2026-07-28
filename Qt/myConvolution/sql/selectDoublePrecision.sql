@@ -9,4 +9,4 @@ SELECT
     max_angle_v,
     step_v,
     conv_v_double
-FROM df_conv;
+FROM df_conv

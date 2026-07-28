@@ -8,4 +8,4 @@ SELECT
     longitude,
     latitude,
     sysname
-FROM df_result;
+FROM df_result

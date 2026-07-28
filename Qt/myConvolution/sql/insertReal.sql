@@ -12,8 +12,8 @@ values ('real',
         :min_angle_h,
         :max_angle_h,
         :step_h,
-        :conv_h_real,
+        CAST(:conv_h_real AS REAL []),
         :min_angle_v,
         :max_angle_v,
         :step_v,
-        :conv_v_real);
+        CAST(:conv_v_real AS REAL []));

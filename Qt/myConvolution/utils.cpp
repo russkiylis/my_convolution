@@ -43,7 +43,7 @@ bool Utils::fileToString(const QString& fileName, QString &result, QString *erro
     return true;
 }
 
-QString Utils::vectorToPgDoubleArray(const std::vector<double> &values)
+QString Utils::vectorToPgArray(const std::vector<double> &values)
 {
     QString result = "{";
 
@@ -51,7 +51,35 @@ QString Utils::vectorToPgDoubleArray(const std::vector<double> &values)
         if (i != 0) {
             result += ", ";
         }
-        result += doubleToString(values[i], 17);
+        result += doubleToString(values[i], 17);    // TODO: Уточнить точность дабла
+    }
+
+    result += "}";
+    return result;
+}
+
+QString Utils::vectorToPgArray(const std::vector<float> &values) {
+    QString result = "{";
+
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        if (i != 0) {
+            result += ", ";
+        }
+        result += doubleToString(values[i], 9);     // TODO: Уточнить точность флоата
+    }
+
+    result += "}";
+    return result;
+}
+
+QString Utils::vectorToPgArray(const std::vector<qint16> &values) {
+    QString result = "{";
+
+    for (std::size_t i = 0; i < values.size(); ++i) {
+        if (i != 0) {
+            result += ", ";
+        }
+        result += QString::number(values[i]);
     }
 
     result += "}";

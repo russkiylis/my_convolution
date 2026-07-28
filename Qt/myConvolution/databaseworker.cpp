@@ -228,13 +228,15 @@ void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
     _lastError = "Ошибок нет.";
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
-
+// FIXME: Тут получился дикий спагетти код как будто бы
 void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package) {
     _busy = true;
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
     // Получаем объект для работы с БД
     QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.transaction();   // Начитаем транзакцию
 
     // Получаем объект для работы с запросами
     QSqlQuery query(db);
@@ -269,6 +271,7 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
             + ": Запись не удалась: "
             + fileError;
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
@@ -281,18 +284,20 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
         + ": Запись не удалась: "
         + query.lastError().text();
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
+
     query.bindValue(":min_angle_h", package.minAngleH);
     query.bindValue(":max_angle_h", package.maxAngleH);
     query.bindValue(":step_h", package.stepH);
-    query.bindValue(":conv_h_double", Utils::vectorToPgDoubleArray(package.convH));
+    query.bindValue(":conv_h_double", Utils::vectorToPgArray(package.convH));
     query.bindValue(":min_angle_v", package.minAngleV);
     query.bindValue(":max_angle_v", package.maxAngleV);
     query.bindValue(":step_v", package.stepV);
-    query.bindValue(":conv_v_double", Utils::vectorToPgDoubleArray(package.convV));
+    query.bindValue(":conv_v_double", Utils::vectorToPgArray(package.convV));
 
     if (!query.exec()) {
         _lastError = "[!] "
@@ -300,20 +305,465 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
         + ": Запись не удалась: "
         + query.lastError().text();
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
 
-    qDebug().noquote().nospace() << "Запись удалась!";
+    // Считываем файл для получения свёртки
+    if (!Utils::fileToString(":sql/selectDoublePrecision.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    command += "WHERE conv_h_double = CAST(:value AS DOUBLE PRECISION []);";
+
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":value", Utils::vectorToPgArray(package.convH));
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Вычленяем id для того, чтобы внести его в df_result
+    query.next();
+    int id = query.value(0).toInt();
+
+    // Считываем файл для записи df_result
+    if (!Utils::fileToString(":sql/insertResult.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":id", id);
+    query.bindValue(":result_timestamp", package.timestamp);
+    query.bindValue(":azimuth", package.bearingH);
+    query.bindValue(":elevation", package.bearingV);
+    query.bindValue(":power", package.level);
+    query.bindValue(":frequency", package.frequency);
+    query.bindValue(":longitude", package.coordinate.longitude());
+    query.bindValue(":latitude", package.coordinate.latitude());
+    query.bindValue(":sysname", package.postName);
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    db.commit();
+    _busy = false;
+    qDebug().noquote().nospace() << "Успешная запись в БД.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
-// TODO: Реализовать запись флоатов
+// FIXME: Тут получился дикий спагетти код как будто бы
 void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
-    // qDebug().noquote().nospace() << "Пакет real попал в рабочий поток: "<< package.postName;
+    _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.transaction();   // Начитаем транзакцию
+
+    // Получаем объект для работы с запросами
+    QSqlQuery query(db);
+    QString fileError;
+    QString command;
+
+    if (!_valid) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно записать данные.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно записать данные "
+                     + "в закрытое соединение.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Считываем файл для записи свёртки
+    if (!Utils::fileToString(":sql/insertReal.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Подготавливаем и выполняем команду записи свёртки
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":min_angle_h", package.minAngleH);
+    query.bindValue(":max_angle_h", package.maxAngleH);
+    query.bindValue(":step_h", package.stepH);
+    query.bindValue(":conv_h_real", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":min_angle_v", package.minAngleV);
+    query.bindValue(":max_angle_v", package.maxAngleV);
+    query.bindValue(":step_v", package.stepV);
+    query.bindValue(":conv_v_real", Utils::vectorToPgArray(package.convV));
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Считываем файл для получения свёртки
+    if (!Utils::fileToString(":sql/selectReal.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    command += "WHERE conv_h_real = CAST(:value AS REAL []);";
+
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":value", Utils::vectorToPgArray(package.convH));
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Вычленяем id для того, чтобы внести его в df_result
+    query.next();
+    int id = query.value(0).toInt();
+
+    // Считываем файл для записи df_result
+    if (!Utils::fileToString(":sql/insertResult.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":id", id);
+    query.bindValue(":result_timestamp", package.timestamp);
+    query.bindValue(":azimuth", package.bearingH);
+    query.bindValue(":elevation", package.bearingV);
+    query.bindValue(":power", package.level);
+    query.bindValue(":frequency", package.frequency);
+    query.bindValue(":longitude", package.coordinate.longitude());
+    query.bindValue(":latitude", package.coordinate.latitude());
+    query.bindValue(":sysname", package.postName);
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    db.commit();
+    _busy = false;
+    qDebug().noquote().nospace() << "Успешная запись в БД.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
-// TODO: Реализовать запись интов
+// FIXME: Тут получился дикий спагетти код как будто бы
 void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
-    // qDebug().noquote().nospace() << "Пакет smallint попал в рабочий поток: "<< package.postName;
+    _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.transaction();   // Начитаем транзакцию
+
+    // Получаем объект для работы с запросами
+    QSqlQuery query(db);
+    QString fileError;
+    QString command;
+
+    if (!_valid) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно записать данные.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно записать данные "
+                     + "в закрытое соединение.";
+        qDebug().noquote().nospace() << _lastError;
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Считываем файл для записи свёртки
+    if (!Utils::fileToString(":sql/insertSmallint.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Подготавливаем и выполняем команду записи свёртки
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":min_angle_h", package.minAngleH);
+    query.bindValue(":max_angle_h", package.maxAngleH);
+    query.bindValue(":step_h", package.stepH);
+    query.bindValue(":conv_h_smallint", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":min_angle_v", package.minAngleV);
+    query.bindValue(":max_angle_v", package.maxAngleV);
+    query.bindValue(":step_v", package.stepV);
+    query.bindValue(":conv_v_smallint", Utils::vectorToPgArray(package.convV));
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Считываем файл для получения свёртки
+    if (!Utils::fileToString(":sql/selectSmallint.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    command += "WHERE conv_h_smallint = CAST(:value AS SMALLINT []);";
+
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":value", Utils::vectorToPgArray(package.convH));
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Вычленяем id для того, чтобы внести его в df_result
+    query.next();
+    int id = query.value(0).toInt();
+
+    // Считываем файл для записи df_result
+    if (!Utils::fileToString(":sql/insertResult.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Запись не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    if (!query.prepare(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    query.bindValue(":id", id);
+    query.bindValue(":result_timestamp", package.timestamp);
+    query.bindValue(":azimuth", package.bearingH);
+    query.bindValue(":elevation", package.bearingV);
+    query.bindValue(":power", package.level);
+    query.bindValue(":frequency", package.frequency);
+    query.bindValue(":longitude", package.coordinate.longitude());
+    query.bindValue(":latitude", package.coordinate.latitude());
+    query.bindValue(":sysname", package.postName);
+
+    if (!query.exec()) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Запись не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    db.commit();
+    _busy = false;
+    qDebug().noquote().nospace() << "Успешная запись в БД.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }

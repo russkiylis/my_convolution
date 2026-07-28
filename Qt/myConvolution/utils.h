@@ -13,5 +13,7 @@ public:
     static bool fileToString(const QString& fileName, QString& result, QString* errorMessage);
 
     //Преобразование вектора в массив для PostgreSQL
-    static QString vectorToPgDoubleArray(const std::vector<double> &values);
+    static QString vectorToPgArray(const std::vector<double> &values);
+    static QString vectorToPgArray(const std::vector<float> &values);
+    static QString vectorToPgArray(const std::vector<qint16> &values);
 };
