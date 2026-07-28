@@ -1,1 +1,1 @@
-DROP TABLE df_conv;
+DROP TABLE IF EXISTS df_conv;

@@ -1,1 +1,1 @@
-DELETE FROM df_conv;
+TRUNCATE df_conv CASCADE;

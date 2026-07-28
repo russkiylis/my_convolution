@@ -7,7 +7,7 @@ Item {
     Rectangle {
         id: postListField
         width: parent.width / 4 - 30
-        height: parent.height - generationToggleButton.height - 90
+        height: parent.height - generationToggleButton.height - 120
         // height: 100
         border.color: main.borderColor
         color: main.backgroundColor
@@ -134,7 +134,7 @@ Item {
     Rectangle {
         id: postEditField
         // width: parent.width - postListField.width - 60
-        height: parent.height - generationToggleButton.height - 60
+        height: parent.height - generationToggleButton.height - 90
         // height: 100
         border.color: main.borderColor
         color: main.backgroundColor

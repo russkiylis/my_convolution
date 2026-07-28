@@ -9,18 +9,20 @@ SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
 }
 
 void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) {
-    switch (m_currentDataType) {
-    case doublePrecision:
-        m_db.saveDataPackage(package);
-        break;
-    case real:
-        m_db.saveDataPackage(DataPackageFloat(package));
-        break;
-    case smallint:
-        m_db.saveDataPackage(DataPackageInt16(package));
-        break;
-    default:
-        throw std::logic_error("Сомнительный тип данных!");
+    if (m_saveEnabled) {
+        switch (m_currentDataType) {
+        case doublePrecision:
+            m_db.saveDataPackage(package);
+            break;
+        case real:
+            m_db.saveDataPackage(DataPackageFloat(package));
+            break;
+        case smallint:
+            m_db.saveDataPackage(DataPackageInt16(package));
+            break;
+        default:
+            throw std::logic_error("Сомнительный тип данных!");
+        }
     }
 }
 
@@ -38,7 +40,19 @@ void SaveBackend::setCurrentDataType(int type) {
 void SaveBackend::onSaveEnableButtonClicked() {
     setSaveEnabled(!m_saveEnabled);
     QString msg = m_saveEnabled ? "Запись в базу данных включена." : "Запись в базу данных отключена.";
-    qDebug() << msg;
+    qDebug().noquote().nospace() << msg;
+}
+
+void SaveBackend::onClearTableButtonClicked() {
+    m_db.signalClearTable();
+}
+
+void SaveBackend::onRecreateTableButtonClicked() {
+    m_db.signalRecreateTable();
+}
+
+void SaveBackend::onDeleteTableButtonClicked() {
+    m_db.signalDeleteTable();
 }
 
 bool SaveBackend::saveEnabled() const

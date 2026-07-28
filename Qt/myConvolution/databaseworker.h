@@ -87,6 +87,10 @@ public slots:
     void slotInsertFloat(const DataPackageFloat &package);
     void slotInsertInt16(const DataPackageInt16 &package);
 
+    void slotClearTable();
+    void slotRecreateTable();
+    void slotDeleteTable();
+
 signals:
 
     // Отправка сигнала об обновлении полей менеджера

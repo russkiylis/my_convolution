@@ -407,6 +407,7 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
     db.commit();
     _busy = false;
     qDebug().noquote().nospace() << "Успешная запись в БД.";
+    _lastError = "Ошибок нет.";
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
@@ -589,6 +590,7 @@ void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
     db.commit();
     _busy = false;
     qDebug().noquote().nospace() << "Успешная запись в БД.";
+    _lastError = "Ошибок нет.";
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
@@ -771,5 +773,384 @@ void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
     db.commit();
     _busy = false;
     qDebug().noquote().nospace() << "Успешная запись в БД.";
+    _lastError = "Ошибок нет.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+}
+
+void DatabaseWorker::slotClearTable() {
+    qDebug() << "Очищение таблиц базы данных...";
+
+    _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.transaction();   // Начитаем транзакцию
+
+    // Получаем объект для работы с запросами
+    QSqlQuery query(db);
+    QString fileError;
+    QString command;
+
+    if (!_valid) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно выполнить операцию.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно выполнить операцию "
+                     + "при закрытом соединении.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Очищаем таблицу со свёртками. Таблица с результатами очистится автоматически через CASCADE
+    if (!Utils::fileToString(":sql/cleanConv.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    db.commit();
+    _busy = false;
+    qDebug().noquote().nospace() << "Успешное удаление данных из таблиц.";
+    _lastError = "Ошибок нет.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+}
+
+void DatabaseWorker::slotRecreateTable() {
+    qDebug() << "Пересоздание таблиц базы данных...";
+
+    _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.transaction();   // Начитаем транзакцию
+
+    // Получаем объект для работы с запросами
+    QSqlQuery query(db);
+    QString fileError;
+    QString command;
+
+    if (!_valid) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно выполнить операцию.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно выполнить операцию "
+                     + "при закрытом соединении.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем таблицу с результатами
+    if (!Utils::fileToString(":sql/deleteResult.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем таблицу со свёртками
+    if (!Utils::fileToString(":sql/deleteConv.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем тип данных "data_type"
+    if (!Utils::fileToString(":sql/deleteDataTypeEnum.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Создаём тип данных "data_type" (на прошлом шаге мы его удалили чтобы его точно не было, а то вылезет ошибка)
+    if (!Utils::fileToString(":sql/createDataTypeEnum.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Создаём таблицу со свёртками
+    if (!Utils::fileToString(":sql/createConv.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Создаём таблицу с результатами
+    if (!Utils::fileToString(":sql/createResult.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    db.commit();
+    _busy = false;
+    qDebug().noquote().nospace() << "Успешное пересоздание таблиц.";
+    _lastError = "Ошибок нет.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+}
+
+void DatabaseWorker::slotDeleteTable() {
+    qDebug() << "Удаление таблиц базы данных...";
+
+        _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.transaction();   // Начитаем транзакцию
+
+    // Получаем объект для работы с запросами
+    QSqlQuery query(db);
+    QString fileError;
+    QString command;
+
+    if (!_valid) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно выполнить операцию.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно выполнить операцию "
+                     + "при закрытом соединении.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем таблицу с результатами
+    if (!Utils::fileToString(":sql/deleteResult.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем таблицу со свёртками
+    if (!Utils::fileToString(":sql/deleteConv.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем тип данных "data_type"
+    if (!Utils::fileToString(":sql/deleteDataTypeEnum.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    db.commit();
+    _busy = false;
+    qDebug().noquote().nospace() << "Успешное удаление таблиц.";
+    _lastError = "Сейчас точно полезут ошибки... Надо пересоздать таблицы.";
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }

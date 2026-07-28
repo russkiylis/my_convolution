@@ -1,1 +1,1 @@
-DROP TABLE df_result;
+DROP TABLE IF EXISTS df_result;

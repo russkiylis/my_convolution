@@ -50,6 +50,9 @@ DatabaseManager::DatabaseManager(ConnectionBackend *backend,
     connect(this, &DatabaseManager::signalInsertDouble, worker, &DatabaseWorker::slotInsertDouble);
     connect(this, &DatabaseManager::signalInsertFloat, worker, &DatabaseWorker::slotInsertFloat);
     connect(this, &DatabaseManager::signalInsertInt16, worker, &DatabaseWorker::slotInsertInt16);
+    connect(this, &DatabaseManager::signalClearTable, worker, &DatabaseWorker::slotClearTable);
+    connect(this, &DatabaseManager::signalRecreateTable, worker, &DatabaseWorker::slotRecreateTable);
+    connect(this, &DatabaseManager::signalDeleteTable, worker, &DatabaseWorker::slotDeleteTable);
     m_workerThread.start();
 
     // Проинициализируем рабочий объект

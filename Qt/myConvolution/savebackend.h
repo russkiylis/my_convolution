@@ -195,6 +195,9 @@ public:
     void setCurrentDataType(int type);
 
     Q_INVOKABLE void onSaveEnableButtonClicked();
+    Q_INVOKABLE void onClearTableButtonClicked();
+    Q_INVOKABLE void onRecreateTableButtonClicked();
+    Q_INVOKABLE void onDeleteTableButtonClicked();
 
 private:
     DatabaseManager &m_db;  // Менеджер базы данных

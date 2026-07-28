@@ -10,7 +10,7 @@ Item {
         id: dbParamsField
         width: parent.width - 40
         // height: connectionGrid.height + 80
-        height: parent.height - dbConnectionButton.height - 60
+        height: parent.height - dbConnectionButton.height - 90
         border.color: main.borderColor
         color: main.backgroundColor
         radius: 5

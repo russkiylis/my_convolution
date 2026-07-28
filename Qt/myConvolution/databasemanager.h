@@ -169,4 +169,8 @@ signals:
     void signalInsertDouble(const LoadGenerator::DataPackage &package);
     void signalInsertInt16(const DataPackageInt16 &package);
     void signalInsertFloat(const DataPackageFloat &package);
+
+    void signalClearTable();
+    void signalRecreateTable();
+    void signalDeleteTable();
 };
