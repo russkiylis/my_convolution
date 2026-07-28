@@ -183,6 +183,7 @@ class SaveBackend : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(int currentDataType READ currentDataType WRITE setCurrentDataType NOTIFY currentDataTypeChanged)
+    Q_PROPERTY(bool saveEnabled READ saveEnabled WRITE setSaveEnabled NOTIFY saveEnabledChanged)
 
 public:
     explicit SaveBackend(DatabaseManager &db, QObject *parent = nullptr);
@@ -193,10 +194,19 @@ public:
 
     void setCurrentDataType(int type);
 
+    Q_INVOKABLE void onSaveEnableButtonClicked();
+
 private:
     DatabaseManager &m_db;  // Менеджер базы данных
     DataType m_currentDataType; // Текущий выбранный тип данных
+    bool m_saveEnabled = false; // Происходит ли сохранение в БД
 
+public:
+    [[nodiscard]] bool saveEnabled() const;
+    void setSaveEnabled(bool saveEnabled);
+
+private:
 signals:
     void currentDataTypeChanged(int type);
+    void saveEnabledChanged(bool saveEnabled);
 };

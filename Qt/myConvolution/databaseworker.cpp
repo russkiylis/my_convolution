@@ -249,6 +249,7 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
                      + ": объект подключения не валиден. "
                      + "Невозможно записать данные.";
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
@@ -259,6 +260,7 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
                      + ": невозможно записать данные "
                      + "в закрытое соединение.";
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
@@ -323,7 +325,7 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
-    command += "WHERE conv_h_double = CAST(:value AS DOUBLE PRECISION []);";
+    command += "ORDER BY id DESC LIMIT 1;";
 
     if (!query.prepare(command)) {
         _lastError = "[!] "
@@ -429,6 +431,7 @@ void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
                      + ": объект подключения не валиден. "
                      + "Невозможно записать данные.";
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
@@ -439,6 +442,7 @@ void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
                      + ": невозможно записать данные "
                      + "в закрытое соединение.";
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
@@ -503,7 +507,7 @@ void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
-    command += "WHERE conv_h_real = CAST(:value AS REAL []);";
+    command += "ORDER BY id DESC LIMIT 1;";
 
     if (!query.prepare(command)) {
         _lastError = "[!] "
@@ -609,6 +613,7 @@ void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
                      + ": объект подключения не валиден. "
                      + "Невозможно записать данные.";
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
@@ -619,6 +624,7 @@ void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
                      + ": невозможно записать данные "
                      + "в закрытое соединение.";
         qDebug().noquote().nospace() << _lastError;
+        db.rollback();
         _busy = false;
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
@@ -683,7 +689,7 @@ void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
         emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
         return;
     }
-    command += "WHERE conv_h_smallint = CAST(:value AS SMALLINT []);";
+    command += "ORDER BY id DESC LIMIT 1;";
 
     if (!query.prepare(command)) {
         _lastError = "[!] "

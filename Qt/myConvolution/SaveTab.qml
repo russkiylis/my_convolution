@@ -49,6 +49,7 @@ Item {
 
     Button {
         id: saveToggleButton
+        width: 200
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 20
@@ -56,11 +57,8 @@ Item {
         background: ButtonBackground {
         }
 
-        // TODO: Добавить адекватный текст
-        // text: generatorBackend.generatorEnabled ? "Остановить генератор нагрузки" : "Запустить генератор нагрузки"
-        text: "пустая кнопка. Скоро тут будет активация сохранения"
+        text: saveBackend.saveEnabled ? "Выключить сохранение в БД" : "Включить сохранение в БД"
 
-        // TODO: Добавить адекватную обработку кликов
-        // onClicked: generatorBackend.onGeneratorEnabledButtonClicked()
+        onClicked: saveBackend.onSaveEnableButtonClicked()
     }
 }

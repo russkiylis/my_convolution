@@ -34,3 +34,20 @@ void SaveBackend::setCurrentDataType(int type) {
     qDebug().noquote().nospace() << "Тип записи сменился: " << m_currentDataType;
     emit currentDataTypeChanged(m_currentDataType);
 }
+
+void SaveBackend::onSaveEnableButtonClicked() {
+    setSaveEnabled(!m_saveEnabled);
+    QString msg = m_saveEnabled ? "Запись в базу данных включена." : "Запись в базу данных отключена.";
+    qDebug() << msg;
+}
+
+bool SaveBackend::saveEnabled() const
+{
+    return m_saveEnabled;
+}
+
+void SaveBackend::setSaveEnabled(bool saveEnabled)
+{
+    m_saveEnabled = saveEnabled;
+    emit saveEnabledChanged(saveEnabled);
+}

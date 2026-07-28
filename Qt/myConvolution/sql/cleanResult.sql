@@ -1,0 +1,1 @@
+DELETE FROM df_result;

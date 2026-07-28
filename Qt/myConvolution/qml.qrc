@@ -10,7 +10,6 @@
         <file>ListViewItemBackground.qml</file>
 
         <!-- .sql команды -->
-        <file>sql/CreateDataTypeEnum.sql</file>
         <file>sql/insertDoublePrecision.sql</file>
         <file>sql/insertReal.sql</file>
         <file>sql/insertResult.sql</file>
@@ -19,5 +18,13 @@
         <file>sql/selectReal.sql</file>
         <file>sql/selectResult.sql</file>
         <file>sql/selectSmallint.sql</file>
+        <file>sql/createDataTypeEnum.sql</file>
+        <file>sql/deleteDataTypeEnum.sql</file>
+        <file>sql/createConv.sql</file>
+        <file>sql/cleanConv.sql</file>
+        <file>sql/deleteConv.sql</file>
+        <file>sql/createResult.sql</file>
+        <file>sql/cleanResult.sql</file>
+        <file>sql/deleteResult.sql</file>
     </qresource>
 </RCC>

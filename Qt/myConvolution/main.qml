@@ -203,5 +203,16 @@ ApplicationWindow {
             anchors.right: dbStatusLabel.left
             anchors.bottom: dbStatusLabel.bottom
         }
+
+        // Текст в нижнем правом углу. Показывает статус сохранения в БД
+        Label {
+            id: saveEnabledLabel
+            padding: 10
+            text: saveBackend.saveEnabled ? "Сохранение включено" : "Сохранение отключено"
+            color: saveBackend.saveEnabled ? "green" : "#FF9900"
+
+            anchors.right: generatorEnabledLabel.left
+            anchors.bottom: generatorEnabledLabel.bottom
+        }
     }
 }
