@@ -2,8 +2,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <limits>
-#include <stdnoreturn.h>
 
 #include "utils.h"
 

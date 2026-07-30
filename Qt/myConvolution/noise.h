@@ -24,7 +24,7 @@ public:
 
         [[nodiscard]] virtual std::unique_ptr<NoiseConfig> clone() = 0;
 
-        virtual std::unique_ptr<AbstractNoise> createNoise() const = 0;
+        [[nodiscard]] virtual std::unique_ptr<AbstractNoise> createNoise() const = 0;
 
         virtual ~NoiseConfig() = default;
 
@@ -66,7 +66,7 @@ protected:
 class NormalNoise final: public AbstractNoise
 {
 public:
-    struct NormalNoiseConfig final : public NoiseConfig
+    struct NormalNoiseConfig final : NoiseConfig
     {
         explicit NormalNoiseConfig(double const &mean, double const &sigma, unsigned int const &seed);
         explicit NormalNoiseConfig(double const &mean, double const &sigma);
@@ -74,7 +74,7 @@ public:
         // Клонирование объекта с умным указателем
         [[nodiscard]] std::unique_ptr<NoiseConfig> clone() override;
 
-        std::unique_ptr<AbstractNoise> createNoise() const override;
+        [[nodiscard]] std::unique_ptr<AbstractNoise> createNoise() const override;
 
         [[nodiscard]] NoiseType noiseType() const override;
 
@@ -110,7 +110,7 @@ public:
     void setSigma(double const &sigma);
 
 private:
-    std::normal_distribution<double> m_distribution; // Гауссово распределение. Туда суём движок и параметры
+    std::normal_distribution<> m_distribution; // Гауссово распределение. Туда суём движок и параметры
 
     double m_mean;   // Математическое ожидание шума
     double m_sigma;  // Среднеквадратическое отклонение шума
@@ -119,14 +119,14 @@ private:
 class UniformNoise final: public AbstractNoise
 {
 public:
-    struct UniformNoiseConfig final : public NoiseConfig
+    struct UniformNoiseConfig final : NoiseConfig
     {
         explicit UniformNoiseConfig(double const &min, double const &max, unsigned int const &seed);
         explicit UniformNoiseConfig(double const &min, double const &max);
 
         [[nodiscard]] NoiseType noiseType() const override;
 
-        std::unique_ptr<AbstractNoise> createNoise() const override;
+        [[nodiscard]] std::unique_ptr<AbstractNoise> createNoise() const override;
 
         // Клонирование объекта с умным указателем
         [[nodiscard]] std::unique_ptr<NoiseConfig> clone() override;
@@ -162,7 +162,7 @@ public:
     void setMax(double const &max);
 
 private:
-    std::uniform_real_distribution<double> m_distribution; // Равномерное распределение. Туда суём движок и параметры
+    std::uniform_real_distribution<> m_distribution; // Равномерное распределение. Туда суём движок и параметры
 
     double m_min;    // Минимальное значение
     double m_max;    // Максимальное значение

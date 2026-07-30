@@ -19,7 +19,7 @@ public:
     // Включён ли генератор
     [[nodiscard]] bool generatorEnabled() const;
 
-    std::vector<LoadGenerator::PostConfig> cfg() const;
+    [[nodiscard]] std::vector<LoadGenerator::PostConfig> cfg() const;
     void setCfg(const std::vector<LoadGenerator::PostConfig> &cfg);
 
     // Задать статус включения генератора
@@ -43,6 +43,6 @@ signals:
     void signalPostConfigUpdate(std::vector<LoadGenerator::PostConfig> newConfig);
 
 public slots:
-    void slotSendData(const LoadGenerator::DataPackage & package);
+    void slotSendData(const LoadGenerator::DataPackage & package) const;
     void slotPostCallToggle(bool toggle);
 };

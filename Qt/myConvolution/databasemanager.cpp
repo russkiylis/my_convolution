@@ -317,9 +317,9 @@ void DatabaseManager::slotManagerUpdate(bool const &connected, bool const &valid
 }
 
 void DatabaseManager::slotReadDb(
-    QVector<RowForVisualization> rows,
-    QVector<QVector<double>> convsH,
-    QVector<QVector<double>> convsV
+    const QVector<RowForVisualization> &rows,
+    const QVector<QVector<double>> &convsH,
+    const QVector<QVector<double>> &convsV
     ) {
 
     emit signalSetData(rows, convsH, convsV);

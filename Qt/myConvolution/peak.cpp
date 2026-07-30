@@ -151,11 +151,11 @@ double TrianglePeak::valueAt(double const &deg) const {
         return 0;
     }
 
-    double distance = std::abs(m_center - deg);
+    const double distance = std::abs(m_center - deg);
     if (distance > m_halfWidth) {
         return 0;
     }
-    return m_amplitude * (1 - (distance / m_halfWidth));
+    return m_amplitude * (1 - distance / m_halfWidth);
 }
 
 double TrianglePeak::halfWidth() const {
@@ -209,7 +209,7 @@ AbstractPeak::PeakType RectanglePeak::type() const {
 }
 
 double RectanglePeak::valueAt(double const &deg) const {
-    if (deg < (m_center - m_halfWidth) || deg > (m_center + m_halfWidth))
+    if (deg < m_center - m_halfWidth || deg > (m_center + m_halfWidth))
         return 0;
     return m_amplitude;
 }

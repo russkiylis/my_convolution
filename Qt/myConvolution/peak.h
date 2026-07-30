@@ -18,13 +18,13 @@ public:
     {
         explicit PeakConfig(double const &center, double const &amplitude);
 
-        virtual PeakType type() const = 0;
+        [[nodiscard]] virtual PeakType type() const = 0;
 
-        virtual QString typeStr() const = 0;
+        [[nodiscard]] virtual QString typeStr() const = 0;
 
-        virtual std::unique_ptr<PeakConfig> clone() const = 0;
+        [[nodiscard]] virtual std::unique_ptr<PeakConfig> clone() const = 0;
 
-        virtual std::unique_ptr<AbstractPeak> createPeak() const = 0;
+        [[nodiscard]] virtual std::unique_ptr<AbstractPeak> createPeak() const = 0;
 
         virtual ~PeakConfig() = default;
 
@@ -63,17 +63,17 @@ protected:
 class GaussPeak final: public AbstractPeak
 {
 public:
-    struct GaussPeakConfig final: public PeakConfig
+    struct GaussPeakConfig final: PeakConfig
     {
         explicit GaussPeakConfig(double const &center, double const &amplitude, double const &sigma);
 
-        std::unique_ptr<PeakConfig> clone() const override;
+        [[nodiscard]] std::unique_ptr<PeakConfig> clone() const override;
 
-        std::unique_ptr<AbstractPeak> createPeak() const override;
+        [[nodiscard]] std::unique_ptr<AbstractPeak> createPeak() const override;
 
-        PeakType type() const override;
+        [[nodiscard]] PeakType type() const override;
 
-        QString typeStr() const override;
+        [[nodiscard]] QString typeStr() const override;
 
         double sigma;   // СКО
     };
@@ -105,17 +105,17 @@ private:
 class TrianglePeak final: public AbstractPeak
 {
 public:
-    struct TrianglePeakConfig final: public PeakConfig
+    struct TrianglePeakConfig final: PeakConfig
     {
         explicit TrianglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
 
-        std::unique_ptr<AbstractPeak> createPeak() const override;
+        [[nodiscard]] std::unique_ptr<AbstractPeak> createPeak() const override;
 
-        PeakType type() const override;
+        [[nodiscard]] PeakType type() const override;
 
-        QString typeStr() const override;
+        [[nodiscard]] QString typeStr() const override;
 
-        std::unique_ptr<PeakConfig> clone() const override;
+        [[nodiscard]] std::unique_ptr<PeakConfig> clone() const override;
 
         double halfWidth;   // Половина ширины
     };
@@ -148,17 +148,17 @@ private:
 class RectanglePeak final: public AbstractPeak
 {
 public:
-    struct RectanglePeakConfig final: public PeakConfig
+    struct RectanglePeakConfig final: PeakConfig
     {
         explicit RectanglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
 
-        std::unique_ptr<AbstractPeak> createPeak() const override;
+        [[nodiscard]] std::unique_ptr<AbstractPeak> createPeak() const override;
 
-        PeakType type() const override;
+        [[nodiscard]] PeakType type() const override;
 
-        QString typeStr() const override;
+        [[nodiscard]] QString typeStr() const override;
 
-        std::unique_ptr<PeakConfig> clone() const override;
+        [[nodiscard]] std::unique_ptr<PeakConfig> clone() const override;
 
         double halfWidth;   // Половина ширины
     };

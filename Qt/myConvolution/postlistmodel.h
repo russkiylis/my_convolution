@@ -1,13 +1,8 @@
 #pragma once
 
-#include <QAbstractListModel>
-#include <QObject>
-
 #include "loadgenerator.h"
 #include "abstractnoisebackend.h"
-#include "normalnoisebackend.h"
 #include "peaklistmodel.h"
-#include "uniformnoisebackend.h"
 
 class GeneratorBackend;
 
@@ -59,97 +54,97 @@ private:
 
 public:
     // Прочитать индекс поста
-    int postIndex() const;
+    [[nodiscard]] int postIndex() const;
 
     // Установить индекс поста
     Q_INVOKABLE void setPostIndex(int postIndex);
 
     // Выдать имя поста по текущему индексу
-    QString currentPostName() const;
+    [[nodiscard]] QString currentPostName() const;
 
     // Установить имя поста по текущему индексу
     void setCurrentPostName(const QString &currentPostName);
 
     // Выдать широту по текущему индексу
-    QString currentLatitude() const;
+    [[nodiscard]] QString currentLatitude() const;
 
     // Установить широту по текущему индексу
     void setCurrentLatitude(const QString &currentLatitude);
 
     // Выдать долготу по текущему индексу
-    QString currentLongitude() const;
+    [[nodiscard]] QString currentLongitude() const;
 
     // Установить долготу по текущему индексу
     void setCurrentLongitude(const QString &currentLongitude);
 
     // Выдать частоту по текущему индексу
-    QString currentFrequency() const;
+    [[nodiscard]] QString currentFrequency() const;
 
     // Установить частоту по текущему индексу
     void setCurrentFrequency(const QString &currentFrequency);
 
     // Выдать средний уровень по текущему индексу
-    QString currentLevel() const;
+    [[nodiscard]] QString currentLevel() const;
 
     // Установить средний уровень по текущему индексу
     void setCurrentLevel(const QString &currentLevel);
 
     // Выдать СКО уровня по текущему индексу
-    QString currentLevelSigma() const;
+    [[nodiscard]] QString currentLevelSigma() const;
 
     // Установить СКО уровня по текущему индексу
     void setCurrentLevelSigma(const QString &currentLevelSigma);
 
     // Выдать минимальный горизонтальный угол по текущему индексу
-    QString currentMinAngleH() const;
+    [[nodiscard]] QString currentMinAngleH() const;
 
     // Установить минимальный горизонтальный угол по текущему индексу
     void setCurrentMinAngleH(const QString &currentMinAngleH);
 
     // Выдать максимальный горизонтальный угол по текущему индексу
-    QString currentMaxAngleH() const;
+    [[nodiscard]] QString currentMaxAngleH() const;
 
     // Установить максимальный горизонтальный угол по текущему индексу
     void setCurrentMaxAngleH(const QString &currentMaxAngleH);
 
     // Выдать шаг горизонтального угла
-    int currentStepH() const;
+    [[nodiscard]] int currentStepH() const;
 
     // Установить шаг горизонтального угла
     void setCurrentStepH(int currentStepH);
 
     // Выдать минимальный вертикальный угол по текущему индексу
-    QString currentMinAngleV() const;
+    [[nodiscard]] QString currentMinAngleV() const;
 
     // Установить минимальный вертикальный угол по текущему индексу
     void setCurrentMinAngleV(const QString &currentMinAngleV);
 
     // Выдать максимальный вертикальный угол по текущему индексу
-    QString currentMaxAngleV() const;
+    [[nodiscard]] QString currentMaxAngleV() const;
 
     // Установить максимальный вертикальный угол по текущему индексу
     void setCurrentMaxAngleV(const QString &currentMaxAngleV);
 
     // Выдать шаг вертикального угла
-    int currentStepV() const;
+    [[nodiscard]] int currentStepV() const;
 
     // Установить шаг горизонтального угла
     void setCurrentStepV(int currentStepV);
 
     // Выдать минимальный период генерации
-    QString currentMinPeriod() const;
+    [[nodiscard]] QString currentMinPeriod() const;
 
     // Установить минимальный период генерации
     void setCurrentMinPeriod(const QString &currentMinPeriod);
 
     // Выдать максимальный период генерации
-    QString currentMaxPeriod() const;
+    [[nodiscard]] QString currentMaxPeriod() const;
 
     // Установить максимальный период генерации
     void setCurrentMaxPeriod(const QString &currentMaxPeriod);
 
     // Выдать статус активности поста
-    bool currentPostEnabled() const;
+    [[nodiscard]] bool currentPostEnabled() const;
 
     // Выдать текущий тип шума
     int currentNoiseType();
@@ -163,13 +158,13 @@ public:
     explicit PostListModel(GeneratorBackend *generatorBackend, std::vector<LoadGenerator::PostConfig> &config, QObject *parent = nullptr);
 
     // Подсчёт строчек
-    int rowCount(const QModelIndex &parent) const override;
+    [[nodiscard]] int rowCount(const QModelIndex &parent) const override;
 
     // Указваем QML, как обращаться к ролям
-    QHash<int, QByteArray> roleNames() const override;
+    [[nodiscard]] QHash<int, QByteArray> roleNames() const override;
 
     // Передаём данные в зависимости от индекса
-    QVariant data(const QModelIndex &index, int role) const override;
+    [[nodiscard]] QVariant data(const QModelIndex &index, int role) const override;
 
     // Добавляем новый пост
     Q_INVOKABLE int addPost();
@@ -183,7 +178,7 @@ public:
     // Отменяем изменения
     Q_INVOKABLE int fallback();
 
-    AbstractNoiseBackend *noiseBackend() const;
+    [[nodiscard]] AbstractNoiseBackend *noiseBackend() const;
 
 private:
 

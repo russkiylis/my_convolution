@@ -113,7 +113,8 @@ void GeneratorBackend::setCfg(const std::vector<LoadGenerator::PostConfig> &cfg)
     m_cfg = cfg;
 }
 
-void GeneratorBackend::slotSendData(const LoadGenerator::DataPackage &package) {
+void GeneratorBackend::slotSendData(const LoadGenerator::DataPackage &package) const
+{
     // freopen("log.txt", "a", stdout);
     // freopen("log.txt", "a", stderr);
     // qDebug().noquote().nospace()

@@ -1,5 +1,7 @@
 #include "postlistmodel.h"
 #include "generatorbackend.h"
+#include "normalnoisebackend.h"
+#include "uniformnoisebackend.h"
 #include "utils.h"
 
 void PostListModel::setFallbackConfig(const std::vector<LoadGenerator::PostConfig> &fallbackConfig)

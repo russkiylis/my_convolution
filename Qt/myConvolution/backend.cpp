@@ -149,10 +149,10 @@ void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString po
     }
 }
 
-void ConnectionBackend::slotSetDbStatus(int dbStatus) {
+void ConnectionBackend::slotSetDbStatus(const int dbStatus) {
     setDbStatus(dbStatus);
 }
 
-void ConnectionBackend::slotSetLastError(QString lastError) {
+void ConnectionBackend::slotSetLastError(const QString &lastError) {
     setLastError(lastError);
 }

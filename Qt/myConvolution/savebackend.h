@@ -1,5 +1,4 @@
 #pragma once
-#include <QObject>
 
 #include "loadgenerator.h"
 #include "utils.h"
@@ -187,16 +186,16 @@ class SaveBackend : public QObject {
 public:
     explicit SaveBackend(DatabaseManager &db, QObject *parent = nullptr);
 
-    void processDataPackage(const LoadGenerator::DataPackage &package);
+    void processDataPackage(const LoadGenerator::DataPackage &package) const;
 
     [[nodiscard]] int currentDataType() const;
 
     void setCurrentDataType(int type);
 
     Q_INVOKABLE void onSaveEnableButtonClicked();
-    Q_INVOKABLE void onClearTableButtonClicked();
-    Q_INVOKABLE void onRecreateTableButtonClicked();
-    Q_INVOKABLE void onDeleteTableButtonClicked();
+    Q_INVOKABLE void onClearTableButtonClicked() const;
+    Q_INVOKABLE void onRecreateTableButtonClicked() const;
+    Q_INVOKABLE void onDeleteTableButtonClicked() const;
 
 private:
     DatabaseManager &m_db;  // Менеджер базы данных

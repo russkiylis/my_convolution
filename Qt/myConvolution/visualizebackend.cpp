@@ -37,18 +37,18 @@ void VisualizeBackend::readDb() {
     m_readerDb.readDb();
 }
 
-void VisualizeBackend::slotSetDbStatus(int dbStatus) {
+void VisualizeBackend::slotSetDbStatus(const int dbStatus) {
     m_readerDbStatus = dbStatus;
 }
 
-void VisualizeBackend::slotSetLastError(QString lastError) {
+void VisualizeBackend::slotSetLastError(const QString &lastError) {
     m_readerLastError = lastError;
 }
 
 void VisualizeBackend::slotSetData(
-    QVector<RowForVisualization> rows,
-    QVector<QVector<double>> convsH,
-    QVector<QVector<double>> convsV
+    const QVector<RowForVisualization>& rows,
+    const QVector<QVector<double>>& convsH,
+    const QVector<QVector<double>>& convsV
     ) {
     qDebug() << "Прочтённые данные дошли до бекенда!";
 }

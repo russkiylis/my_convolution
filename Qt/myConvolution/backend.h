@@ -98,5 +98,5 @@ signals:
 
 public slots:
     void slotSetDbStatus(int dbStatus);
-    void slotSetLastError(QString lastError);
+    void slotSetLastError(const QString &lastError);
 };

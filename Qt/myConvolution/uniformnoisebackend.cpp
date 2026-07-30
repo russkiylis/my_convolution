@@ -122,9 +122,6 @@ void UniformNoiseBackend::setCurrentMax(const QString &currentMax)
     const double currentMin = noiseConfig->min;
     const double allowedLowerBound = std::max(lowerBound, currentMin + 1);
 
-    if (noiseConfig == nullptr)
-        return;
-
     bool ok = false;
     const double parsedMax = currentMax.toDouble(&ok);
 

@@ -1,7 +1,5 @@
 #pragma once
-#include <QObject>
 
-#include "noise.h"
 #include "loadgenerator.h"
 
 class AbstractNoiseBackend : public QObject {

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     // Создание QML-движка
     QQmlApplicationEngine engine;
 
-    // Подключаем backendы в QML-движок.
+    // Подключаем backend в QML-движок.
     // QML начнёт видеть Q_PROPERTY и Q_INVOKABLE
     engine.rootContext()->setContextProperty("connectionBackend", &connectionBackend);
     engine.rootContext()->setContextProperty("generatorBackend", &generatorBackend);

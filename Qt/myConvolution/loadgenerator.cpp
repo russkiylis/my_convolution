@@ -277,7 +277,7 @@ void LoadGenerator::slotPostCallToggle(const bool toggle) {
     }
 }
 
-void LoadGenerator::slotPostConfigUpdate(std::vector<PostConfig> newConfig) {
+void LoadGenerator::slotPostConfigUpdate(const std::vector<PostConfig>& newConfig) {
     setPostConfigs(newConfig);
 }
 

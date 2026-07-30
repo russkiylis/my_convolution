@@ -80,7 +80,6 @@ NormalNoise::NormalNoise(double const &mean, double const &sigma, unsigned int c
 }
 
 NormalNoise::NormalNoise(double const &mean, double const &sigma) :
-    AbstractNoise(),
     m_mean(mean),
     m_sigma(sigma)
 {
@@ -100,7 +99,7 @@ AbstractNoise::NoiseType NormalNoise::type() const {
 double NormalNoise::next()
 {
     // Чтобы не писать долгую строчку
-    using genParam = std::normal_distribution<double>::param_type;
+    using genParam = std::normal_distribution<>::param_type;
 
     return m_distribution(m_rng, genParam(m_mean, m_sigma));
 }
@@ -154,7 +153,6 @@ UniformNoise::UniformNoise(double const &min, double const &max, unsigned int co
 }
 
 UniformNoise::UniformNoise(double const &min, double const &max) :
-    AbstractNoise(),
     m_min(min),
     m_max(max)
 {
@@ -174,7 +172,7 @@ AbstractNoise::NoiseType UniformNoise::type() const {
 double UniformNoise::next()
 {
     // Чтобы не писать долгую строчку
-    using genParam = std::uniform_real_distribution<double>::param_type;
+    using genParam = std::uniform_real_distribution<>::param_type;
 
     return m_distribution(m_rng, genParam(m_min, m_max));
 }

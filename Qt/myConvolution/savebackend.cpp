@@ -8,7 +8,8 @@ SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
 {
 }
 
-void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) {
+void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) const
+{
     if (m_saveEnabled) {
         switch (m_currentDataType) {
         case doublePrecision:
@@ -39,19 +40,22 @@ void SaveBackend::setCurrentDataType(int type) {
 
 void SaveBackend::onSaveEnableButtonClicked() {
     setSaveEnabled(!m_saveEnabled);
-    QString msg = m_saveEnabled ? "Запись в базу данных включена." : "Запись в базу данных отключена.";
+    const QString msg = m_saveEnabled ? "Запись в базу данных включена." : "Запись в базу данных отключена.";
     qDebug().noquote().nospace() << msg;
 }
 
-void SaveBackend::onClearTableButtonClicked() {
+void SaveBackend::onClearTableButtonClicked() const
+{
     m_db.signalClearTable();
 }
 
-void SaveBackend::onRecreateTableButtonClicked() {
+void SaveBackend::onRecreateTableButtonClicked() const
+{
     m_db.signalRecreateTable();
 }
 
-void SaveBackend::onDeleteTableButtonClicked() {
+void SaveBackend::onDeleteTableButtonClicked() const
+{
     m_db.signalDeleteTable();
 }
 
@@ -60,7 +64,7 @@ bool SaveBackend::saveEnabled() const
     return m_saveEnabled;
 }
 
-void SaveBackend::setSaveEnabled(bool saveEnabled)
+void SaveBackend::setSaveEnabled(const bool saveEnabled)
 {
     m_saveEnabled = saveEnabled;
     emit saveEnabledChanged(saveEnabled);

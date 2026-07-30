@@ -1,5 +1,4 @@
 #include <QDebug>
-#include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QSqlError>
 #include <utility>
@@ -319,7 +318,7 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
 
     // Вычленяем id для того, чтобы внести его в df_result
     query.next();
-    int id = query.value(0).toInt();
+    const int id = query.value(0).toInt();
 
     // Считываем файл для записи df_result
     if (!Utils::fileToString(":sql/insertResult.sql", command, &fileError)) {
@@ -464,7 +463,7 @@ void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
 
     // Вычленяем id для того, чтобы внести его в df_result
     query.next();
-    int id = query.value(0).toInt();
+    const int id = query.value(0).toInt();
 
     // Считываем файл для записи df_result
     if (!Utils::fileToString(":sql/insertResult.sql", command, &fileError)) {
@@ -609,7 +608,7 @@ void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
 
     // Вычленяем id для того, чтобы внести его в df_result
     query.next();
-    int id = query.value(0).toInt();
+    const int id = query.value(0).toInt();
 
     // Считываем файл для записи df_result
     if (!Utils::fileToString(":sql/insertResult.sql", command, &fileError)) {
@@ -1208,11 +1207,11 @@ void DatabaseWorker::slotReadDb() {
         }
 
         if (row.dataType == "smallint") {
-            double maxH = *std::max_element(convHForVisualization.constBegin(), convHForVisualization.constEnd());
+            const double maxH = *std::max_element(convHForVisualization.constBegin(), convHForVisualization.constEnd());
             for (auto & value : convHForVisualization) {
                 value /= maxH;
             }
-            double maxV = *std::max_element(convVForVisualization.constBegin(), convVForVisualization.constEnd());
+            const double maxV = *std::max_element(convVForVisualization.constBegin(), convVForVisualization.constEnd());
             for (auto & value : convVForVisualization) {
                 value /= maxV;
             }
