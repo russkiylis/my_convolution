@@ -81,8 +81,7 @@ public:
     // Задать статус ошибки
     void setLastError(QString const &lastError);
 
-    // Метод, вызывающийся при нажатии кнопки генерации нагрузки
-    // в базу данных
+    // Метод, вызывающийся при нажатии кнопки соединения с базой данных
     Q_INVOKABLE void onDbConnectionButtonClicked(QString hostName, QString port, QString userName, QString password,
                                                  QString databaseName, QString connectOptions);
 
@@ -96,4 +95,8 @@ signals:
     void passwordChanged(QString password);
     void databaseNameChanged(QString databaseName);
     void connectOptionsChanged(QString connectOptions);
+
+public slots:
+    void slotSetDbStatus(int dbStatus);
+    void slotSetLastError(QString lastError);
 };

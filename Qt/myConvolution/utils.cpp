@@ -1,6 +1,8 @@
 #include "utils.h"
 
 #include <qfile.h>
+#include <qjsonarray.h>
+#include <qjsondocument.h>
 #include <QString>
 
 QString Utils::doubleToString(const double value, const int precision)
@@ -84,4 +86,47 @@ QString Utils::vectorToPgArray(const std::vector<qint16> &values) {
 
     result += "}";
     return result;
+}
+
+bool Utils::jsonToVector(const QVariant &json, QVector<double> &result, QString *errorMessage) {
+    result.clear();
+    if (errorMessage != nullptr)
+        errorMessage->clear();
+
+    if (!json.isValid() || json.isNull()) {
+        if (errorMessage != nullptr)
+            *errorMessage = "Получен пустой массив";
+        return false;
+    }
+
+    QJsonParseError jsonParseError{};
+    const QJsonDocument jsonDocument = QJsonDocument::fromJson(json.toString().toUtf8(), &jsonParseError);
+
+    if (jsonParseError.error != QJsonParseError::NoError) {
+        if (errorMessage != nullptr)
+            *errorMessage = jsonParseError.errorString();
+        return false;
+    }
+
+    if (!jsonDocument.isArray())
+    {
+        if (errorMessage != nullptr)
+            *errorMessage = "Полученный json не массив!";
+        return false;
+    }
+
+    const QJsonArray jsonArray = jsonDocument.array();
+    result.reserve(jsonArray.size());
+
+    for (QJsonValue element : jsonArray) {
+        if (!element.isDouble()) {
+            if (errorMessage != nullptr)
+                *errorMessage = "В json-массиве есть не числа!";
+            result.clear();
+            return false;
+        }
+        result.push_back(element.toDouble());
+    }
+
+    return true;
 }

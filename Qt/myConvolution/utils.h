@@ -1,5 +1,6 @@
 #pragma once
 #include <QString>
+#include <qvariant.h>
 
 class Utils {
 public:
@@ -16,4 +17,7 @@ public:
     static QString vectorToPgArray(const std::vector<double> &values);
     static QString vectorToPgArray(const std::vector<float> &values);
     static QString vectorToPgArray(const std::vector<qint16> &values);
+
+    //Преобразование json в vector
+    static bool jsonToVector(const QVariant &json, QVector<double> &result, QString* errorMessage = nullptr);
 };

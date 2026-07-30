@@ -158,14 +158,17 @@ Item {
             return "Подключиться"
         }
         // FIXME: Очень некрасивая передача значений
-        onClicked: connectionBackend.onDbConnectionButtonClicked(
-            dbHostName.text,
-            dbPort.text,
-            dbUsername.text,
-            dbPassword.text,
-            dbName.text,
-            dbConnectOptions.text
-        ) // QML видит Q_INVOKABLE метод подключённого класса
+        onClicked: {
+            connectionBackend.onDbConnectionButtonClicked(
+                dbHostName.text,
+                dbPort.text,
+                dbUsername.text,
+                dbPassword.text,
+                dbName.text,
+                dbConnectOptions.text)
+            visualizeBackend.onDbConnectionButtonClicked()
+        }
+        // QML видит Q_INVOKABLE метод подключённого класса
     }
 
     TextEdit {

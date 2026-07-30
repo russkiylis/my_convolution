@@ -107,9 +107,11 @@ void ConnectionBackend::setLastError(QString const &lastError) {
 }
 
 ConnectionBackend::ConnectionBackend(QObject *parent)
-    : QObject{parent},
-    m_db(this)
-{}
+    : QObject{parent}
+{
+    connect(&m_db, &DatabaseManager::signalSetDbStatus, this, &ConnectionBackend::slotSetDbStatus);
+    connect(&m_db, &DatabaseManager::signalSetLastError, this, &ConnectionBackend::slotSetLastError);
+}
 
 void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString port, QString userName, QString password,
                                           QString databaseName, QString connectOptions)
@@ -145,4 +147,12 @@ void ConnectionBackend::onDbConnectionButtonClicked(QString hostName, QString po
         // Если БД подключена, то отключаем
         m_db.closeConnection();
     }
+}
+
+void ConnectionBackend::slotSetDbStatus(int dbStatus) {
+    setDbStatus(dbStatus);
+}
+
+void ConnectionBackend::slotSetLastError(QString lastError) {
+    setLastError(lastError);
 }

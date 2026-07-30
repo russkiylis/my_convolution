@@ -39,6 +39,8 @@ set(PROJECT_SOURCES
         utils.h
         savebackend.cpp
         savebackend.h
+        visualizebackend.cpp
+        visualizebackend.h
 )
 
 add_executable(myConvolution

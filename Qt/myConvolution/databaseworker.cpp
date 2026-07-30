@@ -4,6 +4,8 @@
 #include <QSqlError>
 #include <utility>
 #include "databaseworker.h"
+#include "savebackend.h"
+#include "visualizebackend.h"
 
 DatabaseConfiguration::DatabaseConfiguration(const DatabaseConfiguration &other) = default;
 
@@ -926,7 +928,7 @@ void DatabaseWorker::slotRecreateTable() {
 void DatabaseWorker::slotDeleteTable() {
     qDebug() << "Удаление таблиц базы данных...";
 
-        _busy = true;
+    _busy = true;
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
     // Получаем объект для работы с БД
@@ -1038,5 +1040,195 @@ void DatabaseWorker::slotDeleteTable() {
     _busy = false;
     qDebug().noquote().nospace() << "Успешное удаление таблиц.";
     _lastError = "Сейчас точно полезут ошибки... Надо пересоздать таблицы.";
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+}
+
+void DatabaseWorker::slotReadDb() {
+    qDebug() << "Чтение базы данных...";
+
+    _busy = true;
+    emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+
+    // Получаем объект для работы с БД
+    QSqlDatabase db = QSqlDatabase::database(_config.connectionName);
+
+    db.transaction();   // Начитаем транзакцию
+
+    // Получаем объект для работы с запросами
+    QSqlQuery query(db);
+    QString fileError;
+    QString command;
+
+    if (!_valid) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": объект подключения не валиден. "
+                     + "Невозможно выполнить операцию.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!_connected) {
+        _lastError = "[!] "
+                     + _config.fullConnectionName
+                     + ": невозможно выполнить операцию "
+                     + "при закрытом соединении.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Читаем таблицу
+    if (!Utils::fileToString(":sql/selectRowForVisualization.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    QVector<RowForVisualization> rowsForVisualization;
+    QVector<QVector<double>> convsHForVisualization;
+    QVector<QVector<double>> convsVForVisualization;
+    QVector<double> convHForVisualization;
+    QVector<double> convVForVisualization;
+    while (query.next()) {
+        RowForVisualization row;
+        row.id = query.value("id").toLongLong();
+        row.timestamp = query.value("result_timestamp").toDateTime();
+        row.sysname = query.value("sysname").toString();
+        row.azimuth = query.value("azimuth").toDouble();
+        row.elevation = query.value("elevation").toDouble();
+        row.power = query.value("power").toDouble();
+        row.frequency = query.value("frequency").toDouble();
+        row.latitude = query.value("latitude").toDouble();
+        row.longitude = query.value("longitude").toDouble();
+        row.dataType = query.value("data_type").toString();
+        row.qualityH = query.value("quality_h").toDouble();
+        row.qualityV = query.value("quality_v").toDouble();
+        rowsForVisualization.push_back(row);
+
+        QSqlQuery convQuery(db);
+        // Забираем свёртки по id
+        if (row.dataType == "double_precision") {
+            if (!Utils::fileToString(":sql/selectDoublePrecision.sql", command, &fileError)) {
+                _lastError = "[!] "
+                    + _config.fullConnectionName
+                    + ": Операция не удалась: "
+                    + fileError;
+                qDebug().noquote().nospace() << _lastError;
+                db.rollback();
+                _busy = false;
+                emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+                return;
+            }
+        } else if (row.dataType == "real") {
+            if (!Utils::fileToString(":sql/selectReal.sql", command, &fileError)) {
+                _lastError = "[!] "
+                    + _config.fullConnectionName
+                    + ": Операция не удалась: "
+                    + fileError;
+                qDebug().noquote().nospace() << _lastError;
+                db.rollback();
+                _busy = false;
+                emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+                return;
+            }
+        } else if (row.dataType == "smallint") {
+            if (!Utils::fileToString(":sql/selectSmallint.sql", command, &fileError)) {
+                _lastError = "[!] "
+                    + _config.fullConnectionName
+                    + ": Операция не удалась: "
+                    + fileError;
+                qDebug().noquote().nospace() << _lastError;
+                db.rollback();
+                _busy = false;
+                emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+                return;
+            }
+        } else {
+            throw std::logic_error("При прочтении базы данных вернулся непонятный data_type!");
+        }
+        if (!convQuery.prepare(command)) {
+            _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + query.lastError().text();
+            qDebug().noquote().nospace() << _lastError;
+            db.rollback();
+            _busy = false;
+            emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+            return;
+        }
+        convQuery.bindValue(":id", row.id);
+        convQuery.exec();
+        convQuery.next();
+
+        QString parseError;
+        if (!Utils::jsonToVector(convQuery.value("conv_h"), convHForVisualization, &parseError)) {
+            _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + parseError;
+            qDebug().noquote().nospace() << _lastError;
+            db.rollback();
+            _busy = false;
+            emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+            return;
+        }
+        if (!Utils::jsonToVector(convQuery.value("conv_v"), convVForVisualization, &parseError)) {
+            _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + parseError;
+            qDebug().noquote().nospace() << _lastError;
+            db.rollback();
+            _busy = false;
+            emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+            return;
+        }
+
+        if (row.dataType == "smallint") {
+            double maxH = *std::max_element(convHForVisualization.constBegin(), convHForVisualization.constEnd());
+            for (auto & value : convHForVisualization) {
+                value /= maxH;
+            }
+            double maxV = *std::max_element(convVForVisualization.constBegin(), convVForVisualization.constEnd());
+            for (auto & value : convVForVisualization) {
+                value /= maxV;
+            }
+        }
+
+        convsHForVisualization.push_back(convHForVisualization);
+        convsVForVisualization.push_back(convVForVisualization);
+    }
+    qDebug().noquote().nospace() << "Прочитано " << rowsForVisualization.size() << " строк.";
+    db.commit();
+
+    // Отправляем прочитанные данные из рабочего потока
+    emit signalReadDb(rowsForVisualization, convsHForVisualization, convsVForVisualization);
+
+    _busy = false;
+    qDebug().noquote().nospace() << "Успешное чтение базы данных.";
+    _lastError = "Ошибок нет.";
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }

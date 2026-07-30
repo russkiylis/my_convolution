@@ -4,21 +4,21 @@
 #include "databaseworker.h"
 #include "backend.h"
 #include "savebackend.h"
+#include "visualizebackend.h"
 
-DatabaseManager::DatabaseManager(ConnectionBackend *backend,
-                                       QString const & connectionName,
-                                       QString const & hostName,
-                                       QString const & dbName,
-                                       QString const & userName,
-                                       QString const & password,
-                                       int const & port,
-                                       QString const & connectOptions,
-                                       QObject * parent)
+DatabaseManager::DatabaseManager(QString const & connectionName,
+                               QString const & hostName,
+                               QString const & dbName,
+                               QString const & userName,
+                               QString const & password,
+                               int const & port,
+                               QString const & connectOptions,
+                               QObject * parent)
+
     :QObject{parent},
-    m_backend(backend),
     m_connectionName(connectionName),
     m_hostName(hostName),
-    m_port(5432),
+    m_port(port),
     m_dbName(dbName),
     m_userName(userName),
     m_password(password),
@@ -30,8 +30,6 @@ DatabaseManager::DatabaseManager(ConnectionBackend *backend,
         + "/" + m_dbName),
     m_connectOptions(connectOptions)
 {
-    if (backend == nullptr)
-        throw std::logic_error("Backend это nullptr!");
 
     const auto dbConfig = DatabaseConfiguration(connectionName, hostName, dbName, userName, password, port,
                                                            connectOptions);
@@ -53,6 +51,8 @@ DatabaseManager::DatabaseManager(ConnectionBackend *backend,
     connect(this, &DatabaseManager::signalClearTable, worker, &DatabaseWorker::slotClearTable);
     connect(this, &DatabaseManager::signalRecreateTable, worker, &DatabaseWorker::slotRecreateTable);
     connect(this, &DatabaseManager::signalDeleteTable, worker, &DatabaseWorker::slotDeleteTable);
+    connect(this, &DatabaseManager::signalReadDb, worker, &DatabaseWorker::slotReadDb);
+    connect(worker, &DatabaseWorker::signalReadDb, this, &DatabaseManager::slotReadDb);
     m_workerThread.start();
 
     // Проинициализируем рабочий объект
@@ -64,6 +64,20 @@ DatabaseManager::~DatabaseManager() {
     // Адекватная остановка рабочего потока при уничтожении управляющего рабочим объекта
     m_workerThread.quit();
     m_workerThread.wait();
+}
+
+void DatabaseManager::setConnectionName(QString const &connectionName) {
+    if (m_connected) {
+        qDebug().noquote().nospace() << "[!] "
+                                     << m_fullConnectionName
+                                     << ": невозможно изменить параметры "
+                                        "открытого соединения.";
+        return;
+    }
+    if (m_connectionName == connectionName)
+        return;
+    m_connectionName = connectionName;
+    setFullConnectionName();
 }
 
 void DatabaseManager::setHostName(QString const & value) {
@@ -240,7 +254,7 @@ void DatabaseManager::openConnection() {
         qDebug().noquote().nospace()  << errorText;
 
         m_lastError = errorText;
-        m_backend->setLastError(m_lastError);
+        emit signalSetLastError(m_lastError);
         return;
     }
 
@@ -256,7 +270,7 @@ void DatabaseManager::closeConnection() {
                             + "Невозможно закрыть соединение.";
         qDebug().noquote().nospace()  << errorText;
         m_lastError = errorText;
-        m_backend->setLastError(m_lastError);
+        emit signalSetLastError(m_lastError);
         return;
     }
 
@@ -266,17 +280,21 @@ void DatabaseManager::closeConnection() {
 
 void DatabaseManager::saveDataPackage(LoadGenerator::DataPackage const &package) {
     qDebug().noquote().nospace() << "Пакет типа double precision: " << package.postName;
-    signalInsertDouble(package);
+    emit signalInsertDouble(package);
 }
 
 void DatabaseManager::saveDataPackage(DataPackageFloat const &package) {
     qDebug().noquote().nospace() << "Пакет типа real: " << package.postName;
-    signalInsertFloat(package);
+    emit signalInsertFloat(package);
 }
 
 void DatabaseManager::saveDataPackage(DataPackageInt16 const &package) {
     qDebug().noquote().nospace() << "Пакет типа smallint: " << package.postName;
-    signalInsertInt16(package);
+    emit signalInsertInt16(package);
+}
+
+void DatabaseManager::readDb() {
+    emit signalReadDb();
 }
 
 void DatabaseManager::slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError) {
@@ -294,6 +312,15 @@ void DatabaseManager::slotManagerUpdate(bool const &connected, bool const &valid
         dbStatus = 2;
     }
 
-    m_backend->setLastError(m_lastError);
-    m_backend->setDbStatus(dbStatus);
+    emit signalSetLastError(m_lastError);
+    emit signalSetDbStatus(dbStatus);
+}
+
+void DatabaseManager::slotReadDb(
+    QVector<RowForVisualization> rows,
+    QVector<QVector<double>> convsH,
+    QVector<QVector<double>> convsV
+    ) {
+
+    emit signalSetData(rows, convsH, convsV);
 }

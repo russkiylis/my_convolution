@@ -26,5 +26,6 @@
         <file>sql/createResult.sql</file>
         <file>sql/cleanResult.sql</file>
         <file>sql/deleteResult.sql</file>
+        <file>sql/selectRowForVisualization.sql</file>
     </qresource>
 </RCC>

@@ -19,15 +19,15 @@ class DatabaseManager : public QObject
 
 public:
     // Конструктор
-    explicit DatabaseManager(ConnectionBackend *backend,
-                                QString const & connectionName = "myConvolution",
-                                QString const & hostName = "127.0.0.1",
-                                QString const & dbName = "my_convolution",
-                                QString const & userName = "russkiylis",
-                                QString const & password = "1337",
-                                int const & port = 5432,
-                                QString const & connectOptions = "connect_timeout = 3",
-                                QObject * parent = nullptr);
+explicit DatabaseManager(QString const & connectionName = "myConvolution",
+                        QString const & hostName = "127.0.0.1",
+                        QString const & dbName = "my_convolution",
+                        QString const & userName = "russkiylis",
+                        QString const & password = "1337",
+                        int const & port = 5432,
+                        QString const & connectOptions = "connect_timeout = 3",
+                        QObject * parent = nullptr);
+
 
     // Деструктор
     ~DatabaseManager() override;
@@ -104,6 +104,9 @@ public:
         return m_lastError;
     }
 
+    // Задать имя подключения
+    void setConnectionName(QString const & connectionName);
+
     // Задать адрес хоста
     void setHostName(QString const & value);
 
@@ -128,13 +131,20 @@ public:
     // Закрыть подключение
     void closeConnection();
 
+    // Сохранить свёртку DOUBLE PRECISION
     void saveDataPackage(LoadGenerator::DataPackage const & package);
+
+    // Сохранить свёртку REAL
     void saveDataPackage(DataPackageFloat const & package);
+
+    // Сохранить свёртку SMALLINT
     void saveDataPackage(DataPackageInt16 const & package);
 
+    // Прочитать базу данных
+    void readDb();
+
 private:
-    ConnectionBackend *m_backend;
-    QString const m_connectionName;
+    QString m_connectionName;
     QString m_hostName;
     int m_port;
     QString m_dbName;
@@ -159,6 +169,8 @@ private:
 public slots:
     void slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError);
 
+    void slotReadDb(QVector<RowForVisualization> rows, QVector<QVector<double>> convsH, QVector<QVector<double>> convsV);
+
 signals:
     void signalInitialize();
     void signalOpenConnection();
@@ -173,4 +185,10 @@ signals:
     void signalClearTable();
     void signalRecreateTable();
     void signalDeleteTable();
+
+    void signalSetDbStatus(int dbStatus);
+    void signalSetLastError(QString lastError);
+    void signalSetData(QVector<RowForVisualization> rows, QVector<QVector<double>> convsH, QVector<QVector<double>> convsV);
+
+    void signalReadDb();
 };

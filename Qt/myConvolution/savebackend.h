@@ -3,8 +3,7 @@
 
 #include "loadgenerator.h"
 #include "utils.h"
-
-class DatabaseManager;
+#include "databasemanager.h"
 
 // Пакет данных, свёртка как Int16 (smallint в psql)
 struct DataPackageInt16

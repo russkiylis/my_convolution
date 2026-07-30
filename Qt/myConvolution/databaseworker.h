@@ -4,7 +4,10 @@
 #include <QString>
 
 #include "loadgenerator.h"
-#include "savebackend.h"
+
+struct RowForVisualization;
+struct DataPackageFloat;
+struct DataPackageInt16;
 
 // Класс, непосредственно работающий с базой данных.
 // Сидит в другом потоке чтобы не мешать остальной программе.
@@ -91,9 +94,13 @@ public slots:
     void slotRecreateTable();
     void slotDeleteTable();
 
+    void slotReadDb();
+
 signals:
 
     // Отправка сигнала об обновлении полей менеджера
     void signalManagerUpdate(bool connected, bool valid, bool busy, QString lastError);
+
+    void signalReadDb(QVector<RowForVisualization> rows, QVector<QVector<double>> convsH, QVector<QVector<double>> convsV);
 };
 

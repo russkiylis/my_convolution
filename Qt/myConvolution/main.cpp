@@ -9,6 +9,7 @@
 #include "databasemanager.h"
 #include "loadgenerator.h"
 #include "savebackend.h"
+#include "visualizebackend.h"
 
 // Точка входа в программу
 int main(int argc, char *argv[])
@@ -26,6 +27,7 @@ int main(int argc, char *argv[])
     ConnectionBackend connectionBackend;
     SaveBackend saveBackend(connectionBackend.db());
     GeneratorBackend generatorBackend(saveBackend);
+    VisualizeBackend visualizeBackend(connectionBackend.db());
 
     // Регистрация типа DatabaseConfiguration для передачи через сигналы/слоты
     qRegisterMetaType<DatabaseConfiguration>("DatabaseConfiguration");
@@ -38,6 +40,9 @@ int main(int argc, char *argv[])
     qRegisterMetaType<LoadGenerator::DataPackage>("DataPackage");
     qRegisterMetaType<DataPackageFloat>("DataPackageFloat");
     qRegisterMetaType<DataPackageInt16>("DataPackageInt16");
+    qRegisterMetaType<QVector<RowForVisualization>>("QVector<RowForVisualization>");
+    qRegisterMetaType<RowForVisualization>("rowForVisualization");
+    qRegisterMetaType<QVector<QVector<double>>>("QVector<QVector<double>>");
 
     // Создание QML-движка
     QQmlApplicationEngine engine;
@@ -47,6 +52,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("connectionBackend", &connectionBackend);
     engine.rootContext()->setContextProperty("generatorBackend", &generatorBackend);
     engine.rootContext()->setContextProperty("saveBackend", &saveBackend);
+    engine.rootContext()->setContextProperty("visualizeBackend", &visualizeBackend);
 
     // Создание адреса QML-файла
     const QUrl url(QStringLiteral("qrc:/main.qml"));
