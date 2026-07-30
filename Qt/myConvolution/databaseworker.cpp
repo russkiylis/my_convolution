@@ -296,50 +296,12 @@ void DatabaseWorker::slotInsertDouble(const LoadGenerator::DataPackage &package)
     query.bindValue(":max_angle_h", package.maxAngleH);
     query.bindValue(":step_h", package.stepH);
     query.bindValue(":conv_h_double", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":quality_h", package.qualityH);
     query.bindValue(":min_angle_v", package.minAngleV);
     query.bindValue(":max_angle_v", package.maxAngleV);
     query.bindValue(":step_v", package.stepV);
     query.bindValue(":conv_v_double", Utils::vectorToPgArray(package.convV));
-
-    if (!query.exec()) {
-        _lastError = "[!] "
-        + _config.fullConnectionName
-        + ": Запись не удалась: "
-        + query.lastError().text();
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-
-    // Считываем файл для получения свёртки
-    if (!Utils::fileToString(":sql/selectDoublePrecision.sql", command, &fileError)) {
-        _lastError = "[!] "
-            + _config.fullConnectionName
-            + ": Запись не удалась: "
-            + fileError;
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-    command += "ORDER BY id DESC LIMIT 1;";
-
-    if (!query.prepare(command)) {
-        _lastError = "[!] "
-        + _config.fullConnectionName
-        + ": Запись не удалась: "
-        + query.lastError().text();
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-
-    query.bindValue(":value", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":quality_v", package.qualityV);
 
     if (!query.exec()) {
         _lastError = "[!] "
@@ -479,50 +441,12 @@ void DatabaseWorker::slotInsertFloat(const DataPackageFloat &package) {
     query.bindValue(":max_angle_h", package.maxAngleH);
     query.bindValue(":step_h", package.stepH);
     query.bindValue(":conv_h_real", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":quality_h", package.qualityH);
     query.bindValue(":min_angle_v", package.minAngleV);
     query.bindValue(":max_angle_v", package.maxAngleV);
     query.bindValue(":step_v", package.stepV);
     query.bindValue(":conv_v_real", Utils::vectorToPgArray(package.convV));
-
-    if (!query.exec()) {
-        _lastError = "[!] "
-        + _config.fullConnectionName
-        + ": Запись не удалась: "
-        + query.lastError().text();
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-
-    // Считываем файл для получения свёртки
-    if (!Utils::fileToString(":sql/selectReal.sql", command, &fileError)) {
-        _lastError = "[!] "
-            + _config.fullConnectionName
-            + ": Запись не удалась: "
-            + fileError;
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-    command += "ORDER BY id DESC LIMIT 1;";
-
-    if (!query.prepare(command)) {
-        _lastError = "[!] "
-        + _config.fullConnectionName
-        + ": Запись не удалась: "
-        + query.lastError().text();
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-
-    query.bindValue(":value", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":quality_v", package.qualityV);
 
     if (!query.exec()) {
         _lastError = "[!] "
@@ -662,50 +586,12 @@ void DatabaseWorker::slotInsertInt16(const DataPackageInt16 &package) {
     query.bindValue(":max_angle_h", package.maxAngleH);
     query.bindValue(":step_h", package.stepH);
     query.bindValue(":conv_h_smallint", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":quality_h", package.qualityH);
     query.bindValue(":min_angle_v", package.minAngleV);
     query.bindValue(":max_angle_v", package.maxAngleV);
     query.bindValue(":step_v", package.stepV);
     query.bindValue(":conv_v_smallint", Utils::vectorToPgArray(package.convV));
-
-    if (!query.exec()) {
-        _lastError = "[!] "
-        + _config.fullConnectionName
-        + ": Запись не удалась: "
-        + query.lastError().text();
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-
-    // Считываем файл для получения свёртки
-    if (!Utils::fileToString(":sql/selectSmallint.sql", command, &fileError)) {
-        _lastError = "[!] "
-            + _config.fullConnectionName
-            + ": Запись не удалась: "
-            + fileError;
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-    command += "ORDER BY id DESC LIMIT 1;";
-
-    if (!query.prepare(command)) {
-        _lastError = "[!] "
-        + _config.fullConnectionName
-        + ": Запись не удалась: "
-        + query.lastError().text();
-        qDebug().noquote().nospace() << _lastError;
-        db.rollback();
-        _busy = false;
-        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-        return;
-    }
-
-    query.bindValue(":value", Utils::vectorToPgArray(package.convH));
+    query.bindValue(":quality_v", package.qualityV);
 
     if (!query.exec()) {
         _lastError = "[!] "
