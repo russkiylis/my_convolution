@@ -1,40 +1,25 @@
 #pragma once
 #include <QObject>
 #include "databasemanager.h"
-
-// Отображаемая строчка (без спарклайна свёрток)
-struct RowForVisualization
-{
-    qint64 id;
-    QDateTime timestamp;
-
-    QString sysname;
-    double azimuth;
-    double elevation;
-    double power;
-    double frequency;
-    double latitude;
-    double longitude;
-
-    QString dataType;
-
-    double qualityH;
-    double qualityV;
-};
+#include "visualizationtablemodel.h"
 
 class VisualizeBackend : public QObject {
     Q_OBJECT
+    Q_PROPERTY(VisualizationTableModel *visualizationTableModel READ visualizationTableModel CONSTANT)
 public:
     explicit VisualizeBackend(DatabaseManager &writerDb, QObject *parent = nullptr);
 
     Q_INVOKABLE void onDbConnectionButtonClicked();
     Q_INVOKABLE void readDb();
+
+    VisualizationTableModel *visualizationTableModel();
 private:
     // Обновить данные подключения-читалки в соответствии с данными подключения-писателя
     void updateFromWriter();
 
     DatabaseManager &m_writerDb;
     DatabaseManager m_readerDb;
+    VisualizationTableModel m_visualizationModel;
 
     int m_readerDbStatus = false;
     QString m_readerLastError = "Ошибок нет.";

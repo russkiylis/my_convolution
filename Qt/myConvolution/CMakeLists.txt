@@ -41,6 +41,9 @@ set(PROJECT_SOURCES
         savebackend.h
         visualizebackend.cpp
         visualizebackend.h
+        visualizationtablemodel.cpp
+        visualizationtablemodel.h
+        DataForVisualization.h
 )
 
 add_executable(myConvolution

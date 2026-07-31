@@ -13,5 +13,4 @@ SELECT
     conv.quality_v
 FROM df_result AS result
 JOIN df_conv AS conv USING (id)
-ORDER BY result.result_timestamp DESC, result.id DESC
-LIMIT 50;
+ORDER BY result.result_timestamp DESC, result.id DESC;

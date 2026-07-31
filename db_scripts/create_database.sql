@@ -4,13 +4,37 @@ CREATE DATABASE my_convolution;
 -- Switching to database
 \c my_convolution
 
+-- Creating enum data type
+CREATE TYPE public.data_type AS ENUM (
+    'double_precision',
+    'real',
+    'smallint'
+    );
+
 -- Creating table df_conv
 CREATE TABLE IF NOT EXISTS df_conv (
 	id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	min_angle SMALLINT  NOT NULL DEFAULT 0 CHECK (min_angle >= 0 AND min_angle < 360),
-	max_angle SMALLINT  NOT NULL DEFAULT 360 CHECK (max_angle > 0 AND max_angle <= 360),
-	step NUMERIC(2,1) NOT NULL DEFAULT 0.1 CHECK (step IN (1.0, 0.5, 0.25, 0.1)),
-	data REAL [] NOT NULL CHECK (ARRAY_LENGTH(data,1) = ((max_angle-min_angle)/step))
+	data_type public.data_type NOT NULL,
+	min_angle_h SMALLINT  NOT NULL DEFAULT 0 CHECK (min_angle_h >= 0 AND min_angle_h < 360),
+	max_angle_h SMALLINT  NOT NULL DEFAULT 360 CHECK (max_angle_h > 0 AND max_angle_h <= 360),
+	step_h NUMERIC(3,2) NOT NULL DEFAULT 0.1 CHECK (step_h IN (1.0, 0.5, 0.2, 0.1, 0.01)),
+	conv_h_double DOUBLE PRECISION [],
+	conv_h_real REAL [],
+	conv_h_smallint SMALLINT [],
+	quality_h REAL,
+	min_angle_v SMALLINT  NOT NULL DEFAULT -45 CHECK (min_angle_v >= -45 AND min_angle_v < 45),
+	max_angle_v SMALLINT  NOT NULL DEFAULT 45 CHECK (max_angle_v > -45 AND max_angle_v <= 45),
+	step_v NUMERIC(3,2) NOT NULL DEFAULT 0.1 CHECK (step_v IN (1.0, 0.5, 0.2, 0.1, 0.01)),
+	conv_v_double DOUBLE PRECISION [],
+	conv_v_real REAL [],
+	conv_v_smallint SMALLINT [],
+	quality_v REAL,
+
+	CONSTRAINT df_conv_angle_h_range_check
+        CHECK (min_angle_h < max_angle_h),
+
+    CONSTRAINT df_conv_angle_v_range_check
+        CHECK (min_angle_v < max_angle_v)
 );
 
 -- Creating table df_result
@@ -20,9 +44,10 @@ CREATE TABLE IF NOT EXISTS df_result (
 		ON DELETE CASCADE,
 	result_timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	azimuth	NUMERIC(6,3) NOT NULL CHECK (azimuth >= 0 AND azimuth <= 360),
+	elevation NUMERIC(6,3) NOT NULL CHECK (elevation >= -45 AND elevation <= 45),
 	power NUMERIC(6,3) NOT NULL,
-	frequency BIGINT NOT NULL CHECK (frequency > 0),
+	frequency NUMERIC(15,2) NOT NULL CHECK (frequency >= 0),
 	longitude NUMERIC(9,6) CHECK (longitude >= -180 AND longitude <= 180),
 	latitude NUMERIC(8,6) CHECK (latitude >= -90 AND latitude <= 90),
-	sysname VARCHAR(20)
+	sysname VARCHAR(25)
 );

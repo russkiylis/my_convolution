@@ -1,1 +1,1 @@
-TRUNCATE df_conv CASCADE;
+TRUNCATE df_conv CASCADE;   -- TODO: ОНО РАБОТАЕТ СОМНИТЕЛЬНО

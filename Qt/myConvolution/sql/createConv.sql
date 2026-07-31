@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS df_conv (
+--     TODO: БИНАРНИКИ
                                        id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                                        data_type public.data_type NOT NULL,
                                        min_angle_h SMALLINT  NOT NULL DEFAULT 0 CHECK (min_angle_h >= 0 AND min_angle_h < 360),

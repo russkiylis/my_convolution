@@ -37,6 +37,10 @@ void VisualizeBackend::readDb() {
     m_readerDb.readDb();
 }
 
+VisualizationTableModel * VisualizeBackend::visualizationTableModel() {
+    return &m_visualizationModel;
+}
+
 void VisualizeBackend::slotSetDbStatus(const int dbStatus) {
     m_readerDbStatus = dbStatus;
 }
@@ -51,4 +55,5 @@ void VisualizeBackend::slotSetData(
     const QVector<QVector<double>>& convsV
     ) {
     qDebug() << "Прочтённые данные дошли до бекенда!";
+    m_visualizationModel.replaceData(rows, convsH, convsV);
 }
