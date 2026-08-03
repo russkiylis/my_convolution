@@ -44,6 +44,8 @@ LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
     maxPeriod(other.maxPeriod),
     noiseConfig(other.noiseConfig->clone())
 {
+    peakConfigsV.clear();
+    peakConfigsH.clear();
     // Проходим по вектору умных указателей и копируем их
     for (const auto &peakConfig : other.peakConfigsV) {
         peakConfigsV.push_back(peakConfig->clone());
@@ -72,6 +74,8 @@ LoadGenerator::PostConfig & LoadGenerator::PostConfig::operator=(const PostConfi
     minPeriod = other.minPeriod;
     maxPeriod = other.maxPeriod;
     noiseConfig = other.noiseConfig->clone();
+    peakConfigsV.clear();
+    peakConfigsH.clear();
     // Проходим по вектору умных указателей и копируем их
     for (const auto & peakConfig : other.peakConfigsV) {
         peakConfigsV.push_back(peakConfig->clone());

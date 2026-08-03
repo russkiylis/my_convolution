@@ -44,6 +44,8 @@ set(PROJECT_SOURCES
         visualizationtablemodel.cpp
         visualizationtablemodel.h
         DataForVisualization.h
+        bytearraycoder.cpp
+        bytearraycoder.h
 )
 
 add_executable(myConvolution

@@ -1,5 +1,5 @@
 // Функиця для рисования спарклайна по заданной ширине, высоте и массиву чисел
-function drawSparkline(ctx, width, height, data, color = "black", lineWidth = 1) {
+function drawSparkline(ctx, width, height, data, color = "red", lineWidth = 1) {
     ctx.clearRect(0, 0, width, height);     // Очищаем прямоугольник
 
     if (!data || data === 0) return;
@@ -24,6 +24,7 @@ function drawSparkline(ctx, width, height, data, color = "black", lineWidth = 1)
         const y = getY(data[i]);
         ctx.lineTo(x, y);
     }
+
     ctx.lineTo(width, getY(data[data.length - 1]));
     ctx.strokeStyle = color;
     ctx.lineWidth = lineWidth;
