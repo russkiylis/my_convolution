@@ -51,6 +51,7 @@ void VisualizeBackend::slotSetLastError(const QString &lastError) {
 
 void VisualizeBackend::slotSetData(
     const QVector<RowForVisualization>& rows,
+    // TODO: Всё менять на QVariantListы
     const QVector<QVector<double>>& convsH,
     const QVector<QVector<double>>& convsV
     ) {

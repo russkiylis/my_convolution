@@ -23,6 +23,7 @@ struct RowForVisualization
 
 struct DataForVisualization
 {
+    // TODO: поменять на QVariantListы
     RowForVisualization row;
     QVector<double> convH;
     QVector<double> convV;

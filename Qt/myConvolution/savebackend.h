@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bytearraycoder.h"
 #include "loadgenerator.h"
 #include "utils.h"
 #include "databasemanager.h"
@@ -170,13 +171,6 @@ struct DataPackageFloat
 };
 Q_DECLARE_METATYPE(DataPackageFloat)
 
-enum DataType
-{
-    doublePrecision,
-    real,
-    smallint
-};
-
 class SaveBackend : public QObject {
     Q_OBJECT
 
@@ -199,7 +193,7 @@ public:
 
 private:
     DatabaseManager &m_db;  // Менеджер базы данных
-    DataType m_currentDataType; // Текущий выбранный тип данных
+    ByteArrayCoder::DataType m_currentDataType; // Текущий выбранный тип данных
     bool m_saveEnabled = false; // Происходит ли сохранение в БД
 
 public:

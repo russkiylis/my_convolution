@@ -1126,6 +1126,7 @@ void DatabaseWorker::slotReadDb() {
         row.qualityV = query.value("quality_v").toDouble();
         rowsForVisualization.push_back(row);
 
+        // TODO: Убрать это и добавить 
         QSqlQuery convQuery(db);
         // Забираем свёртки по id
         if (row.dataType == "double_precision") {

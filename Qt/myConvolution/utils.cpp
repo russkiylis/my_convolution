@@ -3,6 +3,7 @@
 #include <qfile.h>
 #include <qjsonarray.h>
 #include <qjsondocument.h>
+#include <cmath>
 
 QString Utils::doubleToString(const double value, const int precision)
 {

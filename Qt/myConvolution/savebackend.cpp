@@ -1,25 +1,30 @@
 #include "savebackend.h"
+
+#include <complex>
+
 #include "databasemanager.h"
 
 SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
     QObject{parent},
     m_db(db),
-    m_currentDataType(static_cast<DataType>(0))
+    m_currentDataType(static_cast<ByteArrayCoder::DataType>(0))
 {
 }
 
 void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) const
 {
+    // TODO: Это всё идёт под снос ибо мы меняем бд на bytearray
     if (m_saveEnabled) {
         switch (m_currentDataType) {
-        case doublePrecision:
+        case ByteArrayCoder::doublePrecision:
             m_db.saveDataPackage(package);
             break;
-        case real:
+        case ByteArrayCoder::real:
             m_db.saveDataPackage(DataPackageFloat(package));
             break;
-        case smallint:
+        case ByteArrayCoder::smallint:
             m_db.saveDataPackage(DataPackageInt16(package));
+
             break;
         default:
             throw std::logic_error("Сомнительный тип данных!");
@@ -33,7 +38,7 @@ int SaveBackend::currentDataType() const
 }
 
 void SaveBackend::setCurrentDataType(int type) {
-    m_currentDataType = static_cast<DataType>(type);
+    m_currentDataType = static_cast<ByteArrayCoder::DataType>(type);
     qDebug().noquote().nospace() << "Тип записи сменился: " << m_currentDataType;
     emit currentDataTypeChanged(m_currentDataType);
 }

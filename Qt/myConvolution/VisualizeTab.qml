@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 import "sparkline.js" as SparklinePainter
 
+// TODO: Добавить scrollbar и количество выведенных штук
 Item {
     Button {
         id: readButton
