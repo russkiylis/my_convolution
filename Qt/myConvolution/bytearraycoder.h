@@ -33,12 +33,19 @@ public:
     // Статический метод-фабрика для создания нужного кодера
     static std::unique_ptr<ByteArrayCoder> create(DataType type, ByteOrder byteOrder);
 
+    // Порядок записи битов
     [[nodiscard]] ByteOrder byteOrder() const;
+
+    // Тип закодированных данных
     [[nodiscard]] DataType type() const;
 
 private:
     ByteOrder m_byteOrder;     // Порядок записи битов
     DataType m_type;    // Тип закодированных данных
+
+protected:
+    // Установка порядка байтов
+    void setSerializerByteOrder(QDataStream &serializer) const;
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем double по 8 байт
