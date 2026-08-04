@@ -14,6 +14,9 @@ SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
 void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) const
 {
     // TODO: Это всё идёт под снос ибо мы меняем бд на bytearray
+
+
+
     if (m_saveEnabled) {
         switch (m_currentDataType) {
         case ByteArrayCoder::doublePrecision:

@@ -35,8 +35,7 @@ public:
         std::chrono::milliseconds maxPeriod;      // Максимальный период между отправками
 
         std::unique_ptr<AbstractNoise::NoiseConfig> noiseConfig;                // Шум
-        std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> peakConfigsV;    // Пики по вертикали
-        std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> peakConfigsH;   // Пики по горизонтали
+        std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> peakConfigs;    // Пики
 
         PostConfig();
         PostConfig(const PostConfig &other);
@@ -63,8 +62,7 @@ public:
         double stepH{};                // Шаг (горизонтальный)
         double stepV{};                // Шаг (вертикальный)
 
-        std::vector<double> convH;   // Свёртка по горизонтали
-        std::vector<double> convV;   // Свёртка по вертикали
+        std::vector<double> conv;   // Свёртка (построчная)
     };
 
     // Класс одного поста

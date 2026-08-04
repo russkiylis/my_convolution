@@ -74,6 +74,7 @@ Item {
             anchors.leftMargin: 1
             anchors.rightMargin: 1
             anchors.bottomMargin: 1
+            ScrollBar.vertical: ScrollBar {}
 
             model: visualizeBackend.visualizationTableModel
             onWidthChanged: tableView.forceLayout()
@@ -129,5 +130,24 @@ Item {
                 border.color: main.borderColor2
             }
         }
+    }
+
+    TextEdit {
+        id: amountText
+        width: tableField - readButton.width - 10
+
+        anchors.top: tableField.bottom
+        anchors.left: tableField.left
+        anchors.topMargin: 10
+
+        text: "Отображено " + tableView.rows + " строк."
+
+        readOnly: true
+        selectByMouse: true
+        selectByKeyboard: true
+
+        wrapMode: TextEdit.Wrap
+
+        color: main.textColor
     }
 }

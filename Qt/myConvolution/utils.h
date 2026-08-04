@@ -3,6 +3,8 @@
 #include <memory>
 #include <qvariant.h>
 
+#include "geometryutils.h"
+
 class Utils {
 public:
     // Преобразование double в QString без 1е-7

@@ -4,6 +4,8 @@
 #include <qjsonarray.h>
 #include <qjsondocument.h>
 #include <cmath>
+#include <qpoint.h>
+#include <QVector3D>
 
 QString Utils::doubleToString(const double value, const int precision)
 {

@@ -46,6 +46,8 @@ set(PROJECT_SOURCES
         dataforvisualization.h
         bytearraycoder.cpp
         bytearraycoder.h
+        geometryutils.cpp
+        geometryutils.h
 )
 
 add_executable(myConvolution

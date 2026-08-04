@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <QObject>
+#include <qpoint.h>
 
 // Абстрактный класс пика функции правдоподобия
 class AbstractPeak
@@ -17,7 +18,7 @@ public:
 
     struct PeakConfig
     {
-        explicit PeakConfig(double const &center, double const &amplitude);
+        explicit PeakConfig(QPointF const &center, double const &amplitude);
 
         [[nodiscard]] virtual PeakType type() const = 0;
 
@@ -29,11 +30,11 @@ public:
 
         virtual ~PeakConfig() = default;
 
-        double center;
+        QPointF center;
         double amplitude;
     };
 
-    explicit AbstractPeak(double const &center = 180.0, double const &amplitude = 1.0);
+    explicit AbstractPeak(QPointF const &center = QPointF(180, 0), double const &amplitude = 1.0);
     explicit AbstractPeak(PeakConfig const &config);
     virtual ~AbstractPeak() = default;
 
@@ -41,13 +42,13 @@ public:
     [[nodiscard]] virtual PeakType type() const = 0;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] virtual double valueAt(double const &deg) const = 0;
+    [[nodiscard]] virtual double valueAt(QPointF const &deg) const = 0;
 
     // Получить центральный градус
-    [[nodiscard]] double center() const;
+    [[nodiscard]] QPointF center() const;
 
     // Задать центральный градус
-    void setCenter(const double &center);
+    void setCenter(const QPointF &center);
 
     // Получить амплитуду
     [[nodiscard]] double amplitude() const;
@@ -56,7 +57,7 @@ public:
     void setAmplitude(const double &amplitude);
 
 protected:
-    double m_center;     // Координата пика (в градусах)
+    QPointF m_center;     // Координата пика (в градусах)
     double m_amplitude;    // Амплитуда пика (в у.е.)
 };
 
@@ -66,7 +67,7 @@ class GaussPeak final: public AbstractPeak
 public:
     struct GaussPeakConfig final: PeakConfig
     {
-        explicit GaussPeakConfig(double const &center, double const &amplitude, double const &sigma);
+        explicit GaussPeakConfig(QPointF const &center, double const &amplitude, double const &sigma);
 
         [[nodiscard]] std::unique_ptr<PeakConfig> clone() const override;
 
@@ -80,7 +81,7 @@ public:
     };
 
     explicit GaussPeak(
-        double const &center = 180.0,
+        QPointF const &center = QPointF(180, 0),
         double const &amplitude = 1.0,
         double const &sigma = 10.0
         );
@@ -90,7 +91,7 @@ public:
     [[nodiscard]] PeakType type() const override;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] double valueAt(double const &deg) const override;
+    [[nodiscard]] double valueAt(QPointF const &deg) const override;
 
     // Получить значение СКО
     [[nodiscard]] double sigma() const;
@@ -108,7 +109,7 @@ class TrianglePeak final: public AbstractPeak
 public:
     struct TrianglePeakConfig final: PeakConfig
     {
-        explicit TrianglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
+        explicit TrianglePeakConfig(QPointF const &center, double const &amplitude, double const &halfWidth);
 
         [[nodiscard]] std::unique_ptr<AbstractPeak> createPeak() const override;
 
@@ -123,7 +124,7 @@ public:
 
 
     explicit TrianglePeak(
-        double const &center = 180.0,
+        QPointF const &center = QPointF(180, 0),
         double const &amplitude = 1.0,
         double const &halfWidth = 10.0
         );
@@ -133,7 +134,7 @@ public:
     [[nodiscard]] PeakType type() const override;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] double valueAt(double const &deg) const override;
+    [[nodiscard]] double valueAt(QPointF const &deg) const override;
 
     // Получить значение полуширины
     [[nodiscard]] double halfWidth() const;
@@ -151,7 +152,7 @@ class RectanglePeak final: public AbstractPeak
 public:
     struct RectanglePeakConfig final: PeakConfig
     {
-        explicit RectanglePeakConfig(double const &center, double const &amplitude, double const &halfWidth);
+        explicit RectanglePeakConfig(QPointF const &center, double const &amplitude, double const &halfWidth);
 
         [[nodiscard]] std::unique_ptr<AbstractPeak> createPeak() const override;
 
@@ -166,7 +167,7 @@ public:
 
 
     explicit RectanglePeak(
-    double const &center = 180.0,
+    QPointF const &center = QPointF(180, 0),
     double const &amplitude = 1.0,
     double const &halfWidth = 10.0
     );
@@ -176,7 +177,7 @@ public:
     [[nodiscard]] PeakType type() const override;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] double valueAt(double const &deg) const override;
+    [[nodiscard]] double valueAt(QPointF const &deg) const override;
 
     // Получить значение полуширины
     [[nodiscard]] double halfWidth() const;
