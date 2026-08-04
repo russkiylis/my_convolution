@@ -2,6 +2,7 @@
 
 #include <QObject>
 #include <random>
+#include <memory>
 
 class AbstractNoise
 {

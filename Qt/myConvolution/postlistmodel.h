@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "loadgenerator.h"
 #include "abstractnoisebackend.h"
 #include "peaklistmodel.h"

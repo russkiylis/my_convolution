@@ -1,5 +1,6 @@
 #pragma once
 #include <QObject>
+#include <memory>
 
 // Кодер из QVariantList в QByteArray
 class ByteArrayCoder {

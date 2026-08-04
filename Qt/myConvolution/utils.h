@@ -1,4 +1,6 @@
 #pragma once
+
+#include <memory>
 #include <qvariant.h>
 
 class Utils {

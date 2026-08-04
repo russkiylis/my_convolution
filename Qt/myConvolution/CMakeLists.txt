@@ -43,7 +43,7 @@ set(PROJECT_SOURCES
         visualizebackend.h
         visualizationtablemodel.cpp
         visualizationtablemodel.h
-        DataForVisualization.h
+        dataforvisualization.h
         bytearraycoder.cpp
         bytearraycoder.h
 )

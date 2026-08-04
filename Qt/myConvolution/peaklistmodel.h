@@ -1,6 +1,7 @@
 #pragma once
 #include <qabstractitemmodel.h>
 
+#include <memory>
 #include "loadgenerator.h"
 
 class PeakListModel : public QAbstractListModel {

@@ -1,4 +1,6 @@
 #pragma once
+
+#include <memory>
 #include <qqml.h>
 #include <qabstractitemmodel.h>
 #include "dataforvisualization.h"

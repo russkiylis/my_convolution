@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "bytearraycoder.h"
 #include "loadgenerator.h"
 #include "utils.h"

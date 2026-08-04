@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <QObject>
 
 // Абстрактный класс пика функции правдоподобия

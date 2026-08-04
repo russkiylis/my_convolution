@@ -1,4 +1,6 @@
 #pragma once
+
+#include <memory>
 #include <QObject>
 #include "databasemanager.h"
 #include "visualizationtablemodel.h"

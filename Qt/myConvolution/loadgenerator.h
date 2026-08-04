@@ -4,6 +4,7 @@
 #include <QString>
 #include <QtPositioning>
 #include <vector>
+#include <memory>
 
 #include "noise.h"
 #include "peak.h"

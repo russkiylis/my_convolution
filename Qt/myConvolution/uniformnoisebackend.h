@@ -1,4 +1,6 @@
 #pragma once
+
+#include <memory>
 #include "abstractnoisebackend.h"
 
 class UniformNoiseBackend final: public AbstractNoiseBackend {
