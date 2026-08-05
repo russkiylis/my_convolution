@@ -9,14 +9,15 @@ class GeneratorBackend;
 
 enum AngleStep
 {
+    _5,
+    _2,
     _1,
     _05,
     _02,
-    _01,
-    _001
+    _01
 };
 
-class PostListModel : public QAbstractListModel
+class PostListModel final : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(int postIndex READ postIndex WRITE setPostIndex NOTIFY postIndexChanged)
@@ -39,8 +40,7 @@ class PostListModel : public QAbstractListModel
     Q_PROPERTY(int currentNoiseType READ currentNoiseType WRITE setCurrentNoiseType NOTIFY currentNoiseTypeChanged)
 
     Q_PROPERTY(AbstractNoiseBackend *noiseBackend READ noiseBackend NOTIFY noiseBackendChanged)
-    Q_PROPERTY(PeakListModel *peakListModelH READ peakListModelH CONSTANT)
-    Q_PROPERTY(PeakListModel *peakListModelV READ peakListModelV CONSTANT)
+    Q_PROPERTY(PeakListModel *peakListModel READ peakListModel CONSTANT)
 
     std::vector<LoadGenerator::PostConfig> &m_config;    // Ссылка на вектор PostConfig
     std::vector<LoadGenerator::PostConfig> m_fallbackConfig;   // Вектор конфигов, к которому мы сможем откатиться
@@ -198,16 +198,11 @@ private:
     // Объект класса бекенда шума
     std::unique_ptr<AbstractNoiseBackend> m_noiseBackend;
 
-    // Модель листа с пиками по горизонтали
-    PeakListModel m_peakListModelH;
+    // Модель листа с пиками
+    PeakListModel m_peakListModel;
 
 public:
-    [[nodiscard]] PeakListModel *peakListModelH();
-    [[nodiscard]] PeakListModel *peakListModelV();
-
-private:
-    // Модель листа с пиками по вертикали
-    PeakListModel m_peakListModelV;
+    [[nodiscard]] PeakListModel *peakListModel();
 
 signals:
     void postIndexChanged(int newPostIndex);

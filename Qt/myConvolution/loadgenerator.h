@@ -31,6 +31,8 @@ public:
         int maxAngleV;               // Максимальный угол (вертикальный)
         double stepH;                // Шаг (горизонтальный)
         double stepV;                // Шаг (вертикальный)
+        int countH{};
+        int countV{};
         std::chrono::milliseconds minPeriod;      // Минимальный период между отправками
         std::chrono::milliseconds maxPeriod;      // Максимальный период между отправками
 
@@ -60,6 +62,8 @@ public:
         double stepH{};                // Шаг (горизонтальный)
         double stepV{};                // Шаг (вертикальный)
 
+        int countH{};
+        int countV{};
         std::vector<double> conv;   // Свёртка (построчная)
     };
 

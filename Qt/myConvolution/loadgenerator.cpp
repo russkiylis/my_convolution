@@ -100,6 +100,8 @@ LoadGenerator::Post::Post(PostConfig const &config, LoadGenerator *loadGenerator
     const auto stepCountV = static_cast<std::size_t>(
         std::floor(rangeV / m_config.stepV)
     );
+    m_config.countH = static_cast<int>(stepCountH);
+    m_config.countV = static_cast<int>(stepCountV);
     for (size_t i = 0; i < stepCountV; ++i ) {
         for (size_t j = 0; j < stepCountH; ++j) {
             m_direction.push_back(GeometryUtils::SphericalCoordDeg(static_cast<double>(j) * m_config.stepH + m_config.minAngleH,
@@ -142,7 +144,7 @@ void LoadGenerator::Post::call(TimePoint const &now) {
             m_data.timestamp = QDateTime::currentDateTimeUtc();
 
             // Далее копирование информации которую мы и так знаем
-            std::normal_distribution<double> levelDistribution(m_config.level, m_config.levelSigma);
+            std::normal_distribution levelDistribution(m_config.level, m_config.levelSigma);
             m_data.level = levelDistribution(m_rng);
             m_data.frequency = m_config.frequency;
             m_data.coordinate.setLatitude(m_config.latitude);
@@ -155,6 +157,8 @@ void LoadGenerator::Post::call(TimePoint const &now) {
             m_data.maxAngleV = m_config.maxAngleV;
             m_data.stepH = m_config.stepH;
             m_data.stepV = m_config.stepV;
+            m_data.countH = m_config.countH;
+            m_data.countV = m_config.countV;
 
             newNextGenTime();   // Генерируем время, через которое произойдёт новая генерация
 
@@ -165,7 +169,7 @@ void LoadGenerator::Post::call(TimePoint const &now) {
 
 void LoadGenerator::Post::newNextGenTime()
 {
-    std::uniform_real_distribution<double> cooldownDistribution {
+    std::uniform_real_distribution cooldownDistribution {
         static_cast<double>(m_config.minPeriod.count())/1000, static_cast<double>(m_config.maxPeriod.count())/1000
     }; // Создаём закон равномерного распределения
     const double cooldownSeconds = cooldownDistribution(m_rng);  // Генерируем кд в секундах

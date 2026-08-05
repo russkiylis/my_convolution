@@ -17,7 +17,8 @@ QHash<int, QByteArray> PeakListModel::roleNames() const
 {
     return {
     {PeakTypeRole, "peakType"},
-    {CenterRole, "center"},
+    {AzimuthRole, "azimuth"},
+    {ElevationRole, "elevation"},
     {AmplitudeRole, "amplitude"},
     {SigmaRole, "sigma"},
     {HalfWidthRole, "halfWidth"}
@@ -35,8 +36,10 @@ QVariant PeakListModel::data(const QModelIndex &index, const int role) const {
     switch (role) {
         case PeakTypeRole:
             return static_cast<int>(config->type());
-        case CenterRole:
-            return config->center;
+        case AzimuthRole:
+            return config->center.azimuth();
+        case ElevationRole:
+            return config->center.elevation();
         case AmplitudeRole:
             return config->amplitude;
         case SigmaRole:
@@ -80,13 +83,13 @@ void PeakListModel::setPeakType(const int row, const int peakType) {
     beginResetModel();
     switch (static_cast<AbstractPeak::PeakType>(peakType)) {
         case AbstractPeak::PeakType::Gauss:
-            (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>(180, 10, 5);
+            (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>(GeometryUtils::SphericalCoordDeg(180, 0), 10, 5);
             break;
         case AbstractPeak::PeakType::Triangle:
-            (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>(180, 10, 25);
+            (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>(GeometryUtils::SphericalCoordDeg(180, 0), 10, 25);
             break;
         case AbstractPeak::PeakType::Rectangle:
-            (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>(180, 10, 5);
+            (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>(GeometryUtils::SphericalCoordDeg(180, 0), 10, 5);
             break;
         default:
             throw std::logic_error("Неадекватный тип пика!");
@@ -95,11 +98,11 @@ void PeakListModel::setPeakType(const int row, const int peakType) {
 }
 
 // FIXME: добавить адекватную проверку значений
-void PeakListModel::setCenter(const int row, const double center) {
+void PeakListModel::setAzimuth(const int row, const double azimuth) {
     // Проверка на адекватность значений
     if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
         throw std::logic_error("Неадекватный индекс модели пиков!");
-    if ((*m_peakConfig)[row]->center == center)
+    if ((*m_peakConfig)[row]->center.azimuth() == azimuth)
         return;
 
     auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[row].get());
@@ -108,20 +111,56 @@ void PeakListModel::setCenter(const int row, const double center) {
 
     switch ((*m_peakConfig)[row]->type()) {
     case AbstractPeak::PeakType::Gauss:
-        (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>(center, configGauss->amplitude, configGauss->sigma);
+        (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>
+        (GeometryUtils::SphericalCoordDeg(azimuth, configGauss->center.elevation()), configGauss->amplitude, configGauss->sigma);
         break;
     case AbstractPeak::PeakType::Triangle:
-        (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>(center, configTriangle->amplitude, configTriangle->halfWidth);
+        (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>
+        (GeometryUtils::SphericalCoordDeg(azimuth, configGauss->center.elevation()), configTriangle->amplitude, configTriangle->halfWidth);
         break;
     case AbstractPeak::PeakType::Rectangle:
-        (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>(center, configRectangle->amplitude, configRectangle->halfWidth);
+        (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>
+        (GeometryUtils::SphericalCoordDeg(azimuth, configGauss->center.elevation()), configRectangle->amplitude, configRectangle->halfWidth);
         break;
     default:
         throw std::logic_error("Неадекватный тип пика!");
     }
     const QModelIndex changedIndex = index(row, 0);
 
-    emit dataChanged(changedIndex, changedIndex, {CenterRole});
+    emit dataChanged(changedIndex, changedIndex, {AzimuthRole});
+}
+
+// FIXME: добавить адекватную проверку значений
+void PeakListModel::setElevation(const int row, const double elevation) {
+    // Проверка на адекватность значений
+    if (m_peakConfig == nullptr || row >= static_cast<int>(m_peakConfig->size()) || row < 0)
+        throw std::logic_error("Неадекватный индекс модели пиков!");
+    if ((*m_peakConfig)[row]->center.elevation() == elevation)
+        return;
+
+    auto * configGauss = dynamic_cast<GaussPeak::GaussPeakConfig *>((*m_peakConfig)[row].get());
+    auto * configTriangle = dynamic_cast<TrianglePeak::TrianglePeakConfig *>((*m_peakConfig)[row].get());
+    auto * configRectangle = dynamic_cast<RectanglePeak::RectanglePeakConfig *>((*m_peakConfig)[row].get());
+
+    switch ((*m_peakConfig)[row]->type()) {
+    case AbstractPeak::PeakType::Gauss:
+        (*m_peakConfig)[row] = std::make_unique<GaussPeak::GaussPeakConfig>
+        (GeometryUtils::SphericalCoordDeg(configGauss->center.azimuth(), elevation), configGauss->amplitude, configGauss->sigma);
+        break;
+    case AbstractPeak::PeakType::Triangle:
+        (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>
+        (GeometryUtils::SphericalCoordDeg(configGauss->center.azimuth(), elevation), configTriangle->amplitude, configTriangle->halfWidth);
+        break;
+    case AbstractPeak::PeakType::Rectangle:
+        (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>
+        (GeometryUtils::SphericalCoordDeg(configGauss->center.azimuth(), elevation), configRectangle->amplitude, configRectangle->halfWidth);
+        break;
+    default:
+        throw std::logic_error("Неадекватный тип пика!");
+    }
+    const QModelIndex changedIndex = index(row, 0);
+
+    emit dataChanged(changedIndex, changedIndex, {ElevationRole});
 }
 
 // FIXME: добавить адекватную проверку значений
@@ -205,7 +244,7 @@ int PeakListModel::addPeak() {
     const int newRowIndex = static_cast<int>(m_peakConfig->size());
 
     beginInsertRows(QModelIndex(), newRowIndex, newRowIndex);
-    m_peakConfig->push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 10));
+    m_peakConfig->push_back(std::make_unique<GaussPeak::GaussPeakConfig>(GeometryUtils::SphericalCoordDeg(180, 0), 30, 10));
     endInsertRows();
 
     return newRowIndex;

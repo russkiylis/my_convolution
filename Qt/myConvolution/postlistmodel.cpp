@@ -23,8 +23,7 @@ void PostListModel::setPostIndex(const int postIndex)
         return;
 
     m_postIndex = postIndex;
-    m_peakListModelH.setPeakConfig(m_config[m_postIndex].peakConfigsH);
-    m_peakListModelV.setPeakConfig(m_config[m_postIndex].peakConfigsV);
+    m_peakListModel.setPeakConfig(m_config[m_postIndex].peakConfigs);
     qmlUpdate();
 }
 
@@ -398,6 +397,12 @@ void PostListModel::setCurrentStepH(int currentStepH) {
         return;
 
     switch (static_cast<AngleStep>(currentStepH)) {
+    case _5:
+        m_config[m_postIndex].stepH = 5;
+        break;
+    case _2:
+        m_config[m_postIndex].stepH = 2;
+        break;
     case _1:
         m_config[m_postIndex].stepH = 1;
         break;
@@ -410,8 +415,6 @@ void PostListModel::setCurrentStepH(int currentStepH) {
     case _01:
         m_config[m_postIndex].stepH = 0.1;
         break;
-    case _001:
-        m_config[m_postIndex].stepH = 0.01;
     }
     emit currentStepHChanged(currentStepH);
 }
@@ -536,6 +539,12 @@ void PostListModel::setCurrentStepV(int currentStepV) {
         return;
 
     switch (static_cast<AngleStep>(currentStepV)) {
+    case _5:
+        m_config[m_postIndex].stepV = 5;
+        break;
+    case _2:
+        m_config[m_postIndex].stepV = 2;
+        break;
     case _1:
         m_config[m_postIndex].stepV = 1;
         break;
@@ -548,8 +557,6 @@ void PostListModel::setCurrentStepV(int currentStepV) {
     case _01:
         m_config[m_postIndex].stepV = 0.1;
         break;
-    case _001:
-        m_config[m_postIndex].stepV = 0.01;
     }
     emit currentStepVChanged(currentStepV);
 }
@@ -749,8 +756,7 @@ PostListModel::PostListModel(GeneratorBackend *generatorBackend, std::vector<Loa
     QAbstractListModel {parent},
     m_config(config),
     m_generatorBackend(generatorBackend),
-    m_peakListModelH(m_config[m_postIndex].peakConfigsH),
-    m_peakListModelV(m_config[m_postIndex].peakConfigsV)
+    m_peakListModel(m_config[m_postIndex].peakConfigs)
 {
 }
 
@@ -868,8 +874,7 @@ int PostListModel::fallback() {
     if (postIndex() >= static_cast<int>(m_fallbackConfig.size())) {
         setPostIndex(m_fallbackPostIndex);
     }
-    peakListModelH()->setPeakConfig(m_config[postIndex()].peakConfigsH);
-    peakListModelV()->setPeakConfig(m_config[postIndex()].peakConfigsV);
+    peakListModel()->setPeakConfig(m_config[postIndex()].peakConfigs);
     endResetModel();
     qDebug() << "Изменения сброшены.";
     return postIndex();
@@ -905,12 +910,6 @@ void PostListModel::qmlUpdate() {
     // m_peakListModelV.qmlUpdate();
 }
 
-PeakListModel *PostListModel::peakListModelH()
-{
-    return &m_peakListModelH;
-}
-
-PeakListModel *PostListModel::peakListModelV()
-{
-    return &m_peakListModelV;
+PeakListModel * PostListModel::peakListModel() {
+    return &m_peakListModel;
 }

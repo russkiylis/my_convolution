@@ -4,7 +4,7 @@
 #include <memory>
 #include "loadgenerator.h"
 
-class PeakListModel : public QAbstractListModel {
+class PeakListModel final : public QAbstractListModel {
     Q_OBJECT
 
 public:
@@ -26,7 +26,8 @@ private:
     enum Roles
     {
         PeakTypeRole = Qt::UserRole + 1,
-        CenterRole,
+        AzimuthRole,
+        ElevationRole,
         AmplitudeRole,
         SigmaRole,
         HalfWidthRole
@@ -42,7 +43,8 @@ public:
     void setPeakConfig(std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> &peakConfig);
 
     Q_INVOKABLE void setPeakType(int row, int peakType);
-    Q_INVOKABLE void setCenter(int row, double center);
+    Q_INVOKABLE void setAzimuth(int row, double azimuth);
+    Q_INVOKABLE void setElevation(int row, double elevation);
     Q_INVOKABLE void setAmplitude(int row, double amplitude);
     Q_INVOKABLE void setSigma(int row, double sigma);
     Q_INVOKABLE void setHalfWidth(int row, double halfWidth);

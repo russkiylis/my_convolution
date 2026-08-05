@@ -20,7 +20,7 @@ std::vector<LoadGenerator::PostConfig> GeneratorBackend::createInitialConfig()
     cfg.maxAngleV = 45;
 
     cfg.stepH = 0.1;
-    cfg.stepV = 0.1;
+    cfg.stepV = 1;
 
     cfg.minPeriod = std::chrono::milliseconds(1000);
     cfg.maxPeriod = std::chrono::milliseconds(5000);
@@ -29,23 +29,17 @@ std::vector<LoadGenerator::PostConfig> GeneratorBackend::createInitialConfig()
     cfg.noiseConfig =
         std::make_unique<NormalNoise::NormalNoiseConfig>(0, 2);
 
-    // cfg.peakConfigsH.push_back(
-    //     std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 5));
-    //
-    // cfg.peakConfigsV.push_back(
-    //     std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 5));
-
     std::vector<LoadGenerator::PostConfig> result;
 
     result.push_back(cfg);
 
-    cfg.peakConfigsV.push_back(
-        std::make_unique<RectanglePeak::RectanglePeakConfig>(30, 50, 10));
+    cfg.peakConfigs.push_back(
+        std::make_unique<RectanglePeak::RectanglePeakConfig>(GeometryUtils::SphericalCoordDeg(90, 30), 50, 10));
     cfg.postName = "Пост 2";
     result.push_back(cfg);
 
-    cfg.peakConfigsV.push_back(
-        std::make_unique<TrianglePeak::TrianglePeakConfig>(-30, 50, 10));
+    cfg.peakConfigs.push_back(
+        std::make_unique<TrianglePeak::TrianglePeakConfig>(GeometryUtils::SphericalCoordDeg(240, -25), 50, 10));
     cfg.postName = "Пост 3";
     result.push_back(cfg);
 

@@ -12,7 +12,7 @@ class ConnectionBackend;
 
 // Класс для работы с БД
 // У него есть рабочий в другом потоке
-class DatabaseManager : public QObject
+class DatabaseManager final : public QObject
 {
     Q_OBJECT
 
