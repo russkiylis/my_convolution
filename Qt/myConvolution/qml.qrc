@@ -10,6 +10,7 @@
         <file>ListViewItemBackground.qml</file>
 
         <!-- .sql команды -->
+        <file>sql/insert.sql</file>
         <file>sql/insertDoublePrecision.sql</file>
         <file>sql/insertReal.sql</file>
         <file>sql/insertResult.sql</file>

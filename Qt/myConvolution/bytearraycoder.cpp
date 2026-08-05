@@ -51,7 +51,7 @@ ByteArrayCoder(DataType::doublePrecision, byteOrder)
 {
 }
 
-QByteArray doubleByteArrayCoder::serialize(QVariantList &data) const {
+QByteArray doubleByteArrayCoder::serialize(const std::vector<double> &data) const {
     // TODO: сериализация даблов
 
     QByteArray bytes;   // Готовые байты
@@ -60,13 +60,11 @@ QByteArray doubleByteArrayCoder::serialize(QVariantList &data) const {
     serializer.setFloatingPointPrecision(QDataStream::DoublePrecision);     // Установка точности (количества битов)
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    for (QVariant const & value : data) {
-        bool ok;
-        const double x = value.toDouble(&ok);
-        if (!ok || !std::isfinite(x))
+    for (double const & value : data) {
+        if (!std::isfinite(value))
             throw std::logic_error("Ошибка преобразования при сериализации!");
 
-        serializer << x;
+        serializer << value;
 
         if (serializer.status() != QDataStream::Ok)
             throw std::logic_error("Ошибка сериализации!");
@@ -75,10 +73,10 @@ QByteArray doubleByteArrayCoder::serialize(QVariantList &data) const {
     return bytes;
 }
 
-QVariantList doubleByteArrayCoder::deserialize(QByteArray &bytes) const {
+std::vector<double> doubleByteArrayCoder::deserialize(QByteArray &bytes) const {
     // TODO: десериализация даблов
 
-    QVariantList data;  // Данные из байтов
+    std::vector<double> data;  // Данные из байтов
     const int dataSize = bytes.size() / 8;
     if (bytes.size() % 8 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
@@ -98,7 +96,7 @@ QVariantList doubleByteArrayCoder::deserialize(QByteArray &bytes) const {
             throw std::logic_error("Ошибка десериализации");
         }
 
-        data.append(x);
+        data.push_back(x);
     }
 
     return data;
@@ -109,7 +107,7 @@ ByteArrayCoder(DataType::real, byteOrder)
 {
 }
 
-QByteArray realByteArrayCoder::serialize(QVariantList &data) const {
+QByteArray realByteArrayCoder::serialize(const std::vector<double> &data) const {
     // TODO: сериализация реалов
 
     QByteArray bytes;   // Готовые байты
@@ -118,13 +116,11 @@ QByteArray realByteArrayCoder::serialize(QVariantList &data) const {
     serializer.setFloatingPointPrecision(QDataStream::SinglePrecision);     // Установка точности (количества битов)
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    for (QVariant const & value : data) {
-        bool ok;
-        const float x = value.toFloat(&ok);
-        if (!ok || !std::isfinite(x))
+    for (double const & value : data) {
+        if (!std::isfinite(value))
             throw std::logic_error("Ошибка преобразования при сериализации!");
 
-        serializer << x;
+        serializer << static_cast<float>(value);
 
         if (serializer.status() != QDataStream::Ok)
             throw std::logic_error("Ошибка сериализации!");
@@ -133,10 +129,10 @@ QByteArray realByteArrayCoder::serialize(QVariantList &data) const {
     return bytes;
 }
 
-QVariantList realByteArrayCoder::deserialize(QByteArray &bytes) const {
+std::vector<double> realByteArrayCoder::deserialize(QByteArray &bytes) const {
     // TODO: десериализация реалов
 
-    QVariantList data;  // Данные из байтов
+    std::vector<double> data;  // Данные из байтов
     const int dataSize = bytes.size() / 4;
     if (bytes.size() % 4 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
@@ -156,7 +152,7 @@ QVariantList realByteArrayCoder::deserialize(QByteArray &bytes) const {
             throw std::logic_error("Ошибка десериализации");
         }
 
-        data.append(x);
+        data.push_back(static_cast<double>(x));
     }
 
     return data;
@@ -167,7 +163,7 @@ ByteArrayCoder(DataType::smallint, byteOrder)
 {
 }
 
-QByteArray smallintByteArrayCoder::serialize(QVariantList &data) const {
+QByteArray smallintByteArrayCoder::serialize(const std::vector<double> &data) const {
     // TODO: сериализация смолинтов
 
     QByteArray bytes;   // Готовые байты
@@ -175,20 +171,16 @@ QByteArray smallintByteArrayCoder::serialize(QVariantList &data) const {
     setSerializerByteOrder(serializer); // Установка порядка байтов
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    for (QVariant const & value : data) {
-        bool ok;
-        const double x = value.toDouble(&ok);
-        if (!ok || !std::isfinite(x))
+    for (double const & value : data) {
+        if (!std::isfinite(value))
             throw std::logic_error("Ошибка преобразования при сериализации!");
 
-        if (std::trunc(x) != x) {
-            throw std::logic_error("Значение не является целым");
-        }
+        const int dataInt = static_cast<int>(value * 30000);
 
-        if (x > std::numeric_limits<qint16>::max() || x < std::numeric_limits<qint16>::min())
+        if (dataInt > std::numeric_limits<qint16>::max() || dataInt < std::numeric_limits<qint16>::min())
             throw std::logic_error("Ошибка преобразования при сериализации! Int не поместился в qint16.");
 
-        const auto xQInt16 = static_cast<qint16>(x);
+        const auto xQInt16 = static_cast<qint16>(dataInt);
         serializer << xQInt16;
 
         if (serializer.status() != QDataStream::Ok)
@@ -198,10 +190,10 @@ QByteArray smallintByteArrayCoder::serialize(QVariantList &data) const {
     return bytes;
 }
 
-QVariantList smallintByteArrayCoder::deserialize(QByteArray &bytes) const {
+std::vector<double> smallintByteArrayCoder::deserialize(QByteArray &bytes) const {
     // TODO: десериализация смолинтов
 
-    QVariantList data;  // Данные из байтов
+    std::vector<double> data;  // Данные из байтов
     const int dataSize = bytes.size() / 2;
     if (bytes.size() % 2 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
@@ -220,7 +212,7 @@ QVariantList smallintByteArrayCoder::deserialize(QByteArray &bytes) const {
             throw std::logic_error("Ошибка десериализации");
         }
 
-        data.append(x);
+        data.push_back(static_cast<double>(x) / 30000);
     }
 
     return data;

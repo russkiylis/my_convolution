@@ -49,7 +49,7 @@ struct DatabaseConfiguration {
 };
 Q_DECLARE_METATYPE(DatabaseConfiguration)
 
-class DatabaseWorker : public QObject
+class DatabaseWorker final : public QObject
 {
     Q_OBJECT
 
@@ -86,9 +86,7 @@ public slots:
     // Обновление конфигурации подключения
     void slotConfigUpdate(const DatabaseConfiguration & new_config);
 
-    void slotInsertDouble(const LoadGenerator::DataPackage &package);
-    void slotInsertFloat(const DataPackageFloat &package);
-    void slotInsertInt16(const DataPackageInt16 &package);
+    void slotInsert(const LoadGenerator::DataPackage &package, int dataType, int byteOrder);
 
     void slotClearTable();
     void slotRecreateTable();

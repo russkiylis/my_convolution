@@ -45,9 +45,7 @@ DatabaseManager::DatabaseManager(QString const & connectionName,
     connect(this, &DatabaseManager::signalManagerUpdate, worker, &DatabaseWorker::slotManagerUpdate);
     connect(this, &DatabaseManager::signalInitialize, worker, &DatabaseWorker::slotInitialize);
     connect(worker, &DatabaseWorker::signalManagerUpdate, this, &DatabaseManager::slotManagerUpdate);
-    connect(this, &DatabaseManager::signalInsertDouble, worker, &DatabaseWorker::slotInsertDouble);
-    connect(this, &DatabaseManager::signalInsertFloat, worker, &DatabaseWorker::slotInsertFloat);
-    connect(this, &DatabaseManager::signalInsertInt16, worker, &DatabaseWorker::slotInsertInt16);
+    connect(this, &DatabaseManager::signalInsert, worker, &DatabaseWorker::slotInsert);
     connect(this, &DatabaseManager::signalClearTable, worker, &DatabaseWorker::slotClearTable);
     connect(this, &DatabaseManager::signalRecreateTable, worker, &DatabaseWorker::slotRecreateTable);
     connect(this, &DatabaseManager::signalDeleteTable, worker, &DatabaseWorker::slotDeleteTable);
@@ -278,19 +276,9 @@ void DatabaseManager::closeConnection() {
     emit signalCloseConnection();
 }
 
-void DatabaseManager::saveDataPackage(LoadGenerator::DataPackage const &package) {
-    qDebug().noquote().nospace() << "Пакет типа double precision: " << package.postName;
-    emit signalInsertDouble(package);
-}
-
-void DatabaseManager::saveDataPackage(DataPackageFloat const &package) {
-    qDebug().noquote().nospace() << "Пакет типа real: " << package.postName;
-    emit signalInsertFloat(package);
-}
-
-void DatabaseManager::saveDataPackage(DataPackageInt16 const &package) {
-    qDebug().noquote().nospace() << "Пакет типа smallint: " << package.postName;
-    emit signalInsertInt16(package);
+void DatabaseManager::saveDataPackage(const LoadGenerator::DataPackage &package, const ByteArrayCoder::DataType type, const ByteArrayCoder::ByteOrder byteOrder) {
+    // qDebug().noquote().nospace() << "Пакет: " << package.postName;
+    emit signalInsert(package, static_cast<int>(type), static_cast<int>(byteOrder));
 }
 
 void DatabaseManager::readDb() {

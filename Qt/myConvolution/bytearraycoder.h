@@ -25,10 +25,10 @@ public:
     virtual ~ByteArrayCoder() = default;
 
     // Приведение к массиву байтов
-    virtual QByteArray serialize(QVariantList &data) const = 0;
+    virtual QByteArray serialize(const std::vector<double> &data) const = 0;
 
     // Приведение из массива байтов
-    virtual QVariantList deserialize(QByteArray &bytes) const = 0;
+    virtual std::vector<double> deserialize(QByteArray &bytes) const = 0;
 
     // Статический метод-фабрика для создания нужного кодера
     static std::unique_ptr<ByteArrayCoder> create(DataType type, ByteOrder byteOrder);
@@ -54,9 +54,9 @@ class doubleByteArrayCoder : public ByteArrayCoder
 public:
     explicit doubleByteArrayCoder(ByteOrder byteOrder);
 
-    QByteArray serialize(QVariantList &data) const override;
+    QByteArray serialize(const std::vector<double> &data) const override;
 
-    QVariantList deserialize(QByteArray &bytes) const override;
+    std::vector<double> deserialize(QByteArray &bytes) const override;
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем real по 4 байта
@@ -65,9 +65,9 @@ class realByteArrayCoder : public ByteArrayCoder
 public:
     explicit realByteArrayCoder(ByteOrder byteOrder);
 
-    QByteArray serialize(QVariantList &data) const override;
+    QByteArray serialize(const std::vector<double> &data) const override;
 
-    QVariantList deserialize(QByteArray &bytes) const override;
+    std::vector<double> deserialize(QByteArray &bytes) const override;
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем smallint по 2 байта
@@ -76,7 +76,7 @@ class smallintByteArrayCoder : public ByteArrayCoder
 public:
     explicit smallintByteArrayCoder(ByteOrder byteOrder);
 
-    QByteArray serialize(QVariantList &data) const override;
+    QByteArray serialize(const std::vector<double> &data) const override;
 
-    QVariantList deserialize(QByteArray &bytes) const override;
+    std::vector<double> deserialize(QByteArray &bytes) const override;
 };

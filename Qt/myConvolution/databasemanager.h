@@ -2,6 +2,8 @@
 
 #include <QObject>
 #include <QString>
+
+#include "bytearraycoder.h"
 #include "databaseworker.h"
 #include "loadgenerator.h"
 
@@ -130,14 +132,8 @@ explicit DatabaseManager(QString const & connectionName = "myConvolution",
     // Закрыть подключение
     void closeConnection();
 
-    // Сохранить свёртку DOUBLE PRECISION
-    void saveDataPackage(LoadGenerator::DataPackage const & package);
-
-    // Сохранить свёртку REAL
-    void saveDataPackage(DataPackageFloat const & package);
-
-    // Сохранить свёртку SMALLINT
-    void saveDataPackage(DataPackageInt16 const & package);
+    // Сохранить свёртку
+    void saveDataPackage(const LoadGenerator::DataPackage & package, ByteArrayCoder::DataType type, ByteArrayCoder::ByteOrder byteOrder);
 
     // Прочитать базу данных
     void readDb();
@@ -177,9 +173,7 @@ signals:
     void signalManagerUpdate();
     void signalConfigUpdate(const DatabaseConfiguration & new_config);
 
-    void signalInsertDouble(const LoadGenerator::DataPackage &package);
-    void signalInsertInt16(const DataPackageInt16 &package);
-    void signalInsertFloat(const DataPackageFloat &package);
+    void signalInsert(const LoadGenerator::DataPackage &package, int type, int byteOrder);
 
     void signalClearTable();
     void signalRecreateTable();

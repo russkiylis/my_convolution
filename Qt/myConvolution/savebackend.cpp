@@ -13,26 +13,7 @@ SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
 
 void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) const
 {
-    // TODO: Это всё идёт под снос ибо мы меняем бд на bytearray
-
-
-
-    if (m_saveEnabled) {
-        switch (m_currentDataType) {
-        case ByteArrayCoder::doublePrecision:
-            m_db.saveDataPackage(package);
-            break;
-        case ByteArrayCoder::real:
-            m_db.saveDataPackage(DataPackageFloat(package));
-            break;
-        case ByteArrayCoder::smallint:
-            m_db.saveDataPackage(DataPackageInt16(package));
-
-            break;
-        default:
-            throw std::logic_error("Сомнительный тип данных!");
-        }
-    }
+    m_db.saveDataPackage(package, m_currentDataType, m_currentByteOrder);
 }
 
 int SaveBackend::currentDataType() const
@@ -44,6 +25,18 @@ void SaveBackend::setCurrentDataType(int type) {
     m_currentDataType = static_cast<ByteArrayCoder::DataType>(type);
     qDebug().noquote().nospace() << "Тип записи сменился: " << m_currentDataType;
     emit currentDataTypeChanged(m_currentDataType);
+}
+
+int SaveBackend::currentByteOrder() const
+{
+    return m_currentByteOrder;
+}
+
+void SaveBackend::setCurrentByteOrder(int byteOrder)
+{
+    m_currentByteOrder = static_cast<ByteArrayCoder::ByteOrder>(byteOrder);
+    qDebug().noquote().nospace() << "Порядок байтов сменился: " << m_currentByteOrder;
+    emit currentByteOrderChanged(m_currentByteOrder);
 }
 
 void SaveBackend::onSaveEnableButtonClicked() {
