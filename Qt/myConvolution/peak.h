@@ -4,6 +4,8 @@
 #include <QObject>
 #include <qpoint.h>
 
+#include "geometryutils.h"
+
 // Абстрактный класс пика функции правдоподобия
 class AbstractPeak
 {
@@ -18,7 +20,7 @@ public:
 
     struct PeakConfig
     {
-        explicit PeakConfig(QPointF const &center, double const &amplitude);
+        explicit PeakConfig(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude);
 
         [[nodiscard]] virtual PeakType type() const = 0;
 
@@ -30,11 +32,11 @@ public:
 
         virtual ~PeakConfig() = default;
 
-        QPointF center;
+        GeometryUtils::SphericalCoordDeg center;
         double amplitude;
     };
 
-    explicit AbstractPeak(QPointF const &center = QPointF(180, 0), double const &amplitude = 1.0);
+    explicit AbstractPeak(GeometryUtils::SphericalCoordDeg const &center = GeometryUtils::SphericalCoordDeg(180, 0), double const &amplitude = 1.0);
     explicit AbstractPeak(PeakConfig const &config);
     virtual ~AbstractPeak() = default;
 
@@ -42,13 +44,13 @@ public:
     [[nodiscard]] virtual PeakType type() const = 0;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] virtual double valueAt(QPointF const &deg) const = 0;
+    [[nodiscard]] virtual double valueAt(GeometryUtils::LinearCoord3D const &deg) const = 0;
 
     // Получить центральный градус
-    [[nodiscard]] QPointF center() const;
+    [[nodiscard]] GeometryUtils::SphericalCoordDeg center() const;
 
     // Задать центральный градус
-    void setCenter(const QPointF &center);
+    void setCenter(const GeometryUtils::SphericalCoordDeg &center);
 
     // Получить амплитуду
     [[nodiscard]] double amplitude() const;
@@ -57,7 +59,7 @@ public:
     void setAmplitude(const double &amplitude);
 
 protected:
-    QPointF m_center;     // Координата пика (в градусах)
+    GeometryUtils::LinearCoord3D m_center;     // Единичный вектор на центр пика
     double m_amplitude;    // Амплитуда пика (в у.е.)
 };
 
@@ -67,7 +69,7 @@ class GaussPeak final: public AbstractPeak
 public:
     struct GaussPeakConfig final: PeakConfig
     {
-        explicit GaussPeakConfig(QPointF const &center, double const &amplitude, double const &sigma);
+        explicit GaussPeakConfig(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude, double const &sigma);
 
         [[nodiscard]] std::unique_ptr<PeakConfig> clone() const override;
 
@@ -81,7 +83,7 @@ public:
     };
 
     explicit GaussPeak(
-        QPointF const &center = QPointF(180, 0),
+        GeometryUtils::SphericalCoordDeg const &center = GeometryUtils::SphericalCoordDeg(180, 0),
         double const &amplitude = 1.0,
         double const &sigma = 10.0
         );
@@ -91,7 +93,7 @@ public:
     [[nodiscard]] PeakType type() const override;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] double valueAt(QPointF const &deg) const override;
+    [[nodiscard]] double valueAt(GeometryUtils::LinearCoord3D const &deg) const override;
 
     // Получить значение СКО
     [[nodiscard]] double sigma() const;
@@ -109,7 +111,7 @@ class TrianglePeak final: public AbstractPeak
 public:
     struct TrianglePeakConfig final: PeakConfig
     {
-        explicit TrianglePeakConfig(QPointF const &center, double const &amplitude, double const &halfWidth);
+        explicit TrianglePeakConfig(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude, double const &halfWidth);
 
         [[nodiscard]] std::unique_ptr<AbstractPeak> createPeak() const override;
 
@@ -124,7 +126,7 @@ public:
 
 
     explicit TrianglePeak(
-        QPointF const &center = QPointF(180, 0),
+        GeometryUtils::SphericalCoordDeg const &center = GeometryUtils::SphericalCoordDeg(180, 0),
         double const &amplitude = 1.0,
         double const &halfWidth = 10.0
         );
@@ -134,7 +136,7 @@ public:
     [[nodiscard]] PeakType type() const override;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] double valueAt(QPointF const &deg) const override;
+    [[nodiscard]] double valueAt(GeometryUtils::LinearCoord3D const &deg) const override;
 
     // Получить значение полуширины
     [[nodiscard]] double halfWidth() const;
@@ -152,7 +154,7 @@ class RectanglePeak final: public AbstractPeak
 public:
     struct RectanglePeakConfig final: PeakConfig
     {
-        explicit RectanglePeakConfig(QPointF const &center, double const &amplitude, double const &halfWidth);
+        explicit RectanglePeakConfig(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude, double const &halfWidth);
 
         [[nodiscard]] std::unique_ptr<AbstractPeak> createPeak() const override;
 
@@ -167,7 +169,7 @@ public:
 
 
     explicit RectanglePeak(
-    QPointF const &center = QPointF(180, 0),
+    GeometryUtils::SphericalCoordDeg const &center = GeometryUtils::SphericalCoordDeg(180, 0),
     double const &amplitude = 1.0,
     double const &halfWidth = 10.0
     );
@@ -177,7 +179,7 @@ public:
     [[nodiscard]] PeakType type() const override;
 
     // Получить посчитанное значение в неком градусе
-    [[nodiscard]] double valueAt(QPointF const &deg) const override;
+    [[nodiscard]] double valueAt(GeometryUtils::LinearCoord3D const &deg) const override;
 
     // Получить значение полуширины
     [[nodiscard]] double halfWidth() const;

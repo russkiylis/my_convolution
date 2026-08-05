@@ -3,6 +3,8 @@
 #include <cmath>
 #include <stdexcept>
 
+#include "utils.h"
+
 double GeometryUtils::normalizeAngle(const double angle, const double period)
 {
     double normalized = std::fmod(angle, period);
@@ -13,45 +15,49 @@ double GeometryUtils::normalizeAngle(const double angle, const double period)
 
 GeometryUtils::LinearCoord3D::LinearCoord3D(const double x, const double y, const double z): m_x(x), m_y(y), m_z(z)
 {
+    setLength();
 }
 
 GeometryUtils::SphericalCoordDeg GeometryUtils::LinearCoord3D::toSphericalCoordDeg() const {
-    SphericalCoordRad resultRad;
-    const LinearCoord3D normalized = normalize();
-
-    resultRad.setElevation(std::asin(normalized.z()));
-    resultRad.setAzimuth(std::atan2(normalized.y(), normalized.x()));
-
-    return resultRad.toSphericalCoordDeg();
+    return toSphericalCoordRad().toSphericalCoordDeg();
 }
 
 GeometryUtils::SphericalCoordRad GeometryUtils::LinearCoord3D::toSphericalCoordRad() const {
-    SphericalCoordRad resultRad;
-    const LinearCoord3D normalized = normalize();
+    const double horizontal = std::hypot(m_x, m_y);
 
-    resultRad.setElevation(std::asin(normalized.z()));
-    resultRad.setAzimuth(std::atan2(normalized.y(), normalized.x()));
+    if (horizontal == 0.0 && m_z == 0.0)
+        throw std::domain_error("Нулевой вектор не имеет направления.");
+
+    const double elevation = std::atan2(m_z, horizontal);
+    const double azimuth =
+        horizontal == 0.0 ? 0.0 : std::atan2(m_y, m_x);
+
+    SphericalCoordRad resultRad;
+
+    resultRad.setElevation(elevation);
+    resultRad.setAzimuth(azimuth);
 
     return resultRad;
 }
 
 GeometryUtils::LinearCoord3D GeometryUtils::LinearCoord3D::normalize() const {
-    LinearCoord3D result;
 
-    const double len = length();
-
-    if (len == 0.0)
+    if (m_length == 0.0)
         throw std::domain_error("Невозможно нормировать нулевой вектор.");
 
-    result.m_x = m_x / len;
-    result.m_y = m_y / len;
-    result.m_z = m_z / len;
-
-    return result;
+    return LinearCoord3D(
+        m_x / m_length,
+        m_y / m_length,
+        m_z / m_length
+    );
 }
 
 double GeometryUtils::LinearCoord3D::length() const {
-    return std::sqrt(m_x * m_x + m_y * m_y + m_z * m_z);
+    return m_length;
+}
+
+void GeometryUtils::LinearCoord3D::setLength() {
+    m_length = std::hypot(m_x, m_y, m_z);
 }
 
 double GeometryUtils::LinearCoord3D::x() const
@@ -62,6 +68,7 @@ double GeometryUtils::LinearCoord3D::x() const
 void GeometryUtils::LinearCoord3D::setX(const double x)
 {
     m_x = x;
+    setLength();
 }
 
 double GeometryUtils::LinearCoord3D::y() const
@@ -72,6 +79,7 @@ double GeometryUtils::LinearCoord3D::y() const
 void GeometryUtils::LinearCoord3D::setY(const double y)
 {
     m_y = y;
+    setLength();
 }
 
 double GeometryUtils::LinearCoord3D::z() const
@@ -82,6 +90,13 @@ double GeometryUtils::LinearCoord3D::z() const
 void GeometryUtils::LinearCoord3D::setZ(const double z)
 {
     m_z = z;
+    setLength();
+}
+
+bool GeometryUtils::LinearCoord3D::operator==(const LinearCoord3D &other) const noexcept{
+    return m_x == other.m_x
+        && m_y == other.m_y
+        && m_z == other.m_z;
 }
 
 GeometryUtils::SphericalCoordDeg::SphericalCoordDeg(const double azimuth, const double elevation) {
@@ -89,7 +104,7 @@ GeometryUtils::SphericalCoordDeg::SphericalCoordDeg(const double azimuth, const 
     m_elevation = std::clamp(elevation, -90.0, 90.0);
 }
 
-GeometryUtils::LinearCoord3D GeometryUtils::SphericalCoordDeg::toLinearCoord(double length) const {
+GeometryUtils::LinearCoord3D GeometryUtils::SphericalCoordDeg::toLinearCoord(const double length) const {
     LinearCoord3D result;
     const SphericalCoordRad rad = toSphericalCoordRad();
 
@@ -128,7 +143,8 @@ void GeometryUtils::SphericalCoordDeg::setElevation(const double elevation)
 }
 
 GeometryUtils::SphericalCoordRad::SphericalCoordRad(const double azimuth, const double elevation) {
-    m_azimuth = normalizeAngle(azimuth, 2.0 * M_PI);
+    constexpr double doublePi = 2.0 * M_PI;
+    m_azimuth = normalizeAngle(azimuth, doublePi);
     m_elevation = std::clamp(elevation, -M_PI_2, M_PI_2);
 }
 
@@ -156,7 +172,8 @@ double GeometryUtils::SphericalCoordRad::azimuth() const
 
 void GeometryUtils::SphericalCoordRad::setAzimuth(const double azimuth)
 {
-    m_azimuth = normalizeAngle(azimuth, 2.0 * M_PI);
+    constexpr double doublePi = 2.0 * M_PI;
+    m_azimuth = normalizeAngle(azimuth, doublePi);
 }
 
 double GeometryUtils::SphericalCoordRad::elevation() const
@@ -167,4 +184,52 @@ double GeometryUtils::SphericalCoordRad::elevation() const
 void GeometryUtils::SphericalCoordRad::setElevation(const double elevation)
 {
     m_elevation = std::clamp(elevation, -M_PI_2, M_PI_2);
+}
+
+double GeometryUtils::scalarProduct(LinearCoord3D const &a, LinearCoord3D const &b) {
+    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
+}
+
+GeometryUtils::LinearCoord3D GeometryUtils::vectorProduct(LinearCoord3D const &a, LinearCoord3D const &b) {
+    LinearCoord3D result;
+    result.setX(a.y() * b.z() - a.z() * b.y());
+    result.setY(a.z() * b.x() - a.x() * b.z());
+    result.setZ(a.x() * b.y() - a.y() * b.x());
+    return result;
+}
+
+double GeometryUtils::degBetweenCoord3D(LinearCoord3D a, LinearCoord3D b) {
+    if (a.length() != 1.0)
+        a = a.normalize();
+
+    if (b.length() != 1.0)
+        b = b.normalize();
+
+    const double cosine = std::clamp(scalarProduct(a, b), -1.0, 1.0);
+    return qRadiansToDegrees(std::acos(cosine));
+}
+
+double GeometryUtils::radBetweenCoord3D(LinearCoord3D a, LinearCoord3D b) {
+    if (a.length() != 1.0)
+        a = a.normalize();
+
+    if (b.length() != 1.0)
+        b = b.normalize();
+
+    const double cosine = std::clamp(scalarProduct(a, b), -1.0, 1.0);
+    return std::acos(cosine);
+}
+
+double GeometryUtils::degBetweenSphericalCoords(SphericalCoordDeg const &a, SphericalCoordDeg const &b) {
+    const LinearCoord3D aLinear = a.toLinearCoord();
+    const LinearCoord3D bLinear = b.toLinearCoord();
+
+    return degBetweenCoord3D(aLinear, bLinear);
+}
+
+double GeometryUtils::radBetweenSphericalCoords(SphericalCoordRad const &a, SphericalCoordRad const &b) {
+    const LinearCoord3D aLinear = a.toLinearCoord();
+    const LinearCoord3D bLinear = b.toLinearCoord();
+
+    return radBetweenCoord3D(aLinear, bLinear);
 }

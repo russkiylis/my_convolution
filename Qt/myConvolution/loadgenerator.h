@@ -9,7 +9,7 @@
 #include "noise.h"
 #include "peak.h"
 
-class LoadGenerator : public QObject
+class LoadGenerator final : public QObject
 {
     Q_OBJECT
 
@@ -45,15 +45,13 @@ public:
     // Пакет данных
     struct DataPackage
     {
-        QDateTime timestamp;        // Временная метка
-        double bearingH{};            // Направление по горизонтали
-        double bearingV{};            // Направление по вертикали
-        double qualityH{};            // Качество свёртки по горизонтали
-        double qualityV{};            // Качество свёртки по вертикали
-        double level{};               // Мощность
-        double frequency{};           // Частота
-        QGeoCoordinate coordinate;  // Координата
-        QString postName;           // Имя поста
+        QDateTime timestamp;                                    // Временная метка
+        GeometryUtils::SphericalCoordDeg bearing{};             // Направление
+        double quality{};                                       // Качество свёртки
+        double level{};                                         // Мощность
+        double frequency{};                                     // Частота
+        QGeoCoordinate coordinate;                              // Координата
+        QString postName;                                       // Имя поста
 
         int minAngleH{};               // Минимальный угол (горизонтальный)
         int maxAngleH{};               // Максимальный угол (горизонтальный)
@@ -86,12 +84,10 @@ public:
         TimePoint m_nextGenTime;     // Следующее время генерации
         void newNextGenTime();  // Создать следующее время генерации
 
-        std::vector<double> m_degH;  // Углы по горизонтали
-        std::vector<double> m_degV;  // Углы по вертикали
+        std::vector<GeometryUtils::LinearCoord3D> m_direction; // Направление в виде линейных координат
 
         std::unique_ptr<AbstractNoise> m_noise;              // Шум (мы не знаем что это за шум)
-        std::vector<std::unique_ptr<AbstractPeak>> m_peaksV; // Вектор пиков по вертикали (мы не знаем что это за пики)
-        std::vector<std::unique_ptr<AbstractPeak>> m_peaksH; // Вектор пиков по горизонтали
+        std::vector<std::unique_ptr<AbstractPeak>> m_peaks;  // Вектор пиков
     };
 
     // Конструктор, когда нет пиков
@@ -114,7 +110,7 @@ private:
     std::vector<PostConfig> m_postConfigs;   // Набор конфигов постов
     std::vector<Post> m_posts;               // Набор постов
     bool m_callingEnabled;                   // Включён ли опрос постов
-    QTimer *m_timer = nullptr;                         // Таймер, по которому опрашиваются посты
+    QTimer *m_timer = nullptr;               // Таймер, по которому опрашиваются посты
 
 public slots:
     void slotPostCallToggle(bool toggle);

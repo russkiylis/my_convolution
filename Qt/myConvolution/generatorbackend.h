@@ -6,7 +6,7 @@
 #include "postlistmodel.h"
 #include "savebackend.h"
 
-class GeneratorBackend : public QObject
+class GeneratorBackend final : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(PostListModel *postListModel READ postListModel CONSTANT)

@@ -24,6 +24,15 @@ public:
     //Преобразование json в vector
     static bool jsonToVector(const QVariant &json, QVector<double> &result, QString* errorMessage = nullptr);
 
+    // Проверка на равенство для типов с плавающей точкой
+    template<typename T, typename = std::enable_if_t<std::is_floating_point_v<T>>>
+    static bool fEqual(const T x, const T y, const double epsilon)
+    {
+        if (std::abs(x - y) <= epsilon)
+            return true;
+        return false;
+    }
+
     // Сжимание вектора
     template <typename T>
     static QVector<T> shrinkVector(const QVector<T> &values, const int newSize) {

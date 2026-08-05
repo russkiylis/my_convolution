@@ -5,6 +5,8 @@
 
 #include "loadgenerator.h"
 
+#include "geometryutils.h"
+
 LoadGenerator::PostConfig::PostConfig() :
     enabled(false),
     latitude(60),
@@ -17,13 +19,12 @@ LoadGenerator::PostConfig::PostConfig() :
     minAngleV(-45),
     maxAngleV(45),
     stepH(0.1),
-    stepV(0.1),
+    stepV(1),
     minPeriod(1000),
     maxPeriod(5000)
 {
     noiseConfig = std::make_unique<NormalNoise::NormalNoiseConfig>(10, 1);
-    peakConfigsH.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(180, 30, 10));
-    peakConfigsV.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(0, 30, 10));
+    peakConfigs.push_back(std::make_unique<GaussPeak::GaussPeakConfig>(GeometryUtils::SphericalCoordDeg(180, 0), 30, 10));
 }
 
 LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
@@ -44,14 +45,10 @@ LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
     maxPeriod(other.maxPeriod),
     noiseConfig(other.noiseConfig->clone())
 {
-    peakConfigsV.clear();
-    peakConfigsH.clear();
+    peakConfigs.clear();
     // Проходим по вектору умных указателей и копируем их
-    for (const auto &peakConfig : other.peakConfigsV) {
-        peakConfigsV.push_back(peakConfig->clone());
-    }
-    for (const auto &peakConfig : other.peakConfigsH) {
-        peakConfigsH.push_back(peakConfig->clone());
+    for (const auto &peakConfig : other.peakConfigs) {
+        peakConfigs.push_back(peakConfig->clone());
     }
 }
 
@@ -74,14 +71,10 @@ LoadGenerator::PostConfig & LoadGenerator::PostConfig::operator=(const PostConfi
     minPeriod = other.minPeriod;
     maxPeriod = other.maxPeriod;
     noiseConfig = other.noiseConfig->clone();
-    peakConfigsV.clear();
-    peakConfigsH.clear();
+    peakConfigs.clear();
     // Проходим по вектору умных указателей и копируем их
-    for (const auto & peakConfig : other.peakConfigsV) {
-        peakConfigsV.push_back(peakConfig->clone());
-    }
-    for (const auto & peakConfig : other.peakConfigsH) {
-        peakConfigsH.push_back(peakConfig->clone());
+    for (const auto & peakConfig : other.peakConfigs) {
+        peakConfigs.push_back(peakConfig->clone());
     }
     return *this;
 }
@@ -93,31 +86,25 @@ LoadGenerator::Post::Post(PostConfig const &config, LoadGenerator *loadGenerator
 {
     m_config.noiseConfig->seed = std::random_device{}();
     m_noise = m_config.noiseConfig->createNoise(); // В зависимости от типа конфига нам выдадут разные шумы
-    for (const auto & peakConfig : m_config.peakConfigsV) {
-        m_peaksV.push_back(peakConfig->createPeak()); // В зависимости от типа конфига нам выдадут разные пики
-    }
-    for (const auto & peakConfig : m_config.peakConfigsH) {
-        m_peaksH.push_back(peakConfig->createPeak()); // В зависимости от типа конфига нам выдадут разные пики
+    for (const auto & peakConfig : m_config.peakConfigs) {
+        m_peaks.push_back(peakConfig->createPeak()); // В зависимости от типа конфига нам выдадут разные пики
     }
 
-    // Инициализвация вектора градусов (горизонтальных)
+    // Инициализвация вектора направлений
 
     const double rangeH = m_config.maxAngleH - m_config.minAngleH;
+    const double rangeV = m_config.maxAngleV - m_config.minAngleV;
     const auto stepCountH = static_cast<std::size_t>(
         std::floor(rangeH / m_config.stepH)
     );
-    for (size_t i = 0; i < stepCountH; ++i ) {
-        m_degH.push_back(static_cast<double>(i) * m_config.stepH + m_config.minAngleH);
-    }
-
-    // Инициализация вектора градусов (вертикальных)
-
-    const double rangeV = m_config.maxAngleV - m_config.minAngleV;
     const auto stepCountV = static_cast<std::size_t>(
         std::floor(rangeV / m_config.stepV)
     );
     for (size_t i = 0; i < stepCountV; ++i ) {
-        m_degV.push_back(static_cast<double>(i) * m_config.stepV + m_config.minAngleV);
+        for (size_t j = 0; j < stepCountH; ++j) {
+            m_direction.push_back(GeometryUtils::SphericalCoordDeg(static_cast<double>(j) * m_config.stepH + m_config.minAngleH,
+                static_cast<double>(i) * m_config.stepV + m_config.minAngleV).toLinearCoord());
+        }
     }
 
 }
@@ -126,53 +113,30 @@ void LoadGenerator::Post::call(TimePoint const &now) {
     if (m_config.enabled) {  // Если пост включён
         if (now >= m_nextGenTime) {  // Если пришло время новой генерации
 
-            // Расчёт свёртки по горизонтали
-            m_data.convH.clear();
-            for (const auto & deg : m_degH) {
+            // Расчёт свёртки
+            m_data.conv.clear();
+            for (const auto & direction : m_direction) {
                 double valueH = m_noise->next();
-                for (const auto & peak : m_peaksH) {
-                    valueH += peak->valueAt(deg);
+                for (const auto & peak : m_peaks) {
+                    valueH += peak->valueAt(direction);
                 }
-                m_data.convH.push_back(valueH);
-            }
-
-            // Расчёт свёртки по вертикали
-            m_data.convV.clear();
-            for (const auto & deg : m_degV) {
-                double valueV = m_noise->next();
-                for (const auto & peak : m_peaksV) {
-                    valueV += peak->valueAt(deg);
-                }
-                m_data.convV.push_back(valueV);
+                m_data.conv.push_back(valueH);
             }
 
             // Взятие свёрток по модулю IDK: возможно брать модуль не надо
-            for (auto & value : m_data.convV) {
-                value = std::abs(value);
-            }
-            for (auto & value : m_data.convH) {
+            for (auto & value : m_data.conv) {
                 value = std::abs(value);
             }
 
-            // Нормировка горизонтальной свёртки и запись качества и направления
-            const auto maxItH = std::max_element(m_data.convH.begin(), m_data.convH.end());
-            const double maxValueH = *maxItH;
-            for (auto & value : m_data.convH) {
-                value /= maxValueH;
+            // Нормировка свёртки и запись качества и направления
+            const auto maxIt = std::max_element(m_data.conv.begin(), m_data.conv.end());
+            const double maxValue = *maxIt;
+            for (auto & value : m_data.conv) {
+                value /= maxValue;
             }
-            m_data.qualityH = maxValueH;   // Записываем это как качество IDK: Я не знаю как расчитать quality
-            const auto maxIndexH = std::distance(m_data.convH.begin(), maxItH);
-            m_data.bearingH = m_degH[maxIndexH];   // Записываем направление по максимуму
-
-            // Нормировка вертикальной свёртки и запись качества и направления
-            const auto maxItV = std::max_element(m_data.convV.begin(), m_data.convV.end());
-            const double maxValueV = *maxItV;
-            for (auto & value : m_data.convV) {
-                value /= maxValueV;
-            }
-            m_data.qualityV = maxValueV;   // Записываем это как качество IDK: Я не знаю как расчитать quality
-            const auto maxIndexV = std::distance(m_data.convV.begin(), maxItV);
-            m_data.bearingV = m_degV[maxIndexV];   // Записываем направление по максимуму
+            m_data.quality = maxValue;   // Записываем это как качество IDK: Я не знаю как расчитать quality
+            const auto maxIndex = std::distance(m_data.conv.begin(), maxIt);
+            m_data.bearing = m_direction[maxIndex].toSphericalCoordDeg();   // Записываем направление по максимуму
 
             // Расчёт временной метки
             m_data.timestamp = QDateTime::currentDateTimeUtc();

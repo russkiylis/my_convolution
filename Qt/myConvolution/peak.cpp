@@ -3,33 +3,33 @@
 
 #include "utils.h"
 
-AbstractPeak::PeakConfig::PeakConfig(QPointF const &center, double const &amplitude) :
+AbstractPeak::PeakConfig::PeakConfig(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude) :
     center(center),
     amplitude(amplitude)
 {
 }
 
-AbstractPeak::AbstractPeak(QPointF const &center, double const &amplitude)
+AbstractPeak::AbstractPeak(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude)
     :
-    m_center(center),
+    m_center(center.toLinearCoord()),
     m_amplitude(amplitude)
 {
 }
 
 AbstractPeak::AbstractPeak(PeakConfig const &config) :
-    m_center(config.center),
+    m_center(config.center.toLinearCoord()),
     m_amplitude(config.amplitude)
 {
 }
 
-QPointF AbstractPeak::center() const
+GeometryUtils::SphericalCoordDeg AbstractPeak::center() const
 {
-    return m_center;
+    return m_center.toSphericalCoordDeg();
 }
 
-void AbstractPeak::setCenter(const QPointF &center)
+void AbstractPeak::setCenter(const GeometryUtils::SphericalCoordDeg &center)
 {
-    m_center = center;
+    m_center = center.toLinearCoord();
 }
 
 double AbstractPeak::amplitude() const
@@ -42,7 +42,7 @@ void AbstractPeak::setAmplitude(const double &amplitude)
     m_amplitude = amplitude;
 }
 
-GaussPeak::GaussPeakConfig::GaussPeakConfig(QPointF const &center, double const &amplitude, double const &sigma) :
+GaussPeak::GaussPeakConfig::GaussPeakConfig(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude, double const &sigma) :
     PeakConfig(center, amplitude),
     sigma(sigma)
 {
@@ -64,7 +64,7 @@ QString GaussPeak::GaussPeakConfig::typeStr() const {
     return "Гауссовский";
 }
 
-GaussPeak::GaussPeak(QPointF const &center, double const &amplitude, double const &sigma) :
+GaussPeak::GaussPeak(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude, double const &sigma) :
     AbstractPeak(center, amplitude),
     m_sigma(sigma)
 {
@@ -81,7 +81,7 @@ AbstractPeak::PeakType GaussPeak::type() const
     return PeakType::Gauss;
 }
 
-double GaussPeak::valueAt(QPointF const &deg) const
+double GaussPeak::valueAt(GeometryUtils::LinearCoord3D const &deg) const
 {
     if (m_sigma == 0) {
         if (deg == m_center)
@@ -90,7 +90,7 @@ double GaussPeak::valueAt(QPointF const &deg) const
     }
 
     // double const exponent = std::exp(-0.5 * std::pow((deg - m_center) / m_sigma, 2));
-    double const exponent = std::exp(-0.5 * std::pow(Utils::degDistanceBetweenPoints(m_center, deg), 2) / pow(m_sigma, 2));
+    double const exponent = std::exp(-0.5 * std::pow(GeometryUtils::degBetweenCoord3D(deg, m_center), 2) / pow(m_sigma, 2));
     return m_amplitude * exponent;
 }
 
@@ -105,7 +105,7 @@ void GaussPeak::setSigma(double const &sigma)
 }
 
 TrianglePeak::TrianglePeakConfig::TrianglePeakConfig(
-    QPointF const &center,
+    GeometryUtils::SphericalCoordDeg const &center,
     double const &amplitude,
     double const &halfWidth
     ) :
@@ -130,7 +130,7 @@ std::unique_ptr<AbstractPeak::PeakConfig> TrianglePeak::TrianglePeakConfig::clon
     return std::make_unique<TrianglePeakConfig>(*this);
 }
 
-TrianglePeak::TrianglePeak(QPointF const &center, double const &amplitude, double const &halfWidth) :
+TrianglePeak::TrianglePeak(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude, double const &halfWidth) :
     AbstractPeak(center, amplitude),
     m_halfWidth(halfWidth)
 {
@@ -146,14 +146,14 @@ AbstractPeak::PeakType TrianglePeak::type() const {
     return PeakType::Triangle;
 }
 
-double TrianglePeak::valueAt(QPointF const &deg) const {
+double TrianglePeak::valueAt(GeometryUtils::LinearCoord3D const &deg) const {
     if (m_halfWidth == 0) {
         if (deg == m_center)
             return m_amplitude;
         return 0;
     }
 
-    const double distance = Utils::degDistanceBetweenPoints(m_center, deg);
+    const double distance = GeometryUtils::degBetweenCoord3D(m_center, deg);
     if (distance > m_halfWidth) {
         return 0;
     }
@@ -169,7 +169,7 @@ void TrianglePeak::setHalfWidth(double const &halfWidth) {
 }
 
 RectanglePeak::RectanglePeakConfig::RectanglePeakConfig(
-    QPointF const &center,
+    GeometryUtils::SphericalCoordDeg const &center,
     double const &amplitude,
     double const &halfWidth
     ) :
@@ -194,7 +194,7 @@ std::unique_ptr<AbstractPeak::PeakConfig> RectanglePeak::RectanglePeakConfig::cl
     return std::make_unique<RectanglePeakConfig>(*this);
 }
 
-RectanglePeak::RectanglePeak(QPointF const &center, double const &amplitude, double const &halfWidth) :
+RectanglePeak::RectanglePeak(GeometryUtils::SphericalCoordDeg const &center, double const &amplitude, double const &halfWidth) :
     AbstractPeak(center, amplitude),
     m_halfWidth(halfWidth)
 {
@@ -210,8 +210,8 @@ AbstractPeak::PeakType RectanglePeak::type() const {
     return PeakType::Rectangle;
 }
 
-double RectanglePeak::valueAt(QPointF const &deg) const {
-    if (Utils::degDistanceBetweenPoints(m_center, deg) > m_halfWidth)
+double RectanglePeak::valueAt(GeometryUtils::LinearCoord3D const &deg) const {
+    if (GeometryUtils::degBetweenCoord3D(m_center, deg) > m_halfWidth)
         return 0;
     return m_amplitude;
 }

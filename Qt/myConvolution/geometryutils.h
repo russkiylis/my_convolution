@@ -1,6 +1,6 @@
 #pragma once
-#include "abstractnoisebackend.h"
-
+#include <cmath>
+#include <qmath.h>
 
 class GeometryUtils
 {
@@ -23,7 +23,6 @@ public:
         // Нормирование вектора
         [[nodiscard]] LinearCoord3D normalize() const;
 
-        // Длина вектора
         [[nodiscard]] double length() const;
 
         [[nodiscard]] double x() const;
@@ -33,10 +32,17 @@ public:
         [[nodiscard]] double z() const;
         void setZ(double z);
 
+        bool operator==(const LinearCoord3D & other) const noexcept;
+
     private:
         double m_x;
         double m_y;
         double m_z;
+
+        double m_length{};
+
+        // Длина вектора
+        void setLength();
     };
 
     struct SphericalCoordDeg
@@ -73,6 +79,23 @@ public:
         double m_elevation;
     };
 
-    // TODO: Добавить расчёт углового расстояния
+    // Скалярное произведение
+    static double scalarProduct(LinearCoord3D const & a, LinearCoord3D const & b);
+
+    // Векторное произведение
+    static LinearCoord3D vectorProduct(LinearCoord3D const & a, LinearCoord3D const & b);
+
+    // Угол между векторами (градусы)
+    static double degBetweenCoord3D(LinearCoord3D a, LinearCoord3D b);
+
+    // Угол между векторами (радианы)
+    static double radBetweenCoord3D(LinearCoord3D a, LinearCoord3D b);
+
+    // Угол между угловыми координатами (градусы)
+    static double degBetweenSphericalCoords(SphericalCoordDeg const & a, SphericalCoordDeg const & b);
+
+    // Угол между угловыми координатами (радианы)
+    static double radBetweenSphericalCoords(SphericalCoordRad const & a, SphericalCoordRad const & b);
+
 };
 
