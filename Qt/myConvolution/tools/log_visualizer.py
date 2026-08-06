@@ -24,6 +24,11 @@ import webbrowser
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LOG_LINE_RE = re.compile(
     r"^post=(.*?)\tlevel=([^\t]+)\ttimestamp=QDateTime\((.*?)\)"
+    r"\tcountH=([0-9]+)\tcountV=([0-9]+)"
+    r"\tconvH=std::vector\((.*)\)\s*$"
+)
+LEGACY_LOG_LINE_RE = re.compile(
+    r"^post=(.*?)\tlevel=([^\t]+)\ttimestamp=QDateTime\((.*?)\)"
     r"\tconvH=std::vector\((.*)\)\s*$"
 )
 TIMESTAMP_RE = re.compile(
@@ -55,21 +60,32 @@ def parse_finite_float(value: str) -> float:
 
 
 def parse_log_line(line: str) -> dict[str, object] | None:
-    match = LOG_LINE_RE.fullmatch(line.rstrip("\r\n"))
+    raw = line.rstrip("\r\n")
+    match = LOG_LINE_RE.fullmatch(raw)
+    legacy = match is None
     if match is None:
-        return None
+        match = LEGACY_LOG_LINE_RE.fullmatch(raw)
+        if match is None:
+            return None
 
     post_name = match.group(1).strip()
     if not post_name:
         raise ValueError("empty post name")
 
+    count_h = int(match.group(4)) if not legacy else 0
+    count_v = int(match.group(5)) if not legacy else 0
+    conv_raw = match.group(6) if not legacy else match.group(4)
+
     convolution = [
         parse_finite_float(item.strip())
-        for item in match.group(4).split(",")
+        for item in conv_raw.split(",")
         if item.strip()
     ]
     if not convolution:
-        raise ValueError("empty convH")
+        raise ValueError("empty conv")
+
+    if count_h <= 0 or count_v <= 0:
+        count_h = count_v = 0
 
     timestamp_raw = match.group(3).strip()
     return {
@@ -77,7 +93,9 @@ def parse_log_line(line: str) -> dict[str, object] | None:
         "level": parse_finite_float(match.group(2).strip()),
         "timestamp": timestamp_to_iso(timestamp_raw),
         "timestampRaw": timestamp_raw,
-        "convH": convolution,
+        "countH": count_h,
+        "countV": count_v,
+        "conv": convolution,
     }
 
 
@@ -186,7 +204,9 @@ class LogSnapshot:
                             "timestamp": post.latest["timestamp"],
                             "timestampRaw": post.latest["timestampRaw"],
                             "level": post.latest["level"],
-                            "convH": post.latest["convH"],
+                            "countH": post.latest["countH"],
+                            "countV": post.latest["countV"],
+                            "conv": post.latest["conv"],
                         },
                     }
                 )
@@ -526,6 +546,85 @@ APP_HTML = r"""<!doctype html>
     });
   }
 
+  function heatColor(value) {
+    const t = Math.max(0, Math.min(1, value));
+    const r = Math.round(Math.min(1, Math.max(0, 1.5 - Math.abs(4 * t - 3))) * 255);
+    const g = Math.round(Math.min(1, Math.max(0, 1.5 - Math.abs(4 * t - 2))) * 255);
+    const b = Math.round(Math.min(1, Math.max(0, 1.5 - Math.abs(4 * t - 1))) * 255);
+    return [r, g, b];
+  }
+
+  function drawConvHeatmap(canvas, record, options = {}) {
+    const { context: ctx, width, height } = fitCanvas(canvas);
+    const countH = record.countH;
+    const countV = record.countV;
+    const conv = record.conv;
+    const margin = { left: 14, right: 12, top: 18, bottom: 32 };
+    const plotWidth = Math.max(1, width - margin.left - margin.right);
+    const plotHeight = Math.max(1, height - margin.top - margin.bottom);
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = css("--surface-soft");
+    ctx.fillRect(0, 0, width, height);
+
+    const offscreen = document.createElement("canvas");
+    offscreen.width = countH;
+    offscreen.height = countV;
+    const octx = offscreen.getContext("2d");
+    const image = octx.createImageData(countH, countV);
+    const pixelCount = countH * countV;
+    for (let index = 0; index < pixelCount; index += 1) {
+      const value = index < conv.length ? conv[index] : 0;
+      const color = heatColor(value);
+      const pixel = index * 4;
+      image.data[pixel] = color[0];
+      image.data[pixel + 1] = color[1];
+      image.data[pixel + 2] = color[2];
+      image.data[pixel + 3] = 255;
+    }
+    octx.putImageData(image, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(offscreen, margin.left, margin.top, plotWidth, plotHeight);
+
+    ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+    ctx.fillStyle = css("--muted");
+    ctx.fillText("H: 0", margin.left, height - 17);
+    ctx.fillText(`H: ${countH - 1}`, margin.left + plotWidth, height - 17);
+    ctx.textAlign = "right";
+    ctx.fillText(`V: 0`, margin.left - 5, margin.top + plotHeight);
+    ctx.fillText(`V: ${countV - 1}`, margin.left - 5, margin.top);
+
+    canvas._chartInfo = {
+      heatmap: true,
+      record,
+      margin,
+      plotWidth,
+      plotHeight,
+      valueElement: options.valueElement,
+      valueLabel: options.valueLabel || ""
+    };
+  }
+
+  function installHeatmapReadout(canvas) {
+    canvas.addEventListener("mousemove", event => {
+      const info = canvas._chartInfo;
+      if (!info || !info.heatmap || !info.valueElement) return;
+      const rect = canvas.getBoundingClientRect();
+      const localX = event.clientX - rect.left;
+      const localY = event.clientY - rect.top;
+      if (localX < info.margin.left || localX >= rect.width - info.margin.right ||
+        localY < info.margin.top || localY >= rect.height - info.margin.bottom) return;
+      const x = Math.min(info.record.countH - 1, Math.max(0, Math.floor(((localX - info.margin.left) / info.plotWidth) * info.record.countH)));
+      const y = Math.min(info.record.countV - 1, Math.max(0, Math.floor(((localY - info.margin.top) / info.plotHeight) * info.record.countV)));
+      const index = Math.min(info.record.conv.length - 1, y * info.record.countH + x);
+      const value = info.record.conv[index];
+      info.valueElement.textContent = `H=${x}, V=${y}: ${value.toFixed(4)}${info.valueLabel}`;
+    });
+  }
+
   function makeElement(tag, className, text) {
     const element = document.createElement(tag);
     if (className) element.className = className;
@@ -618,7 +717,8 @@ APP_HTML = r"""<!doctype html>
       meta.append(
         labeledValue("Последний уровень", `${post.latest.level.toFixed(4)} дБ`),
         labeledValue("Время", formatTime(post.latest.timestamp)),
-        labeledValue("Отсчётов convH", post.latest.convH.length.toLocaleString("ru-RU"))
+        labeledValue("Размер свёртки", `${post.latest.countH} × ${post.latest.countV}`),
+        labeledValue("Отсчётов", post.latest.conv.length.toLocaleString("ru-RU"))
       );
       card.append(meta);
 
@@ -635,10 +735,10 @@ APP_HTML = r"""<!doctype html>
       const convBlock = makeElement("div", "chart-block");
       const convTitle = makeElement("div", "chart-title");
       const convValue = makeElement("span", "chart-value", "Наведите курсор на график");
-      convTitle.append(makeElement("h3", "", "Последняя горизонтальная свёртка"), convValue);
+      convTitle.append(makeElement("h3", "", "Последняя 3D-свёртка"), convValue);
       const convCanvas = document.createElement("canvas");
       convCanvas.setAttribute("role", "img");
-      convCanvas.setAttribute("aria-label", `Последняя горизонтальная свёртка поста ${post.name}`);
+      convCanvas.setAttribute("aria-label", `Последняя 3D-свёртка поста ${post.name}`);
       convBlock.append(convTitle, convCanvas);
       card.append(convBlock);
       elements.posts.append(card);
@@ -651,22 +751,29 @@ APP_HTML = r"""<!doctype html>
           return [Number.isFinite(parsed) ? parsed : readingIndex, reading.level];
         })
       }];
-      const convSeries = [{ name: post.name, color, points: post.latest.convH.map((value, pointIndex) => [pointIndex, value]) }];
+      const useHeatmap = post.latest.countH > 0 && post.latest.countV > 0 &&
+        post.latest.conv.length === post.latest.countH * post.latest.countV;
       const levelDraw = () => drawLineChart(levelCanvas, levelSeries, {
         timeX: true,
         formatX: value => formatTime(new Date(value).toISOString()),
         valueElement: levelValue,
         valueLabel: " дБ"
       });
-      const convDraw = () => drawLineChart(convCanvas, convSeries, {
-        xFromZero: true,
-        fixedY: [0, 1],
-        yDigits: 2,
-        valueElement: convValue
-      });
+      const convDraw = useHeatmap
+        ? () => drawConvHeatmap(convCanvas, post.latest, { valueElement: convValue })
+        : () => drawLineChart(convCanvas, [{
+            name: post.name,
+            color,
+            points: post.latest.conv.map((value, pointIndex) => [pointIndex, value])
+          }], {
+            xFromZero: true,
+            fixedY: [0, 1],
+            yDigits: 2,
+            valueElement: convValue
+          });
       state.charts.push(levelDraw, convDraw);
       installReadout(levelCanvas);
-      installReadout(convCanvas);
+      if (useHeatmap) installHeatmapReadout(convCanvas); else installReadout(convCanvas);
     });
 
     requestAnimationFrame(() => state.charts.forEach(draw => draw()));

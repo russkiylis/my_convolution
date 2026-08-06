@@ -20,6 +20,8 @@ LoadGenerator::PostConfig::PostConfig() :
     maxAngleV(45),
     stepH(0.1),
     stepV(1),
+    countH(3600),
+    countV(90),
     minPeriod(1000),
     maxPeriod(5000)
 {
@@ -41,6 +43,8 @@ LoadGenerator::PostConfig::PostConfig(const PostConfig &other) :
     maxAngleV(other.maxAngleV),
     stepH(other.stepH),
     stepV(other.stepV),
+    countH(other.countH),
+    countV(other.countV),
     minPeriod(other.minPeriod),
     maxPeriod(other.maxPeriod),
     noiseConfig(other.noiseConfig->clone())
@@ -68,6 +72,8 @@ LoadGenerator::PostConfig & LoadGenerator::PostConfig::operator=(const PostConfi
     maxAngleV = other.maxAngleV;
     stepH = other.stepH;
     stepV = other.stepV;
+    countH = other.countH;
+    countV = other.countV;
     minPeriod = other.minPeriod;
     maxPeriod = other.maxPeriod;
     noiseConfig = other.noiseConfig->clone();

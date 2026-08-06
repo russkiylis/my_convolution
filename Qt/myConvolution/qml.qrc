@@ -11,10 +11,6 @@
 
         <!-- .sql команды -->
         <file>sql/insert.sql</file>
-        <file>sql/insertDoublePrecision.sql</file>
-        <file>sql/insertReal.sql</file>
-        <file>sql/insertResult.sql</file>
-        <file>sql/insertSmallint.sql</file>
         <file>sql/selectDoublePrecision.sql</file>
         <file>sql/selectReal.sql</file>
         <file>sql/selectResult.sql</file>
