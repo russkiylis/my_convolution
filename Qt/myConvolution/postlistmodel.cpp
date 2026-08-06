@@ -381,7 +381,7 @@ void PostListModel::setCurrentMaxAngleH(const QString &currentMaxAngleH) {
 }
 
 int PostListModel::currentStepH() const {
-    constexpr std::array<double, 5> etalonStep = {1, 0.5, 0.2, 0.1, 0.01};
+    constexpr std::array<double, 6> etalonStep = {5, 2, 1, 0.5, 0.2, 0.1};
     for (std::size_t i = 0; i < etalonStep.size(); ++i) {
         if (constexpr double epsilon = 0.001; std::abs(m_config[m_postIndex].stepH - etalonStep[i]) <= epsilon) {
             return static_cast<int>(i);
@@ -391,7 +391,7 @@ int PostListModel::currentStepH() const {
 }
 
 void PostListModel::setCurrentStepH(int currentStepH) {
-    if (currentStepH < 0 || currentStepH > 4)
+    if (currentStepH < 0 || currentStepH > 5)
         throw std::runtime_error("Сломанный StepH");
     if (currentStepH == this->currentStepH())
         return;
@@ -523,7 +523,7 @@ void PostListModel::setCurrentMaxAngleV(const QString &currentMaxAngleV) {
 }
 
 int PostListModel::currentStepV() const {
-    constexpr std::array<double, 5> etalonStep = {1, 0.5, 0.2, 0.1, 0.01};
+    constexpr std::array<double, 6> etalonStep = {5, 2, 1, 0.5, 0.2, 0.1};
     for (std::size_t i = 0; i < etalonStep.size(); ++i) {
         if (constexpr double epsilon = 0.001; std::abs(m_config[m_postIndex].stepV - etalonStep[i]) <= epsilon) {
             return static_cast<int>(i);
@@ -533,7 +533,7 @@ int PostListModel::currentStepV() const {
 }
 
 void PostListModel::setCurrentStepV(int currentStepV) {
-    if (currentStepV < 0 || currentStepV > 4)
+    if (currentStepV < 0 || currentStepV > 5)
         throw std::runtime_error("Сломанный StepV");
     if (currentStepV == this->currentStepV())
         return;

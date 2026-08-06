@@ -43,8 +43,7 @@ Item {
                 let newIndex = generatorBackend.postListModel.addPost()
                 if (newIndex >= 0) {
                     postListView.currentIndex = newIndex
-                    peakHListView.currentIndex = 0
-                    peakVListView.currentIndex = 0
+                    peakListView.currentIndex = 0
                 }
             }
         }
@@ -64,8 +63,7 @@ Item {
             onClicked: {
                 let newIndex = generatorBackend.postListModel.removePost(postListView.currentIndex)
                 postListView.currentIndex = newIndex
-                peakHListView.currentIndex = 0
-                peakVListView.currentIndex = 0
+                peakListView.currentIndex = 0
             }
 
             enabled: postListView.count > 1
@@ -94,8 +92,7 @@ Item {
                     generatorBackend.postListModel.setPostIndex(index)
 
                     // FIXME: Это откровенный костыль. Если мы переключимся на пост где не будет пиков то кнопка - все равно будет гореть
-                    peakHListView.currentIndex = 0
-                    peakVListView.currentIndex = 0
+                    peakListView.currentIndex = 0
                 }
 
                 Text {
@@ -350,11 +347,12 @@ Item {
                             }
 
                             model: [
+                                "5",
+                                "2",
                                 "1",
                                 "0.5",
                                 "0.2",
-                                "0.1",
-                                "0.01"
+                                "0.1"
                             ]
 
                             Label {
@@ -421,11 +419,12 @@ Item {
                             }
 
                             model: [
+                                "5",
+                                "2",
                                 "1",
                                 "0.5",
                                 "0.2",
-                                "0.1",
-                                "0.01"
+                                "0.1"
                             ]
 
                             Label {
@@ -624,29 +623,29 @@ Item {
                             background: ButtonBackground {}
                             text: "+"
                             Label {
-                                text: "Пики (азимутальные)"
+                                text: "Пики"
                                 anchors.bottom: parent.top
                                 anchors.bottomMargin: 5
                                 color: main.textColor
                             }
 
                             onClicked: {
-                                peakHListView.currentIndex = generatorBackend.postListModel.peakListModelH.addPeak()
+                                peakListView.currentIndex = generatorBackend.postListModel.peakListModel.addPeak()
                             }
                         }
                         Button {
                             Layout.fillWidth: true
                             background: ButtonBackground {}
                             text: "-"
-                            enabled: peakHListView.currentIndex !== -1
+                            enabled: peakListView.currentIndex !== -1
 
                             onClicked: {
-                                peakHListView.currentIndex = generatorBackend.postListModel.peakListModelH.removePeak(peakHListView.currentIndex)
+                                peakListView.currentIndex = generatorBackend.postListModel.peakListModel.removePeak(peakListView.currentIndex)
                             }
                         }
                     }
                     ListView {
-                        id: peakHListView
+                        id: peakListView
                         interactive: false
                         clip: true
                         spacing: 10
@@ -654,40 +653,41 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: contentHeight
 
-                        model: generatorBackend.postListModel.peakListModelH
+                        model: generatorBackend.postListModel.peakListModel
 
                         delegate: ItemDelegate {
-                            id: peakHListViewDelegate
-                            width: peakHListView.width
+                            id: peakListViewDelegate
+                            width: peakListView.width
                             height: 70
                             background: ListViewItemBackground {}
                             highlighted: ListView.isCurrentItem
 
                             property int rowIndex: index
                             property int peakTypeValue: model.peakType
-                            property double centerValue: model.center
+                            property double azimuthValue: model.azimuth
+                            property double elevationValue: model.elevation
                             property double amplitudeValue: model.amplitude
                             property double sigmaValue: model.sigma
                             property double halfWidthValue: model.halfWidth
 
                             onClicked: {
-                                peakHListView.currentIndex = index
+                                peakListView.currentIndex = index
                                 // generatorBackend.postListModel.postUpdate()
                                 // generatorBackend.postListModel.setPostIndex(index)
                             }
 
                             ComboBox {
-                                id: peakHTypeComboBox
+                                id: peakTypeComboBox
                                 background: TextFieldBackground {
                                 }
                                 anchors.left: parent.left
                                 anchors.bottom: parent.bottom
                                 anchors.leftMargin: 10
                                 anchors.bottomMargin: 10
-                                currentIndex: peakHListViewDelegate.peakTypeValue
+                                currentIndex: peakListViewDelegate.peakTypeValue
 
                                 onActivated: {
-                                    generatorBackend.postListModel.peakListModelH.setPeakType(peakHListViewDelegate.rowIndex, currentIndex)
+                                    generatorBackend.postListModel.peakListModel.setPeakType(peakListViewDelegate.rowIndex, currentIndex)
                                 }
 
                                 model: [
@@ -705,23 +705,25 @@ Item {
                             }
 
                             TextField {
-                                id: peakHCenterTextField
+                                id: peakAzimuthTextField
                                 background: TextFieldBackground {
                                 }
                                 placeholderText: "180"
-                                text: peakHListViewDelegate.centerValue
+                                text: peakListViewDelegate.azimuthValue
                                 selectByMouse: true
 
-                                anchors.left: peakHTypeComboBox.right
-                                anchors.bottom: peakHTypeComboBox.bottom
+                                anchors.left: peakTypeComboBox.right
+                                anchors.bottom: peakTypeComboBox.bottom
                                 anchors.leftMargin: 20
+                                implicitWidth: 125
+
 
                                 onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelH.setCenter(peakHListViewDelegate.rowIndex, text)
+                                    generatorBackend.postListModel.peakListModel.setAzimuth(peakListViewDelegate.rowIndex, text)
                                 }
 
                                 Label {
-                                    text: "Координата вершины"
+                                    text: "Азимут"
                                     anchors.bottom: parent.top
                                     anchors.bottomMargin: 5
                                     color: main.textColor
@@ -729,19 +731,47 @@ Item {
                             }
 
                             TextField {
-                                id: peakHAmplitudeTextField
+                                id: peakElevationTextField
                                 background: TextFieldBackground {
                                 }
-                                placeholderText: "10"
-                                text: peakHListViewDelegate.amplitudeValue
+                                placeholderText: "0"
+                                text: peakListViewDelegate.elevationValue
                                 selectByMouse: true
+                                implicitWidth: 125
 
-                                anchors.left: peakHCenterTextField.right
-                                anchors.bottom: peakHCenterTextField.bottom
+
+                                anchors.left: peakAzimuthTextField.right
+                                anchors.bottom: peakAzimuthTextField.bottom
                                 anchors.leftMargin: 20
 
                                 onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelH.setAmplitude(peakHListViewDelegate.rowIndex, text)
+                                    generatorBackend.postListModel.peakListModel.setElevation(peakListViewDelegate.rowIndex, text)
+                                }
+
+                                Label {
+                                    text: "Угол места"
+                                    anchors.bottom: parent.top
+                                    anchors.bottomMargin: 5
+                                    color: main.textColor
+                                }
+                            }
+
+                            TextField {
+                                id: peakAmplitudeTextField
+                                background: TextFieldBackground {
+                                }
+                                placeholderText: "10"
+                                text: peakListViewDelegate.amplitudeValue
+                                selectByMouse: true
+                                implicitWidth: 125
+
+
+                                anchors.left: peakElevationTextField.right
+                                anchors.bottom: peakElevationTextField.bottom
+                                anchors.leftMargin: 20
+
+                                onTextEdited: {
+                                    generatorBackend.postListModel.peakListModel.setAmplitude(peakListViewDelegate.rowIndex, text)
                                 }
 
                                 Label {
@@ -757,16 +787,18 @@ Item {
                                 background: TextFieldBackground {
                                 }
                                 placeholderText: "10"
-                                text: peakHListViewDelegate.sigmaValue
+                                text: peakListViewDelegate.sigmaValue
                                 selectByMouse: true
+                                implicitWidth: 125
 
-                                anchors.left: peakHAmplitudeTextField.right
-                                anchors.bottom: peakHAmplitudeTextField.bottom
+
+                                anchors.left: peakAmplitudeTextField.right
+                                anchors.bottom: peakAmplitudeTextField.bottom
                                 anchors.leftMargin: 20
-                                visible: peakHTypeComboBox.currentIndex === 0
+                                visible: peakTypeComboBox.currentIndex === 0
 
                                 onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelH.setSigma(peakHListViewDelegate.rowIndex, text)
+                                    generatorBackend.postListModel.peakListModel.setSigma(peakListViewDelegate.rowIndex, text)
                                 }
 
                                 Label {
@@ -782,17 +814,19 @@ Item {
                                 background: TextFieldBackground {
                                 }
                                 placeholderText: "25"
-                                text: peakHListViewDelegate.halfWidthValue
+                                text: peakListViewDelegate.halfWidthValue
                                 selectByMouse: true
+                                implicitWidth: 125
 
-                                anchors.left: peakHAmplitudeTextField.right
-                                anchors.bottom: peakHAmplitudeTextField.bottom
+
+                                anchors.left: peakAmplitudeTextField.right
+                                anchors.bottom: peakAmplitudeTextField.bottom
                                 anchors.leftMargin: 20
-                                visible: peakHTypeComboBox.currentIndex === 1
-                                    || peakHTypeComboBox.currentIndex === 2
+                                visible: peakTypeComboBox.currentIndex === 1
+                                    || peakTypeComboBox.currentIndex === 2
 
                                 onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelH.setHalfWidth(peakHListViewDelegate.rowIndex, text)
+                                    generatorBackend.postListModel.peakListModel.setHalfWidth(peakListViewDelegate.rowIndex, text)
                                 }
 
                                 Label {
@@ -805,199 +839,6 @@ Item {
                         }
                     }
                 }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-                    RowLayout {
-                        spacing: 20
-                        Button {
-                            Layout.fillWidth: true
-                            background: ButtonBackground {}
-                            text: "+"
-                            Label {
-                                text: "Пики (угломестные)"
-                                anchors.bottom: parent.top
-                                anchors.bottomMargin: 5
-                                color: main.textColor
-                            }
-
-                            onClicked: {
-                                peakVListView.currentIndex = generatorBackend.postListModel.peakListModelV.addPeak()
-                            }
-                        }
-                        Button {
-                            Layout.fillWidth: true
-                            background: ButtonBackground {}
-                            text: "-"
-                            enabled: peakVListView.currentIndex !== -1
-
-                            onClicked: {
-                                peakVListView.currentIndex = generatorBackend.postListModel.peakListModelV.removePeak(peakVListView.currentIndex)
-                            }
-                        }
-                    }
-                    ListView {
-                        id: peakVListView
-                        interactive: false
-                        clip: true
-                        spacing: 10
-
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: contentHeight
-
-                        model: generatorBackend.postListModel.peakListModelV
-
-                        delegate: ItemDelegate {
-                            id: peakVListViewDelegate
-                            width: peakHListView.width
-                            height: 70
-                            background: ListViewItemBackground {
-                            }
-                            highlighted: ListView.isCurrentItem
-
-                            property int rowIndex: index
-                            property int peakTypeValue: model.peakType
-                            property double centerValue: model.center
-                            property double amplitudeValue: model.amplitude
-                            property double sigmaValue: model.sigma
-                            property double halfWidthValue: model.halfWidth
-
-                            onClicked: {
-                                peakVListView.currentIndex = index
-                                // generatorBackend.postListModel.postUpdate()
-                                // generatorBackend.postListModel.setPostIndex(index)
-                            }
-
-                            ComboBox {
-                                id: peakVTypeComboBox
-                                background: TextFieldBackground {
-                                }
-                                anchors.left: parent.left
-                                anchors.bottom: parent.bottom
-                                anchors.leftMargin: 10
-                                anchors.bottomMargin: 10
-                                currentIndex: peakVListViewDelegate.peakTypeValue
-
-                                onActivated: {
-                                    generatorBackend.postListModel.peakListModelV.setPeakType(peakVListViewDelegate.rowIndex, currentIndex)
-                                }
-
-                                model: [
-                                    "Гауссовский",
-                                    "Треугольный",
-                                    "Прямоугольный"
-                                ]
-
-                                Label {
-                                    text: "Тип пика"
-                                    anchors.bottom: parent.top
-                                    anchors.bottomMargin: 5
-                                    color: main.textColor
-                                }
-                            }
-
-                            TextField {
-                                id: peakVCenterTextField
-                                background: TextFieldBackground {
-                                }
-                                placeholderText: "180"
-                                text: peakVListViewDelegate.centerValue
-                                selectByMouse: true
-
-                                anchors.left: peakVTypeComboBox.right
-                                anchors.bottom: peakVTypeComboBox.bottom
-                                anchors.leftMargin: 20
-
-                                onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelV.setCenter(peakVListViewDelegate.rowIndex, text)
-                                }
-
-                                Label {
-                                    text: "Координата вершины"
-                                    anchors.bottom: parent.top
-                                    anchors.bottomMargin: 5
-                                    color: main.textColor
-                                }
-                            }
-
-                            TextField {
-                                id: peakVAmplitudeTextField
-                                background: TextFieldBackground {
-                                }
-                                placeholderText: "10"
-                                text: peakVListViewDelegate.amplitudeValue
-                                selectByMouse: true
-
-                                anchors.left: peakVCenterTextField.right
-                                anchors.bottom: peakVCenterTextField.bottom
-                                anchors.leftMargin: 20
-
-                                onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelV.setAmplitude(peakVListViewDelegate.rowIndex, text)
-                                }
-
-                                Label {
-                                    text: "Амплитуда"
-                                    anchors.bottom: parent.top
-                                    anchors.bottomMargin: 5
-                                    color: main.textColor
-                                }
-                            }
-
-                            TextField {
-                                id: peakVSigmaTextField
-                                background: TextFieldBackground {
-                                }
-                                placeholderText: "5"
-                                text: peakVListViewDelegate.sigmaValue
-                                selectByMouse: true
-
-                                anchors.left: peakVAmplitudeTextField.right
-                                anchors.bottom: peakVAmplitudeTextField.bottom
-                                anchors.leftMargin: 20
-                                visible: peakVTypeComboBox.currentIndex === 0
-
-                                onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelV.setSigma(peakVListViewDelegate.rowIndex, text)
-                                }
-
-                                Label {
-                                    text: "СКО"
-                                    anchors.bottom: parent.top
-                                    anchors.bottomMargin: 5
-                                    color: main.textColor
-                                }
-                            }
-
-                            TextField {
-                                id: peakVHalfWidthTextField
-                                background: TextFieldBackground {
-                                }
-                                placeholderText: "25"
-                                text: peakVListViewDelegate.halfWidthValue
-                                selectByMouse: true
-
-                                anchors.left: peakVAmplitudeTextField.right
-                                anchors.bottom: peakVAmplitudeTextField.bottom
-                                anchors.leftMargin: 20
-                                visible: peakVTypeComboBox.currentIndex === 1 || peakVTypeComboBox.currentIndex === 2
-
-                                onTextEdited: {
-                                    generatorBackend.postListModel.peakListModelV.setHalfWidth(peakVListViewDelegate.rowIndex, text)
-                                }
-
-                                Label {
-                                    text: "Полуширина"
-                                    anchors.bottom: parent.top
-                                    anchors.bottomMargin: 5
-                                    color: main.textColor
-                                }
-                            }
-                        }
-                    }
-                }
-
             }
         }
     }
@@ -1045,7 +886,7 @@ Item {
 
         onClicked: {
             postListView.currentIndex = generatorBackend.postListModel.fallback()
-            peakHListView.currentIndex = 0
+            peakListView.currentIndex = 0
             peakVListView.currentIndex = 0
         }
     }
