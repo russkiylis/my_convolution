@@ -51,10 +51,8 @@ void VisualizeBackend::slotSetLastError(const QString &lastError) {
 
 void VisualizeBackend::slotSetData(
     const QVector<RowForVisualization>& rows,
-    // TODO: Всё менять на QVariantListы
-    const QVector<QVector<double>>& convsH,
-    const QVector<QVector<double>>& convsV
+    const QVector<QVector<double>>& convs
     ) {
     qDebug() << "Прочтённые данные дошли до бекенда!";
-    m_visualizationModel.replaceData(rows, convsH, convsV);
+    m_visualizationModel.replaceData(rows, convs);
 }

@@ -887,7 +887,6 @@ Item {
         onClicked: {
             postListView.currentIndex = generatorBackend.postListModel.fallback()
             peakListView.currentIndex = 0
-            peakVListView.currentIndex = 0
         }
     }
 }

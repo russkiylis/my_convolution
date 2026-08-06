@@ -3,7 +3,7 @@
 #include "utils.h"
 
 VisualizationTableModel::VisualizationTableModel(QObject *parent) :
-QAbstractTableModel{parent}
+    QAbstractTableModel {parent}
 {
 }
 
@@ -11,7 +11,7 @@ int VisualizationTableModel::rowCount(const QModelIndex &parent) const {
     if (parent.isValid())
         return 0;
 
-    return m_data.size();
+    return m_data.rows.size();
 }
 
 int VisualizationTableModel::columnCount(const QModelIndex &parent) const {
@@ -26,42 +26,39 @@ QVariant VisualizationTableModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return {};
 
-    if (index.row() < 0 || index.row() >= m_data.size())
+    if (index.row() < 0 || index.row() >= m_data.rows.size())
         return {};
 
     if (index.column() < 0 || index.column() >= ColumnCount)
         return {};
 
-    DataForVisualization data = m_data.at(index.row());
+    RowForVisualization const & row = m_data.rows.at(index.row());
+    QVector<double> const & conv = m_data.convs.at(index.row());
 
     // Обрабатываем те колонки, которые надо просто вывести текстом
     if (role == Qt::DisplayRole) {
         switch (static_cast<Column>(index.column())) {
         case IdColumn:
-            return data.row.id;
+            return row.id;
         case TimestampColumn:
-            return data.row.timestamp.toLocalTime().toString("dd.MM.yyyy HH:mm:ss.zzz");
+            return row.timestamp.toLocalTime().toString("dd.MM.yyyy HH:mm:ss.zzz");
         case SysnameColumn:
-            return data.row.sysname;
+            return row.sysname;
         case AzimuthColumn:
-            return data.row.azimuth;
+            return row.azimuth;
         case ElevationColumn:
-            return data.row.elevation;
+            return row.elevation;
         case PowerColumn:
-            return data.row.power;
+            return row.power;
         case FrequencyColumn:
-            return data.row.frequency;
+            return row.frequency;
         case LatitudeColumn:
-            return data.row.latitude;
+            return row.latitude;
         case LongitudeColumn:
-            return data.row.longitude;
-        case QualityHColumn:
-            return data.row.qualityH;
-        case QualityVColumn:
-            return data.row.qualityV;
-        case ConvHColumn:
-            return "";
-        case ConvVColumn:
+            return row.longitude;
+        case QualityColumn:
+            return row.quality;
+        case ConvColumn:
             return "";
         default:
             return {};
@@ -69,26 +66,18 @@ QVariant VisualizationTableModel::data(const QModelIndex &index, int role) const
     }
 
     if (role == IsSparklineRole) {
-        return index.column() == ConvHColumn || index.column() == ConvVColumn;
+        return index.column() == ConvColumn;
     }
 
     if (role == SparklineRole) {
         QVariantList result;
         QVector<double> shrinkedConvH;
-        QVector<double> shrinkedConvV;
 
         switch (static_cast<Column>(index.column())) {
-        case ConvHColumn:
-            shrinkedConvH = Utils::shrinkVector(data.convH, 100);
+        case ConvColumn:
+            shrinkedConvH = Utils::shrinkVector(Utils::flattenVector(conv, row.countH), 100);
             result.reserve(shrinkedConvH.size());
             for (const double i : shrinkedConvH) {
-                result.append(i);
-            }
-            return result;
-        case ConvVColumn:
-            shrinkedConvV = Utils::shrinkVector(data.convV, 100);
-            result.reserve(shrinkedConvV.size());
-            for (const double i : shrinkedConvV) {
                 result.append(i);
             }
             return result;
@@ -127,14 +116,10 @@ QVariant VisualizationTableModel::headerData(int section, Qt::Orientation orient
         return QStringLiteral("Широта");
     case LongitudeColumn:
         return QStringLiteral("Долгота");
-    case QualityHColumn:
-        return QStringLiteral("Качество (азимут)");
-    case QualityVColumn:
-        return QStringLiteral("Качество (угол места)");
-    case ConvHColumn:
+    case QualityColumn:
+        return QStringLiteral("Качество");
+    case ConvColumn:
         return QStringLiteral("Свёртка (азимут)");
-    case ConvVColumn:
-        return QStringLiteral("Свёртка (угол места)");
     default:
         return {};
     }
@@ -151,18 +136,12 @@ QHash<int, QByteArray> VisualizationTableModel::roleNames() const
 
 void VisualizationTableModel::replaceData(
     const QVector<RowForVisualization> &rows,
-    const QVector<QVector<double>> &convsH,
-    const QVector<QVector<double>> &convsV
+    const QVector<QVector<double>> &convs
     ) {
     beginResetModel();
-    // TODO: Записать данные
-    m_data.clear();
-    for (int i = 0; i < rows.size(); ++i) {
-        DataForVisualization data;
-        data.row = rows.at(i);
-        data.convH = convsH.at(i);
-        data.convV = convsV.at(i);
-        m_data.push_back(data);
-    }
+
+    m_data.convs = convs;
+    m_data.rows = rows;
+
     endResetModel();
 }

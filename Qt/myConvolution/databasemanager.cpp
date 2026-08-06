@@ -306,9 +306,8 @@ void DatabaseManager::slotManagerUpdate(bool const &connected, bool const &valid
 
 void DatabaseManager::slotReadDb(
     const QVector<RowForVisualization> &rows,
-    const QVector<QVector<double>> &convsH,
-    const QVector<QVector<double>> &convsV
+    const QVector<QVector<double>> &convs
     ) {
 
-    emit signalSetData(rows, convsH, convsV);
+    emit signalSetData(rows, convs);
 }

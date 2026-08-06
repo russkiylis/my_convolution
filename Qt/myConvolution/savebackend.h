@@ -10,7 +10,7 @@ class SaveBackend final : public QObject {
     Q_OBJECT
 
     Q_PROPERTY(int currentDataType READ currentDataType WRITE setCurrentDataType NOTIFY currentDataTypeChanged)
-    Q_PROPERTY(int currentByteOrder READ currentByteOrder WRITE setCurrentByteOrder)
+    Q_PROPERTY(int currentByteOrder READ currentByteOrder WRITE setCurrentByteOrder NOTIFY currentByteOrderChanged)
     Q_PROPERTY(bool saveEnabled READ saveEnabled WRITE setSaveEnabled NOTIFY saveEnabledChanged)
 
 public:

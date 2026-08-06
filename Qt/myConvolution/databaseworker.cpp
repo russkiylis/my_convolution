@@ -795,7 +795,7 @@ void DatabaseWorker::slotReadDb() {
     }
 
     // Читаем таблицу
-    if (!Utils::fileToString(":sql/selectRowForVisualization.sql", command, &fileError)) {
+    if (!Utils::fileToString(":sql/select.sql", command, &fileError)) {
         _lastError = "[!] "
             + _config.fullConnectionName
             + ": Операция не удалась: "
@@ -819,10 +819,7 @@ void DatabaseWorker::slotReadDb() {
     }
 
     QVector<RowForVisualization> rowsForVisualization;
-    QVector<QVector<double>> convsHForVisualization;
-    QVector<QVector<double>> convsVForVisualization;
-    QVector<double> convHForVisualization;
-    QVector<double> convVForVisualization;
+    QVector<QVector<double>> convsForVisualization;
     while (query.next()) {
         RowForVisualization row;
         row.id = query.value("id").toLongLong();
@@ -835,109 +832,53 @@ void DatabaseWorker::slotReadDb() {
         row.latitude = query.value("latitude").toDouble();
         row.longitude = query.value("longitude").toDouble();
         row.dataType = query.value("data_type").toString();
-        row.qualityH = query.value("quality_h").toDouble();
-        row.qualityV = query.value("quality_v").toDouble();
+        row.quality = query.value("quality").toDouble();
+        row.countH = query.value("count_h").toInt();
+        row.countV = query.value("count_v").toInt();
         rowsForVisualization.push_back(row);
+        QByteArray convBytes = query.value("conv").toByteArray();
 
-        QSqlQuery convQuery(db);
-        // Забираем свёртки по id
-        if (row.dataType == "double_precision") {
-            if (!Utils::fileToString(":sql/selectDoublePrecision.sql", command, &fileError)) {
-                _lastError = "[!] "
-                    + _config.fullConnectionName
-                    + ": Операция не удалась: "
-                    + fileError;
-                qDebug().noquote().nospace() << _lastError;
-                db.rollback();
-                _busy = false;
-                emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-                return;
-            }
-        } else if (row.dataType == "real") {
-            if (!Utils::fileToString(":sql/selectReal.sql", command, &fileError)) {
-                _lastError = "[!] "
-                    + _config.fullConnectionName
-                    + ": Операция не удалась: "
-                    + fileError;
-                qDebug().noquote().nospace() << _lastError;
-                db.rollback();
-                _busy = false;
-                emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-                return;
-            }
-        } else if (row.dataType == "smallint") {
-            if (!Utils::fileToString(":sql/selectSmallint.sql", command, &fileError)) {
-                _lastError = "[!] "
-                    + _config.fullConnectionName
-                    + ": Операция не удалась: "
-                    + fileError;
-                qDebug().noquote().nospace() << _lastError;
-                db.rollback();
-                _busy = false;
-                emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-                return;
-            }
+        ByteArrayCoder::DataType coderDataType = ByteArrayCoder::doublePrecision;
+        ByteArrayCoder::ByteOrder coderByteOrder = ByteArrayCoder::LittleEndian;
+        if (row.dataType == "double_le") {
+            coderDataType = ByteArrayCoder::doublePrecision;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "double_be") {
+            coderDataType = ByteArrayCoder::doublePrecision;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "real_le") {
+            coderDataType = ByteArrayCoder::real;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "real_be") {
+            coderDataType = ByteArrayCoder::real;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "smallint_le") {
+            coderDataType = ByteArrayCoder::smallint;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "smallint_be") {
+            coderDataType = ByteArrayCoder::smallint;
+            coderByteOrder = ByteArrayCoder::BigEndian;
         } else {
-            throw std::logic_error("При прочтении базы данных вернулся непонятный data_type!");
-        }
-        if (!convQuery.prepare(command)) {
-            _lastError = "[!] "
-            + _config.fullConnectionName
-            + ": Операция не удалась: "
-            + query.lastError().text();
-            qDebug().noquote().nospace() << _lastError;
-            db.rollback();
-            _busy = false;
-            emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-            return;
-        }
-        convQuery.bindValue(":id", row.id);
-        convQuery.exec();
-        convQuery.next();
-
-        QString parseError;
-        if (!Utils::jsonToVector(convQuery.value("conv_h"), convHForVisualization, &parseError)) {
-            _lastError = "[!] "
-            + _config.fullConnectionName
-            + ": Операция не удалась: "
-            + parseError;
-            qDebug().noquote().nospace() << _lastError;
-            db.rollback();
-            _busy = false;
-            emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-            return;
-        }
-        if (!Utils::jsonToVector(convQuery.value("conv_v"), convVForVisualization, &parseError)) {
-            _lastError = "[!] "
-            + _config.fullConnectionName
-            + ": Операция не удалась: "
-            + parseError;
-            qDebug().noquote().nospace() << _lastError;
-            db.rollback();
-            _busy = false;
-            emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
-            return;
+            qWarning().noquote().nospace() << "[!] Прочитан неизвестный тип данных " << row.dataType;
         }
 
-        if (row.dataType == "smallint") {
-            const double maxH = *std::max_element(convHForVisualization.constBegin(), convHForVisualization.constEnd());
-            for (auto & value : convHForVisualization) {
-                value /= maxH;
-            }
-            const double maxV = *std::max_element(convVForVisualization.constBegin(), convVForVisualization.constEnd());
-            for (auto & value : convVForVisualization) {
-                value /= maxV;
+        std::unique_ptr<ByteArrayCoder> coder = ByteArrayCoder::create(coderDataType, coderByteOrder);
+        std::vector<double> convForVisualization = coder->deserialize(convBytes);
+
+        if (row.dataType == "smallint_be" || row.dataType == "smallint_le") {
+            const double max = *std::max_element(convForVisualization.begin(), convForVisualization.end());
+            for (auto & value : convForVisualization) {
+                value /= max;
             }
         }
 
-        convsHForVisualization.push_back(convHForVisualization);
-        convsVForVisualization.push_back(convVForVisualization);
+        convsForVisualization.push_back(QVector<double>(convForVisualization.begin(), convForVisualization.end()));
     }
     qDebug().noquote().nospace() << "Прочитано " << rowsForVisualization.size() << " строк.";
     db.commit();
 
     // Отправляем прочитанные данные из рабочего потока
-    emit signalReadDb(rowsForVisualization, convsHForVisualization, convsVForVisualization);
+    emit signalReadDb(rowsForVisualization, convsForVisualization);
 
     _busy = false;
     qDebug().noquote().nospace() << "Успешное чтение базы данных.";

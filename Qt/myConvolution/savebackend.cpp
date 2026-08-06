@@ -13,7 +13,8 @@ SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
 
 void SaveBackend::processDataPackage(const LoadGenerator::DataPackage &package) const
 {
-    m_db.saveDataPackage(package, m_currentDataType, m_currentByteOrder);
+    if (m_saveEnabled)
+        m_db.saveDataPackage(package, m_currentDataType, m_currentByteOrder);
 }
 
 int SaveBackend::currentDataType() const

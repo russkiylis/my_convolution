@@ -51,6 +51,36 @@ Item {
                 }
             }
 
+            Item {
+                implicitHeight: byteOrderLabel.height + byteOrderComboBox.height
+                ComboBox {
+                    id: byteOrderComboBox
+                    background: TextFieldBackground {
+                    }
+                    Layout.fillWidth: true
+                    currentIndex: saveBackend.currentByteOrder
+
+                    onActivated: {
+                        saveBackend.currentByteOrder = currentIndex
+                    }
+
+                    model: [
+                        "Little endian",
+                        "Big endian"
+                    ]
+
+                    anchors.bottom: parent.bottom
+                }
+
+                Label {
+                    id: byteOrderLabel
+                    text: "Порядок байтов"
+                    anchors.bottom: byteOrderComboBox.top
+                    anchors.bottomMargin: 5
+                    color: main.textColor
+                }
+            }
+
             Button {
                 id: tableClearButton
                 Layout.fillWidth: true

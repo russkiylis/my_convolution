@@ -99,6 +99,6 @@ signals:
     // Отправка сигнала об обновлении полей менеджера
     void signalManagerUpdate(bool connected, bool valid, bool busy, QString lastError);
 
-    void signalReadDb(QVector<RowForVisualization> rows, QVector<QVector<double>> convsH, QVector<QVector<double>> convsV);
+    void signalReadDb(QVector<RowForVisualization> rows, QVector<QVector<double>> convs);
 };
 

@@ -31,6 +31,5 @@ private:
 public slots:
     void slotSetDbStatus(int dbStatus);
     void slotSetLastError(const QString &lastError);
-    void slotSetData(const QVector<RowForVisualization> &rows, const QVector<QVector<double>> &convsH, const QVector<QVector<double>> &
-        convsV);
+    void slotSetData(const QVector<RowForVisualization> &rows, const QVector<QVector<double>> &convs);
 };

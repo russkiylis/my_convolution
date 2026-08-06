@@ -17,14 +17,13 @@ struct RowForVisualization
 
     QString dataType;
 
-    double qualityH;
-    double qualityV;
+    double quality;
+    int countH;
+    int countV;
 };
 
 struct DataForVisualization
 {
-    // TODO: поменять на QVariantListы
-    RowForVisualization row;
-    QVector<double> convH;
-    QVector<double> convV;
+    QVector<RowForVisualization> rows;
+    QVector<QVector<double>> convs;
 };

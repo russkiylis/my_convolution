@@ -11,10 +11,7 @@
 
         <!-- .sql команды -->
         <file>sql/insert.sql</file>
-        <file>sql/selectDoublePrecision.sql</file>
-        <file>sql/selectReal.sql</file>
-        <file>sql/selectResult.sql</file>
-        <file>sql/selectSmallint.sql</file>
+        <file>sql/select.sql</file>
         <file>sql/createDataTypeEnum.sql</file>
         <file>sql/deleteDataTypeEnum.sql</file>
         <file>sql/createConv.sql</file>
@@ -23,7 +20,6 @@
         <file>sql/createResult.sql</file>
         <file>sql/cleanResult.sql</file>
         <file>sql/deleteResult.sql</file>
-        <file>sql/selectRowForVisualization.sql</file>
 
         <!-- JavaScript -->
         <file>sparkline.js</file>

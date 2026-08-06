@@ -116,11 +116,11 @@ void PeakListModel::setAzimuth(const int row, const double azimuth) {
         break;
     case AbstractPeak::PeakType::Triangle:
         (*m_peakConfig)[row] = std::make_unique<TrianglePeak::TrianglePeakConfig>
-        (GeometryUtils::SphericalCoordDeg(azimuth, configGauss->center.elevation()), configTriangle->amplitude, configTriangle->halfWidth);
+        (GeometryUtils::SphericalCoordDeg(azimuth, configTriangle->center.elevation()), configTriangle->amplitude, configTriangle->halfWidth);
         break;
     case AbstractPeak::PeakType::Rectangle:
         (*m_peakConfig)[row] = std::make_unique<RectanglePeak::RectanglePeakConfig>
-        (GeometryUtils::SphericalCoordDeg(azimuth, configGauss->center.elevation()), configRectangle->amplitude, configRectangle->halfWidth);
+        (GeometryUtils::SphericalCoordDeg(azimuth, configRectangle->center.elevation()), configRectangle->amplitude, configRectangle->halfWidth);
         break;
     default:
         throw std::logic_error("Неадекватный тип пика!");

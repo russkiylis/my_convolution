@@ -164,7 +164,7 @@ private:
 public slots:
     void slotManagerUpdate(bool const &connected, bool const &valid, bool const &busy, QString const &lastError);
 
-    void slotReadDb(const QVector<RowForVisualization> &rows, const QVector<QVector<double>> &convsH, const QVector<QVector<double>> &convsV);
+    void slotReadDb(const QVector<RowForVisualization> &rows, const QVector<QVector<double>> &convs);
 
 signals:
     void signalInitialize();
@@ -181,7 +181,7 @@ signals:
 
     void signalSetDbStatus(int dbStatus);
     void signalSetLastError(QString lastError);
-    void signalSetData(QVector<RowForVisualization> rows, QVector<QVector<double>> convsH, QVector<QVector<double>> convsV);
+    void signalSetData(const QVector<RowForVisualization> &rows, const QVector<QVector<double>> &convs);
 
     void signalReadDb();
 };

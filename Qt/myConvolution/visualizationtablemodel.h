@@ -22,10 +22,8 @@ public:
         FrequencyColumn,
         LatitudeColumn,
         LongitudeColumn,
-        QualityHColumn,
-        ConvHColumn,
-        QualityVColumn,
-        ConvVColumn,
+        QualityColumn,
+        ConvColumn,
 
         ColumnCount
     };
@@ -57,10 +55,9 @@ public:
 
     // Замена отображаемых данных
     void replaceData(const QVector<RowForVisualization> &rows,
-                 const QVector<QVector<double>> &convsH,
-                 const QVector<QVector<double>> &convsV);
+                 const QVector<QVector<double>> &convs);
 
 private:
-    QVector<DataForVisualization> m_data;    // Информация, которая отображается в данный момент
+    DataForVisualization m_data;
 };
 

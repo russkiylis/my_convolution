@@ -62,4 +62,25 @@ public:
 
         return result;
     }
+
+    template <typename T>
+    static QVector<T> flattenVector(const QVector<T> &vec, const int rowSize)
+    {
+        if (rowSize <= 0 || vec.isEmpty()) {
+            return {};
+        }
+
+        QVector<T> result;
+        result.reserve((vec.size() + rowSize - 1) / rowSize); // Предварительно выделяем память
+
+        for (int i = 0; i < vec.size(); i += rowSize) {
+            // Защита от выхода за границы, если длина вектора не кратна rowSize
+            auto first = vec.begin() + i;
+            auto last = vec.begin() + std::min(i + rowSize, vec.size());
+
+            result.append(std::accumulate(first, last, T{}));
+        }
+
+        return result;
+    }
 };
