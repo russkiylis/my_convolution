@@ -35,23 +35,26 @@ set(PROJECT_SOURCES
     uniformnoisebackend.h uniformnoisebackend.cpp
     peaklistmodel.h peaklistmodel.cpp
     postlistmodel.h postlistmodel.cpp
-        utils.cpp
-        utils.h
-        savebackend.cpp
-        savebackend.h
-        visualizebackend.cpp
-        visualizebackend.h
-        visualizationtablemodel.cpp
-        visualizationtablemodel.h
-        dataforvisualization.h
-        bytearraycoder.cpp
-        bytearraycoder.h
-        geometryutils.cpp
-        geometryutils.h
+    utils.h utils.cpp
+    savebackend.h savebackend.cpp
+    visualizebackend.h visualizebackend.cpp
+    visualizationtablemodel.h visualizationtablemodel.cpp
+    dataforvisualization.h
+    bytearraycoder.h bytearraycoder.cpp
+    geometryutils.cpp geometryutils.h
+)
+
+set(PACKEDARRAY_DIR
+        ${CMAKE_CURRENT_SOURCE_DIR}/third-party/PackedArray
+)
+
+set(PACKEDARRAY_SOURCES
+        ${PACKEDARRAY_DIR}/packedarray.h ${PACKEDARRAY_DIR}/packedarray.c
 )
 
 add_executable(myConvolution
     ${PROJECT_SOURCES}
+    ${PACKEDARRAY_SOURCES}
 )
 
 target_link_libraries(myConvolution
