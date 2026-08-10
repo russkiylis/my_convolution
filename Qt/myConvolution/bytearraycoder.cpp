@@ -52,15 +52,20 @@ int ByteArrayCoder::bits() const {
 }
 
 std::vector<uint32_t> ByteArrayCoder::packValues(const std::vector<double> &data) const {
-
-    // Создание указателя на packedArray
-    PackedArray * packedArrayPtr = PackedArray_create(m_bits, data.size());
-
     // Вычисление максимума нормировки
     if (m_bits < 2 || m_bits > 8) {
         throw std::runtime_error("Недопустимое количество бит");
     }
-    const auto maximum = static_cast<uint8_t>((1u << m_bits) - 1);
+
+    if (data.empty()) {
+        return {};
+    }
+
+    if (data.size() > std::numeric_limits<uint32_t>::max()) {
+        throw std::length_error("Слишком большое количество элементов");
+    }
+
+    const uint32_t maximum = (1u << m_bits) - 1u;
 
     // Нормировка массива double для упаковки
     std::vector<uint32_t> normalizedData;
@@ -72,46 +77,73 @@ std::vector<uint32_t> ByteArrayCoder::packValues(const std::vector<double> &data
         normalizedData.push_back(static_cast<uint32_t>(std::clamp(value, 0.0, 1.0) * maximum));
     }
 
+    // Создание указателя на packedArray
+    std::unique_ptr<PackedArray, decltype(&PackedArray_destroy)> packedArrayPtr{
+        PackedArray_create(m_bits, static_cast<uint32_t>(data.size())),
+        &PackedArray_destroy
+    };
+    if (!packedArrayPtr) {
+        throw std::bad_alloc{};
+    }
+
     // Упаковка в packedArray
-    PackedArray_pack(packedArrayPtr, 0, normalizedData.data(), data.size());
+    PackedArray_pack(
+        packedArrayPtr.get(),
+        0,
+        normalizedData.data(),
+        static_cast<uint32_t>(normalizedData.size())
+    );
 
     std::vector<uint32_t> result;
-    for (uint32_t i = 0; i < PackedArray_bufferSize(packedArrayPtr); i++) {
+    result.reserve(PackedArray_bufferSize(packedArrayPtr.get()));
+    for (uint32_t i = 0; i < PackedArray_bufferSize(packedArrayPtr.get()); i++) {
         result.push_back(packedArrayPtr->buffer[i]);
     }
 
-    // Удаление packedArray из памяти
-    PackedArray_destroy(packedArrayPtr);
     return result;
 }
 
 std::vector<double> ByteArrayCoder::unpackValues(const std::vector<uint32_t> &packedArray, uint32_t elementCount) const {
-
-    std::vector<double> result;
-    std::vector<uint32_t> normalizedData;
-
     // Вычисление максимума нормировки
     if (m_bits < 2 || m_bits > 8) {
         throw std::runtime_error("Недопустимое количество бит");
     }
-    const auto maximum = static_cast<uint8_t>((1u << m_bits) - 1);
+
+    const uint64_t expectedWordCount =
+        (static_cast<uint64_t>(m_bits) * elementCount + 31u) / 32u;
+    if (packedArray.size() != expectedWordCount) {
+        throw std::logic_error("Некорректный размер упакованных данных");
+    }
+
+    if (elementCount == 0) {
+        return {};
+    }
+
+    const uint32_t maximum = (1u << m_bits) - 1u;
 
     // Создание указателя на packedArray
-    PackedArray * packedArrayPtr = PackedArray_create(m_bits, elementCount);  // первый элемент это количество элементов
+    std::unique_ptr<PackedArray, decltype(&PackedArray_destroy)> packedArrayPtr{
+        PackedArray_create(m_bits, elementCount),
+        &PackedArray_destroy
+    };
+    if (!packedArrayPtr) {
+        throw std::bad_alloc{};
+    }
+
     std::copy(packedArray.begin(), packedArray.end(), packedArrayPtr->buffer);
 
-    normalizedData.resize(elementCount);
+    std::vector<uint32_t> normalizedData(elementCount);
 
     // Распаковка
-    PackedArray_unpack(packedArrayPtr, 0, normalizedData.data(), elementCount);
+    PackedArray_unpack(packedArrayPtr.get(), 0, normalizedData.data(), elementCount);
 
     // Превращение из квантованных данных в даблы
+    std::vector<double> result;
     result.reserve(normalizedData.size());
     for (auto const & value : normalizedData) {
         result.push_back(std::clamp(static_cast<double>(value)/maximum, 0.0, 1.0));
     }
 
-    PackedArray_destroy(packedArrayPtr);
     return result;
 }
 
@@ -367,15 +399,11 @@ QByteArray PackedArrayCoder::serialize(const std::vector<double> &data) const {
 }
 
 std::vector<double> PackedArrayCoder::deserialize(QByteArray &bytes) const {
-
-    std::vector<double> data;  // Данные из байтов
-
-    std::vector<uint32_t> packedData;   // Запакованные в packedArray данные
-    const int packedDataSize = (bytes.size() - 4) / 4;
-    if ((bytes.size() - 4) % 4 != 0) {
+    if (bytes.size() < 4 || (bytes.size() - 4) % 4 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
     }
-    packedData.reserve(packedDataSize);
+
+    const int packedDataSize = (bytes.size() - 4) / 4;
 
     QDataStream serializer(&bytes, QIODevice::ReadOnly);   // Сериализатор в виде QDataStream
     setSerializerByteOrder(serializer); // Установка порядка байтов
@@ -384,7 +412,18 @@ std::vector<double> PackedArrayCoder::deserialize(QByteArray &bytes) const {
     // Определение количества элементов
     uint32_t elementCount;
     serializer >> elementCount;
-    data.reserve(elementCount);
+    if (serializer.status() != QDataStream::Ok) {
+        throw std::logic_error("Ошибка десериализации");
+    }
+
+    const uint64_t expectedWordCount =
+        (static_cast<uint64_t>(m_bits) * elementCount + 31u) / 32u;
+    if (expectedWordCount != static_cast<uint64_t>(packedDataSize)) {
+        throw std::logic_error("Некорректный размер упакованных данных");
+    }
+
+    std::vector<uint32_t> packedData;
+    packedData.reserve(static_cast<std::size_t>(packedDataSize));
 
     // Выкидываем запакованные данные из массива байтов
     for (int i = 0; i < packedDataSize; i++) {
@@ -399,7 +438,5 @@ std::vector<double> PackedArrayCoder::deserialize(QByteArray &bytes) const {
     }
 
     // Распаковываем значения
-    data = unpackValues(packedData, elementCount);
-
-    return data;
+    return unpackValues(packedData, elementCount);
 }
