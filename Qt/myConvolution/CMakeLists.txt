@@ -75,4 +75,43 @@ target_compile_options(myConvolution PRIVATE
         -Wall
         -Wextra
         -Wimplicit-fallthrough
+        -Wshadow
+        -Wformat=2
+        -Wundef
+        -Wold-style-cast
 )
+
+target_compile_options(myConvolution  PRIVATE
+    "$<$<CONFIG:Release>:-O3>"
+    "$<$<CONFIG:Release>:-ffast-math>"
+)
+
+
+include(CheckIPOSupported)
+check_ipo_supported(
+        RESULT ipo_supported
+        OUTPUT ipo_error
+        LANGUAGES CXX
+)
+
+if(ipo_supported)
+    set_property(
+            TARGET myConvolution
+            PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+    )
+endif()
+
+
+if(MSVC)
+    target_compile_options(myConvolution PRIVATE
+            "$<$<CONFIG:Release>:/arch:AVX2>"
+    )
+elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+    target_compile_options(myConvolution PRIVATE
+            "$<$<CONFIG:Release>:-mcpu=native>"
+    )
+else()
+    target_compile_options(myConvolution PRIVATE
+            "$<$<CONFIG:Release>:-march=native>"
+    )
+endif()

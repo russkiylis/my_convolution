@@ -3,7 +3,6 @@
 #include <memory>
 #include "bytearraycoder.h"
 #include "loadgenerator.h"
-#include "utils.h"
 #include "databasemanager.h"
 
 class SaveBackend final : public QObject {

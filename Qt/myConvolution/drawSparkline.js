@@ -1,4 +1,6 @@
 // Функиця для рисования спарклайна по заданной ширине, высоте и массиву чисел
+// noinspection JSUnusedGlobalSymbols
+
 function drawSparkline(ctx, width, height, data, color = "red", lineWidth = 1) {
     ctx.clearRect(0, 0, width, height);     // Очищаем прямоугольник
 

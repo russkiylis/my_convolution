@@ -1,11 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <QObject>
 #include "databasemanager.h"
 #include "visualizationtablemodel.h"
 
-class VisualizeBackend : public QObject {
+class VisualizeBackend final : public QObject {
     Q_OBJECT
     Q_PROPERTY(VisualizationTableModel *visualizationTableModel READ visualizationTableModel CONSTANT)
 public:

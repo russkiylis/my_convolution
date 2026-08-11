@@ -5,7 +5,7 @@
 #include <qabstractitemmodel.h>
 #include "dataforvisualization.h"
 
-class VisualizationTableModel : public QAbstractTableModel {
+class VisualizationTableModel final : public QAbstractTableModel {
     Q_OBJECT
 
 public:
@@ -59,5 +59,6 @@ public:
 
 private:
     DataForVisualization m_data;
+    QVector<QVector<double>> mutable m_shrinkedConvs;
 };
 

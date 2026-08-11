@@ -22,6 +22,6 @@
         <file>sql/deleteResult.sql</file>
 
         <!-- JavaScript -->
-        <file>sparkline.js</file>
+        <file>drawSparkline.js</file>
     </qresource>
 </RCC>

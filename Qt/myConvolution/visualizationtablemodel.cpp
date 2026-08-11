@@ -21,7 +21,7 @@ int VisualizationTableModel::columnCount(const QModelIndex &parent) const {
     return ColumnCount;
 }
 
-QVariant VisualizationTableModel::data(const QModelIndex &index, int role) const {
+QVariant VisualizationTableModel::data(const QModelIndex &index, const int role) const {
 
     if (!index.isValid())
         return {};
@@ -34,6 +34,12 @@ QVariant VisualizationTableModel::data(const QModelIndex &index, int role) const
 
     RowForVisualization const & row = m_data.rows.at(index.row());
     QVector<double> const & conv = m_data.convs.at(index.row());
+    bool shrinkedConvExist = false;
+    if (index.row() < m_shrinkedConvs.size()) {
+        if (!m_shrinkedConvs.at(index.row()).isEmpty()) {
+            shrinkedConvExist = true;
+        }
+    }
 
     // Обрабатываем те колонки, которые надо просто вывести текстом
     if (role == Qt::DisplayRole) {
@@ -71,13 +77,17 @@ QVariant VisualizationTableModel::data(const QModelIndex &index, int role) const
 
     if (role == SparklineRole) {
         QVariantList result;
-        QVector<double> shrinkedConvH;
 
         switch (static_cast<Column>(index.column())) {
         case ConvColumn:
-            shrinkedConvH = Utils::shrinkVector(Utils::flattenVector(conv, row.countH), 100);
-            result.reserve(shrinkedConvH.size());
-            for (const double i : shrinkedConvH) {
+            if (!shrinkedConvExist) {
+                if (index.row() > m_shrinkedConvs.size()) {
+                    m_shrinkedConvs.resize(index.row());
+                }
+                m_shrinkedConvs.insert(index.row(), Utils::shrinkVector(Utils::flattenVector(conv, row.countH), 100));
+            }
+            result.reserve(m_shrinkedConvs.at(index.row()).size());
+            for (const double i : m_shrinkedConvs.at(index.row())) {
                 result.append(i);
             }
             return result;
@@ -89,7 +99,7 @@ QVariant VisualizationTableModel::data(const QModelIndex &index, int role) const
     return {};
 }
 
-QVariant VisualizationTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant VisualizationTableModel::headerData(int section, const Qt::Orientation orientation, const int role) const
 {
     if (role != Qt::DisplayRole)
         return {};
@@ -142,6 +152,8 @@ void VisualizationTableModel::replaceData(
 
     m_data.convs = convs;
     m_data.rows = rows;
+    m_shrinkedConvs.clear();
+    m_shrinkedConvs.reserve(rows.size());
 
     endResetModel();
 }

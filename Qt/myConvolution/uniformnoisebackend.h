@@ -6,8 +6,8 @@
 class UniformNoiseBackend final: public AbstractNoiseBackend {
     Q_OBJECT
 
-    Q_PROPERTY(QString currentMin READ currentMin WRITE setCurrentMin NOTIFY currentMinChanged);
-    Q_PROPERTY(QString currentMax READ currentMax WRITE setCurrentMax NOTIFY currentMaxChanged);
+    Q_PROPERTY(QString currentMin READ currentMin WRITE setCurrentMin NOTIFY currentMinChanged)
+    Q_PROPERTY(QString currentMax READ currentMax WRITE setCurrentMax NOTIFY currentMaxChanged)
 
     [[nodiscard]] UniformNoise::UniformNoiseConfig* noiseConfigAcess() const;
 public:

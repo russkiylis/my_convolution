@@ -2,7 +2,7 @@
 #include "utils.h"
 
 UniformNoise::UniformNoiseConfig * UniformNoiseBackend::noiseConfigAcess() const {
-    return dynamic_cast<UniformNoise::UniformNoiseConfig *>(m_config[m_postIndex].noiseConfig.get());
+    return dynamic_cast<UniformNoise::UniformNoiseConfig *>(m_config[static_cast<size_t>(m_postIndex)].noiseConfig.get());
 }
 
 UniformNoiseBackend::UniformNoiseBackend(std::vector<LoadGenerator::PostConfig> &config, int &postIndex, QObject *parent):
@@ -22,24 +22,6 @@ QString UniformNoiseBackend::currentMin() const {
 
 void UniformNoiseBackend::setCurrentMin(const QString &currentMin)
 {
-    // if (double min = currentMin.toDouble(); min < std::numeric_limits<float>::min()) {
-    //     min = std::numeric_limits<float>::min();
-    //     if (min == currentMin.toDouble())
-    //         return;
-    //     m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(min, currentMax().toDouble());
-    //     emit currentMinChanged(QString::number(min));
-    // } else if (min > std::numeric_limits<float>::max() - 1) {
-    //     min = std::numeric_limits<float>::max() - 1;
-    //     if (min == currentMin.toDouble())
-    //         return;
-    //     m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(min, currentMax().toDouble());
-    //     emit currentMinChanged(QString::number(min));
-    // } else {
-    //     if (min == currentMin.toDouble())
-    //         return;
-    //     m_config[m_postIndex].noiseConfig = std::make_unique<UniformNoise::UniformNoiseConfig>(min, currentMax().toDouble());
-    //     emit currentMinChanged(currentMin);
-    // }
     UniformNoise::UniformNoiseConfig *noiseConfig = noiseConfigAcess();
     constexpr double lowerBound = -1000.0;
     constexpr double upperBound = 999.0;
@@ -68,7 +50,7 @@ void UniformNoiseBackend::setCurrentMin(const QString &currentMin)
     // Если в конце точка, то ждем дальнейших цифр
     if (currentMin.endsWith('.'))
         return;
-    
+
     const double currentMax = noiseConfig->max;
     const double allowedUpperBound = std::min(upperBound, currentMax - 1);
 

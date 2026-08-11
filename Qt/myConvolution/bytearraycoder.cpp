@@ -3,6 +3,7 @@
 #include <qdatastream.h>
 #include <qiodevice.h>
 #include <QVariant>
+#include "third-party/PackedArray/packedarray.h"
 
 ByteArrayCoder::ByteArrayCoder(const DataType type, const ByteOrder byteOrder) :
 m_byteOrder(byteOrder),
@@ -18,22 +19,12 @@ std::unique_ptr<ByteArrayCoder> ByteArrayCoder::create(const DataType type, Byte
         return std::make_unique<realByteArrayCoder>(byteOrder);
     case smallint:
         return std::make_unique<smallintByteArrayCoder>(byteOrder);
-    case pa_2b:
-        return std::make_unique<PackedArrayCoder>(byteOrder, type);
-    case pa_3b:
-        return std::make_unique<PackedArrayCoder>(byteOrder, type);
-    case pa_4b:
-        return std::make_unique<PackedArrayCoder>(byteOrder, type);
-    case pa_5b:
-        return std::make_unique<PackedArrayCoder>(byteOrder, type);
-    case pa_6b:
-        return std::make_unique<PackedArrayCoder>(byteOrder, type);
-    case pa_7b:
-        return std::make_unique<PackedArrayCoder>(byteOrder, type);
-    case pa_8b:
-        return std::make_unique<PackedArrayCoder>(byteOrder, type);
-    default:
+    default: {
+        if (type > smallint && type <= pa_2b) {
+            return std::make_unique<PackedArrayCoder>(byteOrder, type);
+        }
         return nullptr;
+    }
     }
 }
 
@@ -78,7 +69,7 @@ std::vector<uint32_t> ByteArrayCoder::packValues(const std::vector<double> &data
     }
 
     // Создание указателя на packedArray
-    std::unique_ptr<PackedArray, decltype(&PackedArray_destroy)> packedArrayPtr{
+    const std::unique_ptr<PackedArray, decltype(&PackedArray_destroy)> packedArrayPtr{
         PackedArray_create(m_bits, static_cast<uint32_t>(data.size())),
         &PackedArray_destroy
     };
@@ -103,7 +94,7 @@ std::vector<uint32_t> ByteArrayCoder::packValues(const std::vector<double> &data
     return result;
 }
 
-std::vector<double> ByteArrayCoder::unpackValues(const std::vector<uint32_t> &packedArray, uint32_t elementCount) const {
+std::vector<double> ByteArrayCoder::unpackValues(const std::vector<uint32_t> &packedArray, const uint32_t elementCount) const {
     // Вычисление максимума нормировки
     if (m_bits < 2 || m_bits > 8) {
         throw std::runtime_error("Недопустимое количество бит");
@@ -122,7 +113,7 @@ std::vector<double> ByteArrayCoder::unpackValues(const std::vector<uint32_t> &pa
     const uint32_t maximum = (1u << m_bits) - 1u;
 
     // Создание указателя на packedArray
-    std::unique_ptr<PackedArray, decltype(&PackedArray_destroy)> packedArrayPtr{
+    const std::unique_ptr<PackedArray, decltype(&PackedArray_destroy)> packedArrayPtr{
         PackedArray_create(m_bits, elementCount),
         &PackedArray_destroy
     };
@@ -161,7 +152,7 @@ void ByteArrayCoder::setSerializerByteOrder(QDataStream &serializer) const {
 }
 
 doubleByteArrayCoder::doubleByteArrayCoder(const ByteOrder byteOrder) :
-ByteArrayCoder(DataType::doublePrecision, byteOrder)
+ByteArrayCoder(doublePrecision, byteOrder)
 {
     m_bits = 8;
 }
@@ -221,7 +212,7 @@ std::vector<double> doubleByteArrayCoder::deserialize(QByteArray &bytes) const {
 }
 
 realByteArrayCoder::realByteArrayCoder(const ByteOrder byteOrder) :
-ByteArrayCoder(DataType::real, byteOrder)
+ByteArrayCoder(real, byteOrder)
 {
     m_bits = 4;
 }
@@ -274,14 +265,14 @@ std::vector<double> realByteArrayCoder::deserialize(QByteArray &bytes) const {
             throw std::logic_error("Ошибка десериализации");
         }
 
-        data.push_back(static_cast<double>(x));
+        data.push_back(x);
     }
 
     return data;
 }
 
-smallintByteArrayCoder::smallintByteArrayCoder(ByteOrder byteOrder) :
-ByteArrayCoder(DataType::smallint, byteOrder)
+smallintByteArrayCoder::smallintByteArrayCoder(const ByteOrder byteOrder) :
+ByteArrayCoder(smallint, byteOrder)
 {
     m_bits = 2;
 }
@@ -344,7 +335,7 @@ std::vector<double> smallintByteArrayCoder::deserialize(QByteArray &bytes) const
     return data;
 }
 
-PackedArrayCoder::PackedArrayCoder(ByteOrder byteOrder, DataType type) :
+PackedArrayCoder::PackedArrayCoder(const ByteOrder byteOrder, const DataType type) :
 ByteArrayCoder(type, byteOrder)
 {
     switch (type) {

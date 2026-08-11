@@ -1,5 +1,4 @@
 #include "geometryutils.h"
-#include <QVector3D>
 #include <cmath>
 #include <stdexcept>
 

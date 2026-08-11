@@ -4,7 +4,7 @@
 #include "databasemanager.h"
 
 // Класс, подключаемый к QML и отвечающий за логику работы интерфейса
-class ConnectionBackend : public QObject
+class ConnectionBackend final : public QObject
 {
 public:
     // Получить статус базы данных

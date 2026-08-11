@@ -1,13 +1,12 @@
 #include "savebackend.h"
-
 #include <complex>
-
 #include "databasemanager.h"
 
 SaveBackend::SaveBackend(DatabaseManager &db, QObject *parent) :
-    QObject{parent},
+    QObject {parent},
     m_db(db),
-    m_currentDataType(static_cast<ByteArrayCoder::DataType>(0))
+    m_currentDataType(static_cast<ByteArrayCoder::DataType>(0)),
+    m_currentByteOrder()
 {
 }
 

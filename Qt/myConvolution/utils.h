@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <QDebug>
 #include <qvariant.h>
 
 #include "geometryutils.h"
@@ -71,14 +72,16 @@ public:
         }
 
         QVector<T> result;
-        result.reserve((vec.size() + rowSize - 1) / rowSize); // Предварительно выделяем память
+        result.reserve(rowSize);    // Предварительно выделяем память
 
-        for (int i = 0; i < vec.size(); i += rowSize) {
-            // Защита от выхода за границы, если длина вектора не кратна rowSize
-            auto first = vec.begin() + i;
-            auto last = vec.begin() + std::min(i + rowSize, vec.size());
-
-            result.append(std::accumulate(first, last, T{}));
+        for (int resultIndex = 0; resultIndex < rowSize; ++resultIndex) {
+            result.push_back(0);
+            int i = resultIndex;
+            while (i < vec.size()) {
+                // qDebug().noquote() << resultIndex << i
+                result[resultIndex] += vec[i];
+                i += rowSize;
+            }
         }
 
         return result;

@@ -696,9 +696,11 @@
     }
 
     [data-thread="main"] { --thread-color: #4f5fd1; }
-    [data-thread="db"] { --thread-color: #168167; }
     [data-thread="gen"] { --thread-color: #c87016; }
-    [data-thread="external"] { --thread-color: #64748b; }
+    [data-thread="db-writer"] { --thread-color: #168167; }
+    [data-thread="db-reader"] { --thread-color: #0f86a3; }
+    [data-thread="postgres"] { --thread-color: #64748b; }
+    [data-thread="external"] { --thread-color: #7b8799; }
 
     .scenario-switcher {
       display: grid;
@@ -1107,11 +1109,11 @@
     <header class="topbar">
       <div class="title-block">
         <div class="eyebrow-row">
-          <div class="eyebrow" data-i18n="eyebrow">Qt 5.15 · C++17 · 27 типов · 1 точка входа</div>
+          <div class="eyebrow" data-i18n="eyebrow">Qt 5.15 · C++17 · 43 C++-типа · 47 узлов</div>
           <span class="verified" data-i18n="verified">Сверено с исходным кодом</span>
         </div>
         <h1 data-i18n="heading">Архитектура классов myConvolution</h1>
-        <p class="subtitle" data-i18n="subtitle">Маршрут от main() к UI и рабочим потокам. Показаны только подтверждённые связи; генератор не записывает данные в PostgreSQL в текущей реализации.</p>
+        <p class="subtitle" data-i18n="subtitle">Полный маршрут от QML и генерации через кодирование к PostgreSQL — и обратно в интерактивную таблицу со спарклайнами.</p>
       </div>
       <div class="actions" data-i18n-aria="exportAria" aria-label="Экспорт диаграммы">
         <div class="language-switch" data-i18n-aria="languageAria" aria-label="Язык диаграммы">
@@ -1198,7 +1200,7 @@
       </div>
 
       <div class="canvas-shell">
-        <svg id="class-diagram" class="diagram-svg" viewBox="0 0 2200 2120" role="img" aria-labelledby="diagram-title diagram-description"></svg>
+        <svg id="class-diagram" class="diagram-svg" viewBox="0 0 3600 3060" role="img" aria-labelledby="diagram-title diagram-description"></svg>
       </div>
 
       <div class="hint">
@@ -1215,12 +1217,13 @@
           <p data-i18n="scenariosIntro">Выберите сценарий: каждый шаг показывает исполнителя, поток, способ передачи управления и точный вызов в коде.</p>
         </div>
         <div class="scenario-heading-aside">
-          <div class="scenario-proof"><strong>7</strong><span data-i18n="scenariosVerified">проверенных маршрутов<br>по текущему исходному коду</span></div>
+          <div class="scenario-proof"><strong id="scenario-count">12</strong><span data-i18n="scenariosVerified">проверенных маршрутов<br>по текущему исходному коду</span></div>
           <div class="thread-legend" data-i18n-aria="threadLegendAria" aria-label="Потоки и внешняя система">
             <span class="thread-key" data-thread="main" data-i18n="threadMain">QML / главный</span>
-            <span class="thread-key" data-thread="db" data-i18n="threadDb">поток БД</span>
             <span class="thread-key" data-thread="gen" data-i18n="threadGen">поток генератора</span>
-            <span class="thread-key" data-thread="external" data-i18n="threadExternal">PostgreSQL</span>
+            <span class="thread-key" data-thread="db-writer" data-i18n="threadDbWriter">writer БД</span>
+            <span class="thread-key" data-thread="db-reader" data-i18n="threadDbReader">reader БД</span>
+            <span class="thread-key" data-thread="postgres" data-i18n="threadPostgres">PostgreSQL</span>
           </div>
         </div>
       </header>
@@ -1258,8 +1261,8 @@
 
   <script>
     (() => {
-      const WIDTH = 2200;
-      const HEIGHT = 2120;
+      const WIDTH = 3600;
+      const HEIGHT = 3060;
       let currentLanguage = 'ru';
 
       const L = (ru, en) => ({ ru, en });
@@ -1269,10 +1272,10 @@
       const ui = {
         ru: {
           pageTitle: 'myConvolution — интерактивная диаграмма классов',
-          eyebrow: 'Qt 5.15 · C++17 · 27 типов · 1 точка входа',
+          eyebrow: 'Qt 5.15 · C++17 · 43 C++-типа · 47 узлов',
           verified: 'Сверено с исходным кодом',
           heading: 'Архитектура классов myConvolution',
-          subtitle: 'Маршрут от main() к UI и рабочим потокам. Показаны только подтверждённые связи; генератор не записывает данные в PostgreSQL в текущей реализации.',
+          subtitle: 'Полный маршрут от QML и генерации через кодирование к PostgreSQL — и обратно в интерактивную таблицу со спарклайнами.',
           exportAria: 'Экспорт диаграммы',
           languageAria: 'Язык диаграммы',
           shareSvg: 'Поделиться SVG',
@@ -1295,13 +1298,13 @@
           hint: 'Клик по классу — раскрыть поля и методы · кнопки ± — масштаб · перетаскивание пустого места — панорама',
           footer: 'Сформировано по текущим заголовкам и connect-цепочкам проекта.',
           diagramTitle: 'Интерактивная диаграмма классов myConvolution',
-          diagramDescription: 'Точка входа main() и 27 классов и структур выстроены сверху вниз и сгруппированы по UI, базе данных, генерации, шуму и пикам.',
+          diagramDescription: 'Полная архитектура из 47 узлов: 43 проектных C++-типа, main(), QML-оболочка, схема PostgreSQL и внешняя библиотека PackedArray.',
           overviewKicker: 'Как читать диаграмму',
           overviewName: 'Вся архитектура',
           overviewPurpose: 'Начните с main() сверху и двигайтесь по веткам вниз. Цвет показывает архитектурную область, линия — характер связи, а клик раскрывает проверенные поля и методы.',
-          overviewLayer: '5 архитектурных областей',
-          overviewFile: '11 заголовочных файлов',
-          overviewThread: 'Главный + 2 рабочих потока',
+          overviewLayer: '8 архитектурных областей',
+          overviewFile: '19 заголовков проекта + QML / SQL / внешняя C-библиотека',
+          overviewThread: 'Главный + 3 worker-потока: генератор, writer и reader БД',
           expandedKicker: 'Раскрытая карточка класса',
           collapse: 'Свернуть',
           fields: 'Ключевые поля',
@@ -1309,7 +1312,7 @@
           relations: 'Место в архитектуре',
           implementationNote: 'Нюанс реализации',
           sourceChecked: 'Сверено с исходником:',
-          allOption: 'Вся картина · 27 типов + вход',
+          allOption: 'Вся картина · 47 архитектурных узлов',
           selectedStatus: 'Выбран: {name} · прямых связей: {count}',
           overviewStatus: 'Диаграмма целиком помещена в область просмотра',
           detailsCollapsed: 'Карточка класса свёрнута',
@@ -1339,7 +1342,7 @@
           connectionOutgoing: 'выходит',
           showSecondary: 'Показать доп. связи',
           hideSecondary: 'Скрыть доп. связи',
-          secondaryShown: 'Показаны все 39 подтверждённых связей',
+          secondaryShown: 'Показаны все {edges} подтверждённых связей',
           secondaryHidden: 'Оставлено основное дерево; дополнительные связи появятся при выборе класса',
           scenariosKicker: 'От действия к результату',
           scenariosHeading: 'Как приложение работает по шагам',
@@ -1347,9 +1350,10 @@
           scenariosVerified: 'проверенных маршрутов по текущему исходному коду',
           threadLegendAria: 'Потоки и внешняя система',
           threadMain: 'QML / главный',
-          threadDb: 'поток БД',
           threadGen: 'поток генератора',
-          threadExternal: 'PostgreSQL',
+          threadDbWriter: 'writer БД',
+          threadDbReader: 'reader БД',
+          threadPostgres: 'PostgreSQL',
           scenarioSwitcherAria: 'Выбор сценария работы',
           scenarioTrigger: 'Что запускает',
           scenarioHighlight: 'Подсветить маршрут на диаграмме',
@@ -1365,10 +1369,10 @@
         },
         en: {
           pageTitle: 'myConvolution — Interactive Class Diagram',
-          eyebrow: 'Qt 5.15 · C++17 · 27 types · 1 entry point',
+          eyebrow: 'Qt 5.15 · C++17 · 43 C++ types · 47 nodes',
           verified: 'Verified against source code',
           heading: 'Class Architecture of myConvolution',
-          subtitle: 'A route from main() to the UI and worker threads. Only confirmed relationships are shown; the generator does not write data to PostgreSQL in the current implementation.',
+          subtitle: 'The complete route from QML and generation through encoding to PostgreSQL—and back into an interactive table with sparklines.',
           exportAria: 'Diagram export',
           languageAria: 'Diagram language',
           shareSvg: 'Share SVG',
@@ -1391,13 +1395,13 @@
           hint: 'Click a class — reveal fields and methods · ± buttons — zoom · drag empty space — pan',
           footer: 'Generated from the current headers and connect() chains of the project.',
           diagramTitle: 'Interactive Class Diagram of myConvolution',
-          diagramDescription: 'The main() entry point and 27 classes and structs are arranged top to bottom and grouped into UI, database, generation, noise, and peak areas.',
+          diagramDescription: 'The complete 47-node architecture: 43 project C++ types, main(), the QML shell, the PostgreSQL schema, and the external PackedArray library.',
           overviewKicker: 'How to read the diagram',
           overviewName: 'Entire architecture',
           overviewPurpose: 'Start with main() at the top and follow the branches downward. Color identifies the architectural area, each line describes a relationship, and a click reveals verified fields and methods.',
-          overviewLayer: '5 architectural areas',
-          overviewFile: '11 header files',
-          overviewThread: 'Main + 2 worker threads',
+          overviewLayer: '8 architectural areas',
+          overviewFile: '19 project headers + QML / SQL / external C library',
+          overviewThread: 'Main + 3 worker threads: generator, DB writer, and DB reader',
           expandedKicker: 'Expanded class card',
           collapse: 'Collapse',
           fields: 'Key fields',
@@ -1405,7 +1409,7 @@
           relations: 'Architectural context',
           implementationNote: 'Implementation note',
           sourceChecked: 'Verified against source:',
-          allOption: 'Full view · 27 types + entry point',
+          allOption: 'Full view · 47 architecture nodes',
           selectedStatus: 'Selected: {name} · direct connections: {count}',
           overviewStatus: 'The diagram is fitted to the viewport',
           detailsCollapsed: 'Class card collapsed',
@@ -1435,7 +1439,7 @@
           connectionOutgoing: 'outgoing',
           showSecondary: 'Show additional links',
           hideSecondary: 'Hide additional links',
-          secondaryShown: 'All 39 confirmed relationships are shown',
+          secondaryShown: 'All {edges} verified relationships are shown',
           secondaryHidden: 'Only the main tree is shown; additional links appear when a class is selected',
           scenariosKicker: 'From action to result',
           scenariosHeading: 'How the application works, step by step',
@@ -1443,9 +1447,10 @@
           scenariosVerified: 'verified routes from the current source code',
           threadLegendAria: 'Threads and external system',
           threadMain: 'QML / main',
-          threadDb: 'database thread',
           threadGen: 'generator thread',
-          threadExternal: 'PostgreSQL',
+          threadDbWriter: 'DB writer',
+          threadDbReader: 'DB reader',
+          threadPostgres: 'PostgreSQL',
           scenarioSwitcherAria: 'Choose a runtime scenario',
           scenarioTrigger: 'Trigger',
           scenarioHighlight: 'Highlight route on the diagram',
@@ -1461,7 +1466,7 @@
         }
       };
 
-      const layerMeta = {
+      const legacyLayerMeta = {
         entry: { label: L('Точка входа', 'Entry point'), color: '#334155' },
         ui: { label: L('UI / QML', 'UI / QML'), color: '#4f5fd1' },
         db: { label: L('База данных', 'Database'), color: '#168167' },
@@ -1470,7 +1475,7 @@
         peak: { label: L('Пики', 'Peaks'), color: '#a8498d' }
       };
 
-      const implementationNotes = {
+      const legacyImplementationNotes = {
         'connection-backend': L(
           'Комментарий у m_dbStatus не совпадает с фактической шкалой: менеджер использует 0 = нет соединения, 1 = занято, 2 = подключено и свободно.',
           'The m_dbStatus comment does not match the effective scale: the manager uses 0 = disconnected, 1 = busy, 2 = connected and idle.'
@@ -1505,7 +1510,7 @@
         )
       };
 
-      const clusters = [
+      const legacyClusters = [
         { id: 'ui', label: L('UI / QML · главный поток', 'UI / QML · main thread'), x: 40, y: 130, w: 2120, h: 530 },
         { id: 'db', label: L('Ветка базы данных', 'Database branch'), x: 40, y: 700, w: 620, h: 410 },
         { id: 'gen', label: L('Ветка генерации нагрузки', 'Load-generation branch'), x: 700, y: 700, w: 1460, h: 410 },
@@ -1513,7 +1518,7 @@
         { id: 'peak', label: L('Модель пиков', 'Peak model'), x: 1000, y: 1150, w: 1160, h: 900 }
       ];
 
-      const nodes = [
+      const legacyNodes = [
         {
           id: 'app-entry', name: L('main() · корневой контекст QML', 'main() · QML root context'), layer: 'entry',
           kind: L('точка входа приложения', 'application entry'), base: 'main.cpp · main.qml', file: 'main.cpp · main.qml',
@@ -1967,7 +1972,7 @@
         }
       ];
 
-      const edges = [
+      const legacyEdges = [
         { source: 'app-entry', target: 'connection-backend', type: 'lifecycle', from: 'bottom', to: 'top', via: [[1100, 120], [455, 120], [455, 180]] },
         { source: 'app-entry', target: 'generator-backend', type: 'lifecycle', from: 'bottom', to: 'top', via: [[1100, 120], [1550, 120], [1550, 180]] },
         { source: 'connection-backend', target: 'database-manager', type: 'composition', from: 'bottom', to: 'top', via: [[455, 680], [350, 680], [350, 745]], label: '1', labelAt: [438, 675] },
@@ -2010,16 +2015,487 @@
         { source: 'rectangle-peak-config', target: 'rectangle-peak', type: 'reference', crosslink: true, from: 'left', to: 'right', label: L('создаёт', 'creates'), labelAt: [1480, 1804] }
       ];
 
+      // Current model. The legacy snapshot above is intentionally kept only as a
+      // compact source for unchanged member descriptions; every rendered node is
+      // rebuilt below from the current source tree.
+      const layerMeta = {
+        entry: { label: L('Точка входа', 'Entry point'), color: '#334155' },
+        ui: { label: L('QML и фасады', 'QML and facades'), color: '#4f5fd1' },
+        gen: { label: L('Генерация', 'Generation'), color: '#c87016' },
+        geometry: { label: L('Геометрия', 'Geometry'), color: '#0f7c8d' },
+        db: { label: L('База данных', 'Database'), color: '#168167' },
+        codec: { label: L('Формат данных', 'Data format'), color: '#7048b8' },
+        noise: { label: L('Шум', 'Noise'), color: '#087da8' },
+        peak: { label: L('Пики', 'Peaks'), color: '#a8498d' },
+        visual: { label: L('Визуализация', 'Visualization'), color: '#b45367' },
+        external: { label: L('Внешняя граница', 'External boundary'), color: '#64748b' }
+      };
+
+      const implementationNotes = {
+        'app-entry': L(
+          'Начальные Post и их трёхмерные сетки направлений создаются в конструкторе GeneratorBackend до moveToThread(), поэтому эта тяжёлая часть запуска выполняется в главном потоке.',
+          'Initial Post objects and their 3D direction grids are built in GeneratorBackend before moveToThread(), so this expensive startup work runs on the main thread.'
+        ),
+        'connection-backend': L(
+          'Комментарий у m_dbStatus перепутывает значения 1 и 2: фактически 1 = занято, 2 = подключено и свободно.',
+          'The m_dbStatus comment swaps values 1 and 2: in practice 1 = busy and 2 = connected and idle.'
+        ),
+        'save-backend': L(
+          'm_currentDataType и m_currentByteOrder теперь стартуют как 0: double и LittleEndian. Сеттеры по-прежнему принимают произвольный int без проверки диапазона, а QML разрешает переключать сохранение и при dbStatus=1 (busy).',
+          'm_currentDataType and m_currentByteOrder now start at 0: double and LittleEndian. Their setters still accept arbitrary int values without range checks, and QML allows persistence to be toggled even while dbStatus=1 (busy).'
+        ),
+        'visualize-backend': L(
+          'Reader-status и reader-error сохраняются внутри объекта, но не опубликованы в QML. Поэтому главный индикатор подтверждает только writer-соединение.',
+          'Reader status and reader error stay internal and are not exposed to QML. The main status indicator therefore confirms only the writer connection.'
+        ),
+        'post-list-model': L(
+          'UI не позволяет удалить последний пост; сам removePost() при пустом списке вызывает setPostIndex(-1), который бросает исключение.',
+          'The UI prevents deleting the final station; removePost() itself calls setPostIndex(-1) for an empty list, which throws.'
+        ),
+        'abstract-noise': L(
+          'setSeed() меняет m_seed, но не переинициализирует m_rng; последовательность случайных чисел сама по себе не перезапускается.',
+          'setSeed() changes m_seed but does not reseed m_rng; the random sequence itself is not restarted.'
+        ),
+        'normal-noise-backend': L(
+          'Текущая проверка допускает sigma <= 0, хотя std::normal_distribution ожидает положительное стандартное отклонение.',
+          'The current validation permits sigma <= 0 even though std::normal_distribution expects a positive standard deviation.'
+        ),
+        'load-generator': L(
+          'Каждый повторный запуск снова connect()-ит timeout к slotPostCall() без UniqueConnection; после stop/start обработчики могут накапливаться.',
+          'Every restart connects timeout to slotPostCall() again without UniqueConnection; callbacks can accumulate across stop/start cycles.'
+        ),
+        'post': L(
+          'call() не защищает пустую сетку направлений и maxValue == 0: возможны разыменование end() и деление на ноль.',
+          'call() does not guard an empty direction grid or maxValue == 0, allowing end() dereference and division by zero.'
+        ),
+        'data-package': L(
+          'quality сейчас равен максимуму до нормировки; в комментарии кода прямо отмечено, что окончательная формула качества ещё не определена.',
+          'quality currently stores the pre-normalization maximum; the source comment explicitly says the final quality formula is still undefined.'
+        ),
+        'database-worker': L(
+          'Исключения serialize()/deserialize() не перехватываются. Неизвестный data_type после warning продолжает чтение как double little-endian.',
+          'serialize()/deserialize() exceptions are not caught. An unknown data_type continues after a warning using double little-endian.'
+        ),
+        'byte-array-coder': L(
+          'Чистая сборка текущего дерева останавливается в bytearraycoder.cpp: PackedArray API используется без include packedarray.h. Кроме того, create() возвращает nullptr для неизвестного DataType, а вызывающий код это не проверяет; у простых кодеров m_bits фактически хранит 8/4/2 байта, несмотря на имя.',
+          'A clean build of the current tree stops in bytearraycoder.cpp because the PackedArray API is used without including packedarray.h. In addition, create() returns nullptr for an unknown DataType and callers do not check it; for simple codecs m_bits effectively stores 8/4/2 bytes despite its name.'
+        ),
+        'packed-array-coder': L(
+          'Квантование clamp-ит значения в [0,1] и использует усечение, а не округление: уменьшение числа бит предсказуемо добавляет потерю точности.',
+          'Quantization clamps values to [0,1] and truncates rather than rounds, so reducing the bit width predictably loses precision.'
+        ),
+        'visualization-table-model': L(
+          'Модель предполагает одинаковую длину rows и convs. Новый lazy-кеш m_shrinkedConvs ускоряет повторные роли, но insert(index, ...) с пустыми промежутками сдвигает уже рассчитанные элементы: при непоследовательном запросе строк кеш может перестать соответствовать row index.',
+          'The model assumes rows and convs have equal length. The new lazy m_shrinkedConvs cache speeds up repeated role reads, but insert(index, ...) shifts existing entries across empty gaps, so out-of-order row requests can misalign cached data with row indices.'
+        ),
+        'postgresql-schema': L(
+          'Чтение выбирает все строки без LIMIT/pagination, а DDL, вставки и очистка конкурируют через очередь writer с независимой reader-транзакцией.',
+          'Reads select every row without LIMIT/pagination, while DDL, inserts, and cleanup share the writer queue alongside an independent reader transaction.'
+        )
+      };
+
+      const clusters = [
+        { id: 'ui', label: L('01 · QML и фасады · главный поток', '01 · QML and facades · main thread'), x: 40, y: 130, w: 3520, h: 650 },
+        { id: 'gen', label: L('02 · Генерация измерения', '02 · Measurement generation'), x: 40, y: 820, w: 1400, h: 740 },
+        { id: 'geometry', label: L('03 · Геометрия направлений', '03 · Direction geometry'), x: 1480, y: 820, w: 760, h: 740 },
+        { id: 'db', label: L('04 · Два канала БД и PostgreSQL', '04 · Two DB channels and PostgreSQL'), x: 2280, y: 820, w: 1280, h: 740 },
+        { id: 'noise', label: L('05 · Полиморфная модель шума', '05 · Polymorphic noise model'), x: 40, y: 1600, w: 960, h: 1390 },
+        { id: 'peak', label: L('06 · Полиморфная модель пиков', '06 · Polymorphic peak model'), x: 1040, y: 1600, w: 1500, h: 1390 },
+        { id: 'codec', label: L('07 · Бинарные форматы и PackedArray', '07 · Binary formats and PackedArray'), x: 2580, y: 1600, w: 980, h: 870 },
+        { id: 'visual', label: L('08 · Данные для таблицы и sparkline', '08 · Table and sparkline data'), x: 2580, y: 2510, w: 980, h: 480 }
+      ];
+
+      const nodeUpdates = {
+        'app-entry': {
+          name: 'main()', base: 'main.cpp', file: 'main.cpp', x: 1590, y: 25, w: 420, h: 70, compact: true,
+          purpose: L('Общий вход: создаёт четыре QML-фасада в порядке зависимостей, регистрирует межпоточные типы, загружает QML и запускает цикл событий.', 'Common entry: constructs four QML facades in dependency order, registers cross-thread types, loads QML, and starts the event loop.'),
+          fields: [
+            M('local', 'QGuiApplication app', 'Главный цикл событий Qt.', 'Main Qt event loop.'),
+            M('local', 'ConnectionBackend → SaveBackend → GeneratorBackend', 'Writer передаётся по ссылке в цепочку генерации и сохранения.', 'The writer is passed by reference into the generation and persistence chain.'),
+            M('local', 'VisualizeBackend visualizeBackend(connectionBackend.db())', 'Создаёт независимый reader рядом с writer.', 'Creates an independent reader alongside the writer.'),
+            M('local', 'QQmlApplicationEngine engine', 'Владеет QML-объектами.', 'Owns the QML object tree.')
+          ],
+          methods: [
+            M('public', 'qRegisterMetaType<T>()', 'Регистрирует конфиги, пакеты и QVector для queued-сигналов.', 'Registers configs, packages, and QVector types for queued signals.'),
+            M('public', 'setContextProperty(...) × 4', 'Публикует connection/generator/save/visualize backends.', 'Exposes connection/generator/save/visualize backends.'),
+            M('public', 'engine.load("qrc:/main.qml")', 'Загружает интерфейс из ресурсов.', 'Loads the UI from resources.'),
+            M('public', 'QGuiApplication::exec()', 'Запускает обработку событий.', 'Starts event processing.')
+          ]
+        },
+        'connection-backend': { kind: L('final QObject-фасад', 'final QObject facade'), x: 2280, y: 315, w: 360, h: 88 },
+        'generator-backend': {
+          x: 880, y: 315, w: 380, h: 88,
+          purpose: L('QML-фасад генератора: владеет редактируемой моделью и потоком LoadGenerator, а полученный DataPackage передаёт в SaveBackend.', 'Generator QML facade: owns the editable model and LoadGenerator thread, then forwards each DataPackage to SaveBackend.'),
+          fields: [
+            M('private', 'std::vector<PostConfig> m_cfg', 'Редактируемые конфигурации постов.', 'Editable station configurations.'),
+            M('private', 'QThread m_loadGeneratorThread', 'Поток генератора.', 'Generator thread.'),
+            M('private', 'PostListModel m_postListModel', 'Модель для GenTab.qml.', 'Model used by GenTab.qml.'),
+            M('private', 'SaveBackend& m_saveBackend', 'Следующая ступень runtime-маршрута.', 'Next stage of the runtime path.')
+          ],
+          methods: [
+            M('public', 'onGeneratorEnabledButtonClicked()', 'Переключает опрос постов.', 'Toggles station polling.'),
+            M('slot', 'slotSendData(const DataPackage&)', 'Передаёт пакет в m_saveBackend.processDataPackage().', 'Forwards the package to m_saveBackend.processDataPackage().'),
+            M('signal', 'signalPostCallToggle(bool)', 'Команда в поток генератора.', 'Command sent to the generator thread.'),
+            M('signal', 'signalPostConfigUpdate(vector<PostConfig>)', 'Отправляет полный снимок настроек.', 'Sends a complete configuration snapshot.')
+          ]
+        },
+        'post-list-model': {
+          x: 650, y: 500, w: 360, h: 88,
+          purpose: L('Редактирует PostConfig из QML, управляет выбранным постом, адаптером шума, PeakListModel и снимком для отката.', 'Edits PostConfig from QML and manages selection, the noise adapter, PeakListModel, and the rollback snapshot.'),
+          fields: [
+            M('private', 'std::vector<PostConfig>& m_config', 'Ссылка на GeneratorBackend::m_cfg.', 'Reference to GeneratorBackend::m_cfg.'),
+            M('private', 'std::vector<PostConfig> m_fallbackConfig', 'Последний применённый снимок.', 'Last applied snapshot.'),
+            M('private', 'std::unique_ptr<AbstractNoiseBackend> m_noiseBackend', 'Адаптер конкретного NoiseConfig.', 'Adapter for the concrete NoiseConfig.'),
+            M('private', 'PeakListModel m_peakListModel', 'Редактирует единый peakConfigs выбранного поста.', 'Edits the selected station’s single peakConfigs vector.')
+          ],
+          methods: [
+            M('public', 'rowCount() / data() / roleNames()', 'Контракт QAbstractListModel.', 'QAbstractListModel contract.'),
+            M('public', 'addPost() / removePost()', 'Меняет список постов.', 'Changes the station list.'),
+            M('public', 'postUpdate()', 'Отправляет конфиги в LoadGenerator и обновляет fallback.', 'Sends configs to LoadGenerator and refreshes fallback.'),
+            M('public', 'fallback()', 'Отменяет локальные правки.', 'Cancels local edits.')
+          ]
+        },
+        'abstract-noise-backend': { x: 1470, y: 500, w: 380, h: 88 },
+        'normal-noise-backend': { kind: L('final QML-адаптер', 'final QML adapter'), x: 1400, y: 640, w: 340, h: 88 },
+        'uniform-noise-backend': { x: 1810, y: 640, w: 340, h: 88 },
+        'database-manager': {
+          x: 2360, y: 880, w: 400, h: 88,
+          purpose: L('Координатор одного именованного SQL-канала. В приложении есть два экземпляра: writer у ConnectionBackend и reader у VisualizeBackend.', 'Coordinator for one named SQL channel. The app has two instances: a writer owned by ConnectionBackend and a reader owned by VisualizeBackend.'),
+          fields: [
+            M('private', 'QString m_connectionName / host / db / user / ...', 'Снимок параметров соединения.', 'Connection parameter snapshot.'),
+            M('private', 'bool m_valid, m_connected, m_busy', 'Состояние конкретного канала.', 'State of this particular channel.'),
+            M('private', 'QThread m_workerThread', 'Один поток на каждый manager.', 'One thread per manager instance.'),
+            M('private', 'QString m_lastError', 'Последняя ошибка канала.', 'Latest channel error.')
+          ],
+          methods: [
+            M('public', 'openConnection() / closeConnection()', 'Ставит команду worker-у.', 'Queues a command for the worker.'),
+            M('public', 'saveDataPackage(package, type, byteOrder)', 'Посылает signalInsert в writer.', 'Emits signalInsert to the writer.'),
+            M('public', 'readDb()', 'Посылает signalReadDb в reader.', 'Emits signalReadDb to the reader.'),
+            M('slot', 'slotManagerUpdate(...) / slotReadDb(...)', 'Возвращает статус или данные в главный поток.', 'Returns status or data to the main thread.')
+          ]
+        },
+        'database-worker': {
+          x: 2850, y: 880, w: 400, h: 88,
+          purpose: L('Работает в writer- или reader-потоке: владеет QSqlDatabase, выполняет insert/select/DDL и кодирует или декодирует BYTEA.', 'Runs in the writer or reader thread: owns QSqlDatabase, executes insert/select/DDL, and encodes or decodes BYTEA.'),
+          fields: [
+            M('private', 'DatabaseConfiguration _config', 'Локальная конфигурация именованного соединения.', 'Local named-connection configuration.'),
+            M('private', 'bool _connected, _valid, _busy', 'Состояние worker-а.', 'Worker state.'),
+            M('private', 'QString _lastError', 'Последняя SQL/файловая ошибка.', 'Latest SQL/file error.')
+          ],
+          methods: [
+            M('slot', 'slotInsert(package, dataType, byteOrder)', 'Сериализует conv и пишет df_conv + df_result в транзакции.', 'Serializes conv and writes df_conv + df_result in one transaction.'),
+            M('slot', 'slotReadDb()', 'JOIN-ит таблицы, декодирует blob и возвращает rows/convs.', 'Joins tables, decodes blobs, and returns rows/convs.'),
+            M('slot', 'slotClearTable() / slotRecreateTable() / slotDeleteTable()', 'Выполняет SQL-ресурсы обслуживания схемы.', 'Executes schema-maintenance SQL resources.'),
+            M('signal', 'signalReadDb(rows, convs)', 'Передаёт выборку из reader-потока.', 'Returns the result set from the reader thread.')
+          ]
+        },
+        'database-configuration': { x: 2360, y: 1070, w: 400, h: 88 },
+        'load-generator': {
+          x: 600, y: 880, w: 400, h: 88,
+          purpose: L('Worker генератора: хранит runtime-посты, по точному QTimer опрашивает их и отправляет DataPackage в главный поток.', 'Generator worker: owns runtime stations, polls them with a precise QTimer, and sends DataPackage to the main thread.'),
+          fields: [
+            M('private', 'std::vector<PostConfig> m_postConfigs', 'Последний применённый снимок.', 'Last applied configuration snapshot.'),
+            M('private', 'std::vector<Post> m_posts', 'Runtime-объекты постов.', 'Runtime station objects.'),
+            M('private', 'bool m_callingEnabled', 'Включён ли опрос.', 'Whether polling is enabled.'),
+            M('private', 'QTimer* m_timer', 'PreciseTimer с интервалом 10 мс.', '10 ms PreciseTimer.')
+          ],
+          methods: [
+            M('private', 'load()', 'Полностью пересоздаёт Post по конфигам.', 'Rebuilds all Post objects from configs.'),
+            M('slot', 'slotPostCallToggle(bool)', 'Запускает или останавливает таймер.', 'Starts or stops the timer.'),
+            M('slot', 'slotPostConfigUpdate(vector<PostConfig>)', 'Применяет новый снимок.', 'Applies a new snapshot.'),
+            M('signal', 'signalSendData(const DataPackage&)', 'Возвращает готовое измерение.', 'Returns a completed measurement.')
+          ]
+        },
+        'post-config': {
+          x: 120, y: 1070, w: 400, h: 88,
+          purpose: L('Глубоко копируемая конфигурация одного поста: метаданные, 2D-угловая сетка, один шум и единый список пиков.', 'Deep-copyable station configuration: metadata, a 2D angular grid, one noise source, and one peak list.'),
+          fields: [
+            M('public', 'enabled, postName, latitude, longitude', 'Идентичность и положение поста.', 'Station identity and location.'),
+            M('public', 'frequency, level, levelSigma, periods', 'Параметры измерения и расписания.', 'Measurement and scheduling parameters.'),
+            M('public', 'min/max/step/count H,V', 'Размеры двумерной сетки.', 'Two-dimensional grid dimensions.'),
+            M('public', 'unique_ptr<NoiseConfig> + vector<unique_ptr<PeakConfig>>', 'Полиморфные компоненты.', 'Polymorphic components.')
+          ],
+          methods: [
+            M('public', 'PostConfig()', 'Создаёт безопасные начальные значения.', 'Creates initial defaults.'),
+            M('public', 'PostConfig(const PostConfig&)', 'Клонирует noise и каждый peak.', 'Clones noise and every peak.'),
+            M('public', 'operator=(const PostConfig&)', 'Очищает peakConfigs и делает глубокую копию.', 'Clears peakConfigs and deep-copies it.')
+          ]
+        },
+        'post': {
+          x: 590, y: 1070, w: 380, h: 88,
+          purpose: L('Один runtime-пост: заранее строит row-major сетку единичных 3D-направлений, складывает шум с пиками и формирует измерение.', 'One runtime station: precomputes a row-major grid of unit 3D directions, adds noise and peaks, and builds a measurement.'),
+          fields: [
+            M('private', 'PostConfig m_config / DataPackage m_data', 'Снимок настроек и переиспользуемый пакет.', 'Configuration snapshot and reusable package.'),
+            M('private', 'vector<LinearCoord3D> m_direction', 'countV × countH направлений.', 'countV × countH directions.'),
+            M('private', 'unique_ptr<AbstractNoise> m_noise', 'Runtime-шум.', 'Runtime noise source.'),
+            M('private', 'vector<unique_ptr<AbstractPeak>> m_peaks', 'Runtime-пики.', 'Runtime peaks.')
+          ],
+          methods: [
+            M('public', 'call(const TimePoint& now)', 'Строит нормированную 2D-свёртку и пакет, если срок наступил.', 'Builds a normalized 2D convolution and package when due.'),
+            M('private', 'newNextGenTime()', 'Случайно выбирает следующий момент в диапазоне периодов.', 'Chooses the next due time inside the configured range.')
+          ]
+        },
+        'data-package': {
+          x: 1020, y: 1070, w: 390, h: 88,
+          purpose: L('Снимок одного измерения: плоская row-major 2D-свёртка, направление максимума, качество и метаданные поста.', 'Snapshot of one measurement: a flat row-major 2D convolution, maximum bearing, quality, and station metadata.'),
+          fields: [
+            M('public', 'QDateTime timestamp', 'UTC-время измерения.', 'UTC measurement time.'),
+            M('public', 'SphericalCoordDeg bearing / double quality', 'Направление и максимум до нормировки.', 'Bearing and pre-normalization maximum.'),
+            M('public', 'level, frequency, coordinate, postName', 'Метаданные результата.', 'Result metadata.'),
+            M('public', 'grid min/max/step/count + vector<double> conv', 'Форма и значения 2D-сетки.', '2D grid shape and values.')
+          ],
+          methods: []
+        },
+        'abstract-noise': { x: 100, y: 1710, w: 360, h: 88 },
+        'noise-config': { x: 570, y: 1710, w: 360, h: 88 },
+        'normal-noise': { x: 100, y: 1940, w: 360, h: 88 },
+        'normal-noise-config': { x: 570, y: 1940, w: 360, h: 88 },
+        'uniform-noise': { x: 100, y: 2180, w: 360, h: 88 },
+        'uniform-noise-config': { x: 570, y: 2180, w: 360, h: 88 },
+        'abstract-peak': {
+          x: 1100, y: 1710, w: 380, h: 88,
+          purpose: L('Интерфейс пика на сфере: хранит центр как единичный LinearCoord3D и вычисляет вклад по угловому расстоянию.', 'Spherical peak interface: stores its center as a unit LinearCoord3D and evaluates contribution by angular distance.'),
+          fields: [
+            M('protected', 'LinearCoord3D m_center', 'Единичный вектор центра.', 'Unit vector for the center.'),
+            M('protected', 'double m_amplitude', 'Высота пика.', 'Peak height.')
+          ],
+          methods: [
+            M('public', 'virtual PeakType type() const = 0', 'Сообщает форму.', 'Reports the shape.'),
+            M('public', 'virtual double valueAt(const LinearCoord3D&) const = 0', 'Вычисляет вклад в направлении.', 'Evaluates contribution at a direction.'),
+            M('public', 'SphericalCoordDeg center() / setCenter(...)', 'Преобразует центр на границе API.', 'Converts the center at the API boundary.'),
+            M('public', 'amplitude() / setAmplitude()', 'Доступ к амплитуде.', 'Amplitude access.')
+          ]
+        },
+        'peak-config': {
+          x: 2000, y: 1710, w: 440, h: 88,
+          purpose: L('Полиморфная конфигурация пика со сферическим центром, клонированием и фабрикой runtime-объекта.', 'Polymorphic peak config with a spherical center, cloning, and a runtime-object factory.'),
+          fields: [
+            M('public', 'SphericalCoordDeg center', 'Азимут и угол места центра.', 'Center azimuth and elevation.'),
+            M('public', 'double amplitude', 'Амплитуда будущего пика.', 'Future peak amplitude.')
+          ],
+          methods: [
+            M('public', 'virtual PeakType type() const = 0', 'Тип формы.', 'Shape type.'),
+            M('public', 'virtual QString typeStr() const = 0', 'Человекочитаемое имя.', 'Human-readable name.'),
+            M('public', 'virtual clone() const = 0', 'Глубокая копия.', 'Deep copy.'),
+            M('public', 'virtual createPeak() const = 0', 'Фабрика runtime-пика.', 'Runtime-peak factory.')
+          ]
+        },
+        'gauss-peak': { x: 1100, y: 1940, w: 380, h: 88, methods: [M('public', 'double valueAt(const LinearCoord3D&) const override', 'Гаусс по сферическому угловому расстоянию.', 'Gaussian over spherical angular distance.'), M('public', 'PeakType type() const override', 'PeakType::Gauss.', 'PeakType::Gauss.'), M('public', 'sigma() / setSigma()', 'Ширина формы.', 'Shape width.')] },
+        'gauss-peak-config': { x: 2000, y: 1940, w: 440, h: 88, fields: [M('public', 'double sigma', 'СКО формы.', 'Shape standard deviation.'), M('inherited', 'SphericalCoordDeg center / amplitude', 'Общие параметры.', 'Shared parameters.')] },
+        'triangle-peak': { x: 1100, y: 2180, w: 380, h: 88, methods: [M('public', 'double valueAt(const LinearCoord3D&) const override', 'Линейный спад по сферическому расстоянию.', 'Linear falloff by spherical distance.'), M('public', 'PeakType type() const override', 'PeakType::Triangle.', 'PeakType::Triangle.'), M('public', 'halfWidth() / setHalfWidth()', 'Угловая полуширина.', 'Angular half-width.')] },
+        'triangle-peak-config': { x: 2000, y: 2180, w: 440, h: 88, fields: [M('public', 'double halfWidth', 'Угловая полуширина.', 'Angular half-width.'), M('inherited', 'SphericalCoordDeg center / amplitude', 'Общие параметры.', 'Shared parameters.')] },
+        'rectangle-peak': { x: 1100, y: 2420, w: 380, h: 88, methods: [M('public', 'double valueAt(const LinearCoord3D&) const override', 'Постоянная амплитуда внутри сферической полуширины.', 'Constant amplitude inside the spherical half-width.'), M('public', 'PeakType type() const override', 'PeakType::Rectangle.', 'PeakType::Rectangle.'), M('public', 'halfWidth() / setHalfWidth()', 'Угловая полуширина.', 'Angular half-width.')] },
+        'rectangle-peak-config': { x: 2000, y: 2420, w: 440, h: 88, fields: [M('public', 'double halfWidth', 'Угловая полуширина.', 'Angular half-width.'), M('inherited', 'SphericalCoordDeg center / amplitude', 'Общие параметры.', 'Shared parameters.')] }
+      };
+
+      const newNodes = [
+        {
+          id: 'qml-shell', name: L('main.qml · 4 вкладки', 'main.qml · 4 tabs'), layer: 'ui',
+          kind: L('QML-поверхность', 'QML surface'), base: 'ApplicationWindow · StackLayout', file: 'main.qml · 7 QML-компонентов · sparkline.js · qml.qrc',
+          thread: L('QML / главный поток', 'QML / main thread'), x: 1580, y: 160, w: 440, h: 88,
+          purpose: L('Единая пользовательская точка входа: четыре рабочие вкладки, три переиспользуемых фоновых компонента и Canvas-отрисовка результата.', 'Single user entry surface with four work tabs, three reusable background components, and Canvas rendering for results.'),
+          fields: [M('public', 'connectionBackend / generatorBackend', 'Контекстные свойства подключения и генерации.', 'Connection and generation context properties.'), M('public', 'saveBackend / visualizeBackend', 'Контекстные свойства записи и отображения.', 'Persistence and visualization context properties.'), M('public', 'ConnectTab / GenTab / SaveTab / VisualizeTab', 'Четыре экрана внутри StackLayout.', 'Four screens inside StackLayout.'), M('public', 'ButtonBackground / TextFieldBackground / ListViewItemBackground', 'Общие визуальные компоненты, включённые в qml.qrc.', 'Shared visual components bundled by qml.qrc.')],
+          methods: [M('public', 'ConnectTab.onClicked', 'Одним действием переключает writer и reader.', 'Toggles writer and reader in one action.'), M('public', 'GenTab / SaveTab / VisualizeTab handlers', 'Вызывают Q_INVOKABLE фасадов.', 'Invoke facade Q_INVOKABLE methods.'), M('public', 'sparkline.js::drawSparkline()', 'Рисует декодированную свёртку в Canvas.', 'Draws the decoded convolution into a Canvas.')]
+        },
+        {
+          id: 'save-backend', name: 'SaveBackend', layer: 'ui', kind: L('QObject-фасад сохранения', 'persistence QObject facade'), base: 'QObject', extendsBase: true,
+          file: 'savebackend.h · savebackend.cpp · SaveTab.qml', thread: L('Главный поток', 'Main thread'), x: 1680, y: 315, w: 360, h: 88,
+          purpose: L('Шлюз записи: хранит выбранный формат, порядок байтов и флаг сохранения; пересылает пакеты и команды схемы writer-менеджеру.', 'Persistence gate: stores format, byte order, and enabled state, then forwards packages and schema commands to the writer manager.'),
+          fields: [M('private', 'DatabaseManager& m_db', 'Ссылка на writer из ConnectionBackend.', 'Reference to ConnectionBackend’s writer.'), M('private', 'DataType m_currentDataType', 'По умолчанию double; затем real/smallint/pa_8b…pa_2b.', 'Defaults to double; then real/smallint/pa_8b…pa_2b.'), M('private', 'ByteOrder m_currentByteOrder', 'Value-init даёт LittleEndian; QML может выбрать BigEndian.', 'Value-initialization yields LittleEndian; QML may select BigEndian.'), M('private', 'bool m_saveEnabled', 'Пропускать ли пакеты в БД.', 'Whether packages may reach the database.')],
+          methods: [M('public', 'processDataPackage(const DataPackage&)', 'Отбрасывает пакет либо вызывает saveDataPackage().', 'Drops the package or calls saveDataPackage().'), M('public', 'onSaveEnableButtonClicked()', 'Переключает gate.', 'Toggles the gate.'), M('public', 'onClear/Recreate/DeleteTableButtonClicked()', 'Команды обслуживания схемы.', 'Schema-maintenance commands.'), M('signal', 'currentDataType/ByteOrder/saveEnabledChanged', 'Обновляет QML.', 'Updates QML.')]
+        },
+        {
+          id: 'visualize-backend', name: 'VisualizeBackend', layer: 'ui', kind: L('QObject-фасад чтения', 'reader QObject facade'), base: 'QObject', extendsBase: true,
+          file: 'visualizebackend.h · visualizebackend.cpp · VisualizeTab.qml', thread: L('Главный поток · владеет reader', 'Main thread · owns reader'), x: 2880, y: 315, w: 380, h: 88,
+          purpose: L('Копирует настройки writer в независимый reader, управляет его соединением и передаёт прочитанные данные в табличную модель.', 'Copies writer settings into an independent reader, manages its connection, and forwards read data into the table model.'),
+          fields: [M('private', 'DatabaseManager& m_writerDb', 'Источник параметров подключения.', 'Source of connection parameters.'), M('private', 'DatabaseManager m_readerDb', 'Отдельный myConvolution_reader и QThread.', 'Separate myConvolution_reader and QThread.'), M('private', 'VisualizationTableModel m_visualizationModel', 'Модель для QML TableView.', 'Model used by the QML TableView.'), M('private', 'int m_readerDbStatus / QString m_readerLastError', 'Внутреннее состояние reader.', 'Internal reader state.')],
+          methods: [M('public', 'onDbConnectionButtonClicked()', 'Открывает/закрывает reader.', 'Opens/closes the reader.'), M('private', 'updateFromWriter()', 'Копирует параметры writer.', 'Copies writer settings.'), M('public', 'readDb()', 'Запускает SELECT в reader-потоке.', 'Starts SELECT in the reader thread.'), M('slot', 'slotSetData(rows, convs)', 'Заменяет данные модели.', 'Replaces model data.')]
+        },
+        {
+          id: 'peak-list-model', name: 'PeakListModel', layer: 'ui', kind: L('модель списка QML', 'QML list model'), base: 'QAbstractListModel', extendsBase: true,
+          file: 'peaklistmodel.h · peaklistmodel.cpp · GenTab.qml', thread: L('Главный поток', 'Main thread'), x: 1060, y: 500, w: 360, h: 88,
+          purpose: L('Представляет peakConfigs выбранного поста и заменяет конкретные конфиги при смене типа или параметров пика.', 'Exposes the selected station’s peakConfigs and replaces concrete configs as peak type or parameters change.'),
+          fields: [M('private', 'vector<unique_ptr<PeakConfig>>* m_peakConfig', 'Указатель переназначается при смене поста.', 'Pointer is rebound when station selection changes.'), M('private', 'Roles: type, azimuth, elevation, amplitude, sigma, halfWidth', 'Контракт делегата QML.', 'QML delegate contract.')],
+          methods: [M('public', 'rowCount() / data() / roleNames()', 'Контракт списка.', 'List model contract.'), M('public', 'setPeakType() / setAzimuth() / setElevation()', 'Заменяет полиморфный конфиг.', 'Replaces the polymorphic config.'), M('public', 'setAmplitude() / setSigma() / setHalfWidth()', 'Обновляет параметры.', 'Updates parameters.'), M('public', 'addPeak() / removePeak()', 'Меняет коллекцию.', 'Changes the collection.')]
+        },
+        {
+          id: 'visualization-table-model', name: 'VisualizationTableModel', layer: 'visual', kind: L('табличная модель QML', 'QML table model'), base: 'QAbstractTableModel', extendsBase: true,
+          file: 'visualizationtablemodel.h · visualizationtablemodel.cpp · VisualizeTab.qml · sparkline.js', thread: L('Главный поток', 'Main thread'), x: 2840, y: 500, w: 400, h: 88,
+          purpose: L('Даёт TableView 11 колонок и отдельные роли sparkline/isSparkline; агрегированный азимутальный профиль вычисляет лениво и кеширует по строке.', 'Provides 11 TableView columns plus sparkline/isSparkline roles, lazily computing and caching the aggregated azimuth profile per row.'),
+          fields: [M('private', 'DataForVisualization m_data', 'Параллельные rows и convs.', 'Parallel rows and convs.'), M('private', 'mutable QVector<QVector<double>> m_shrinkedConvs', 'Lazy-кеш профилей до 100 точек.', 'Lazy cache of profiles with up to 100 points.'), M('public', 'Column enum · 11 columns', 'ID, time, metadata, quality, convolution.', 'ID, time, metadata, quality, convolution.'), M('public', 'SparklineRole / IsSparklineRole', 'Специальные роли последней колонки.', 'Special roles for the final column.')],
+          methods: [M('public', 'rowCount() / columnCount() / headerData()', 'Форма таблицы.', 'Table shape.'), M('public', 'data(index, SparklineRole)', 'Лениво строит или возвращает кешированный профиль.', 'Lazily builds or returns the cached profile.'), M('public', 'replaceData(rows, convs)', 'Сбрасывает модель, очищает кеш и reserve-ит место по rows.size().', 'Resets the model, clears the cache, and reserves rows.size() entries.')]
+        },
+        {
+          id: 'utils', name: 'Utils', layer: 'gen', kind: L('статические помощники', 'static helpers'), base: L('служебный класс', 'utility class'), file: 'utils.h · utils.cpp', thread: L('Вызывающий поток', 'Calling thread'), x: 1000, y: 1380, w: 350, h: 88,
+          purpose: L('Общие преобразования, чтение SQL-ресурсов и подготовка sparkline: форматирование чисел, flatten и shrink.', 'Shared conversions, SQL-resource reading, and sparkline preparation: number formatting, flattening, and shrinking.'),
+          fields: [], methods: [M('public', 'doubleToString() / doubleToQint16()', 'Числовые преобразования.', 'Numeric conversions.'), M('public', 'fileToString()', 'Читает SQL из qrc.', 'Reads SQL from qrc.'), M('public', 'flattenVector(vec, rowSize)', 'Даёт rowSize колонок: суммирует индексы i, i+rowSize, ... по вертикальным слоям.', 'Produces rowSize columns by summing indices i, i+rowSize, ... across vertical layers.'), M('public', 'shrinkVector(values, newSize)', 'Оставляет максимум каждого диапазона.', 'Keeps the maximum in each bucket.')]
+        },
+        {
+          id: 'geometry-utils', name: 'GeometryUtils', layer: 'geometry', kind: L('геометрический модуль', 'geometry module'), base: L('статический класс', 'static class'), file: 'geometryutils.h · geometryutils.cpp', thread: L('Поток генератора', 'Generator thread'), x: 1670, y: 880, w: 400, h: 88,
+          purpose: L('Нормализует углы, преобразует сферические и линейные координаты и считает устойчивое угловое расстояние.', 'Normalizes angles, converts spherical and Cartesian coordinates, and computes robust angular distance.'),
+          fields: [], methods: [M('public', 'normalizeAngle(angle, period)', 'Циклическая нормализация.', 'Cyclic normalization.'), M('public', 'scalarProduct() / vectorProduct()', 'Операции над 3D-векторами.', '3D vector operations.'), M('public', 'deg/radBetweenCoord3D()', 'Угол через нормировку, clamp и acos.', 'Angle via normalization, clamp, and acos.'), M('public', 'deg/radBetweenSphericalCoords()', 'Угол между сферическими направлениями.', 'Angle between spherical directions.')]
+        },
+        {
+          id: 'linear-coord-3d', name: 'GeometryUtils::LinearCoord3D', layer: 'geometry', kind: L('вложенная структура', 'nested struct'), base: L('декартов вектор', 'Cartesian vector'), file: 'geometryutils.h · geometryutils.cpp', thread: L('Поток генератора', 'Generator thread'), x: 1515, y: 1070, w: 330, h: 88,
+          purpose: L('Декартов 3D-вектор с кешированной длиной, нормировкой и обратным переводом в сферические координаты.', 'Cartesian 3D vector with cached length, normalization, and conversion back to spherical coordinates.'),
+          fields: [M('private', 'double m_x, m_y, m_z', 'Компоненты.', 'Components.'), M('private', 'double m_length', 'Кеш длины.', 'Cached length.')], methods: [M('public', 'normalize() / length()', 'Нормировка и длина.', 'Normalization and length.'), M('public', 'toSphericalCoordDeg/Rad()', 'Обратное преобразование.', 'Reverse conversion.'), M('public', 'operator==', 'Покомпонентное сравнение.', 'Component-wise comparison.')]
+        },
+        {
+          id: 'spherical-coord-deg', name: 'GeometryUtils::SphericalCoordDeg', layer: 'geometry', kind: L('вложенная структура', 'nested struct'), base: L('азимут/угол места · градусы', 'azimuth/elevation · degrees'), file: 'geometryutils.h · geometryutils.cpp', thread: L('UI и поток генератора', 'UI and generator thread'), x: 1880, y: 1070, w: 340, h: 88,
+          purpose: L('Публичное угловое представление: нормализует азимут, ограничивает elevation и строит LinearCoord3D.', 'Public angular representation that normalizes azimuth, clamps elevation, and builds LinearCoord3D.'),
+          fields: [M('private', 'double m_azimuth', 'Цикл 0…360.', '0…360 cycle.'), M('private', 'double m_elevation', 'Ограничение −90…90.', 'Clamped to −90…90.')], methods: [M('public', 'toLinearCoord(length)', 'Сферические → декартовы.', 'Spherical → Cartesian.'), M('public', 'toSphericalCoordRad()', 'Градусы → радианы.', 'Degrees → radians.'), M('public', 'azimuth/elevation getters/setters', 'Нормализуют вход.', 'Normalize input.')]
+        },
+        {
+          id: 'spherical-coord-rad', name: 'GeometryUtils::SphericalCoordRad', layer: 'geometry', kind: L('вложенная структура', 'nested struct'), base: L('азимут/угол места · радианы', 'azimuth/elevation · radians'), file: 'geometryutils.h · geometryutils.cpp', thread: L('Вызывающий поток', 'Calling thread'), x: 1700, y: 1290, w: 350, h: 88,
+          purpose: L('Радианное сферическое представление с теми же гарантиями диапазона и преобразованиями.', 'Radian spherical representation with the same range guarantees and conversions.'),
+          fields: [M('private', 'double m_azimuth / m_elevation', 'Радианные углы.', 'Radian angles.')], methods: [M('public', 'toLinearCoord(length)', 'Сферические → декартовы.', 'Spherical → Cartesian.'), M('public', 'toSphericalCoordDeg()', 'Радианы → градусы.', 'Radians → degrees.')]
+        },
+        {
+          id: 'postgresql-schema', name: L('PostgreSQL · df_conv + df_result', 'PostgreSQL · df_conv + df_result'), layer: 'external', kind: L('внешнее хранилище', 'external storage'), base: 'QPSQL · data_type enum · BYTEA', file: 'sql/*.sql · qml.qrc', thread: L('Внешняя система', 'External system'), x: 2850, y: 1070, w: 440, h: 88,
+          purpose: L('df_conv хранит формат, сетку, quality и BYTEA; df_result тем же id хранит время, bearing и метаданные результата.', 'df_conv stores format, grid, quality, and BYTEA; df_result uses the same id for time, bearing, and result metadata.'),
+          fields: [M('public', 'df_conv(id, data_type, grid, quality, conv)', 'Тяжёлые данные свёртки.', 'Heavy convolution data.'), M('public', 'df_result(id FK, timestamp, bearing, power, ...)', 'Результат и метаданные.', 'Result and metadata.'), M('public', 'public.data_type · 20 labels', '10 форматов × 2 byte order.', '10 formats × 2 byte orders.')], methods: [M('public', 'insert.sql · CTE + shared id', 'Атомарная вставка пары строк.', 'Atomic two-row insert.'), M('public', 'select.sql · JOIN USING(id)', 'Чтение новых записей первыми.', 'Reads newest records first.'), M('public', 'create/delete/clean scripts', 'Обслуживание схемы.', 'Schema maintenance.')]
+        },
+        {
+          id: 'byte-array-coder', name: 'ByteArrayCoder', layer: 'codec', kind: L('абстрактный кодер', 'abstract codec'), base: L('стратегия serialize/deserialize', 'serialize/deserialize strategy'), file: 'bytearraycoder.h · bytearraycoder.cpp', thread: L('Writer или reader DB thread', 'Writer or reader DB thread'), x: 2800, y: 1700, w: 420, h: 88,
+          purpose: L('Фабрика и общий контракт преобразования нормированной std::vector<double> ↔ QByteArray с выбранным endian.', 'Factory and shared contract for normalized std::vector<double> ↔ QByteArray conversion with selected endian.'),
+          fields: [M('private', 'ByteOrder m_byteOrder / DataType m_type', 'Идентификатор wire-формата.', 'Wire-format identity.'), M('protected', 'int m_bits', 'Параметр размера/квантования.', 'Size/quantization parameter.')], methods: [M('public', 'static create(type, byteOrder)', 'Выбирает конкретную стратегию.', 'Selects a concrete strategy.'), M('public', 'virtual serialize() / deserialize() = 0', 'Двунаправленный контракт.', 'Bidirectional contract.'), M('protected', 'setSerializerByteOrder()', 'Настраивает QDataStream Qt 5.15.', 'Configures Qt 5.15 QDataStream.'), M('protected', 'packValues() / unpackValues()', 'Общий PackedArray-маршрут.', 'Shared PackedArray path.')]
+        },
+        {
+          id: 'double-byte-array-coder', name: 'doubleByteArrayCoder', layer: 'codec', kind: L('final кодер · 8 байт', 'final codec · 8 bytes'), base: 'ByteArrayCoder', extendsBase: true, file: 'bytearraycoder.h · bytearraycoder.cpp', thread: L('DB thread', 'DB thread'), x: 2620, y: 1900, w: 390, h: 88,
+          purpose: L('Хранит elementCount и значения double без дополнительной потери точности.', 'Stores elementCount followed by double values without additional precision loss.'), fields: [], methods: [M('public', 'serialize(vector<double>)', 'QDataStream DoublePrecision.', 'QDataStream DoublePrecision.'), M('public', 'deserialize(QByteArray&)', 'Проверяет размер и статус потока.', 'Validates size and stream status.')]
+        },
+        {
+          id: 'real-byte-array-coder', name: 'realByteArrayCoder', layer: 'codec', kind: L('final кодер · 4 байта', 'final codec · 4 bytes'), base: 'ByteArrayCoder', extendsBase: true, file: 'bytearraycoder.h · bytearraycoder.cpp', thread: L('DB thread', 'DB thread'), x: 3060, y: 1900, w: 390, h: 88,
+          purpose: L('Преобразует double в float и хранит elementCount + SinglePrecision payload.', 'Converts double to float and stores elementCount plus a SinglePrecision payload.'), fields: [], methods: [M('public', 'serialize(vector<double>)', 'Проверяет finite и пишет float.', 'Checks finite values and writes float.'), M('public', 'deserialize(QByteArray&)', 'Возвращает double из float.', 'Returns double values reconstructed from float.')]
+        },
+        {
+          id: 'smallint-byte-array-coder', name: 'smallintByteArrayCoder', layer: 'codec', kind: L('final кодер · 2 байта', 'final codec · 2 bytes'), base: 'ByteArrayCoder', extendsBase: true, file: 'bytearraycoder.h · bytearraycoder.cpp', thread: L('DB thread', 'DB thread'), x: 2620, y: 2110, w: 390, h: 88,
+          purpose: L('Масштабирует нормированное значение на 30000, хранит qint16 и восстанавливает double делением.', 'Scales a normalized value by 30000, stores qint16, and reconstructs double by division.'), fields: [], methods: [M('public', 'serialize(vector<double>)', 'Проверяет finite и диапазон qint16.', 'Checks finite values and qint16 range.'), M('public', 'deserialize(QByteArray&)', 'qint16 / 30000.0.', 'qint16 / 30000.0.')]
+        },
+        {
+          id: 'packed-array-coder', name: 'PackedArrayCoder', layer: 'codec', kind: L('final кодер · 2…8 бит', 'final codec · 2…8 bits'), base: 'ByteArrayCoder', extendsBase: true, file: 'bytearraycoder.h · bytearraycoder.cpp', thread: L('DB thread', 'DB thread'), x: 3060, y: 2110, w: 390, h: 88,
+          purpose: L('Квантует [0,1] в 2…8 бит и уплотняет значения в uint32-слова через внешнюю C-библиотеку.', 'Quantizes [0,1] to 2…8 bits and packs values into uint32 words through the external C library.'), fields: [M('inherited', 'm_bits · 2…8', 'Ширина одного элемента.', 'Bits per element.')], methods: [M('public', 'serialize(vector<double>)', 'elementCount + packed uint32 words.', 'elementCount plus packed uint32 words.'), M('public', 'deserialize(QByteArray&)', 'Проверяет ожидаемое число слов и распаковывает.', 'Validates the expected word count and unpacks.')]
+        },
+        {
+          id: 'packed-array', name: 'PackedArray (_PackedArray)', layer: 'external', kind: L('внешняя C-библиотека', 'external C library'), base: 'third-party/PackedArray', file: 'third-party/PackedArray/packedarray.h · packedarray.c · LICENSE', thread: L('DB thread', 'DB thread'), x: 3060, y: 2330, w: 390, h: 88,
+          purpose: L('Низкоуровневый контейнер и функции плотной упаковки целых значений фиксированной битности.', 'Low-level container and functions for densely packing fixed-width integer values.'), fields: [M('public', 'bitsPerItem / count / uint32_t* buffer', 'Форма и буфер packed array.', 'Packed-array shape and buffer.')], methods: [M('public', 'PackedArray_create/destroy()', 'Жизненный цикл C-объекта.', 'C-object lifecycle.'), M('public', 'PackedArray_pack/unpack()', 'Плотная битовая упаковка.', 'Dense bit packing.'), M('public', 'PackedArray_bufferSize()', 'Число uint32-слов.', 'Number of uint32 words.')]
+        },
+        {
+          id: 'row-for-visualization', name: 'RowForVisualization', layer: 'visual', kind: L('структура строки', 'row struct'), base: L('метаданные без conv', 'metadata without conv'), file: 'dataforvisualization.h', thread: L('Reader → главный поток', 'Reader → main thread'), x: 2630, y: 2600, w: 390, h: 88,
+          purpose: L('Лёгкая строка таблицы: результат JOIN без тяжёлого вектора свёртки.', 'Lightweight table row holding JOIN metadata without the heavy convolution vector.'), fields: [M('public', 'id / timestamp / sysname', 'Идентичность записи.', 'Record identity.'), M('public', 'azimuth / elevation / power / frequency', 'Результат измерения.', 'Measurement result.'), M('public', 'latitude / longitude / dataType / quality', 'Положение и формат.', 'Location and format.'), M('public', 'countH / countV', 'Форма плоской conv.', 'Shape of the flat conv.')], methods: []
+        },
+        {
+          id: 'data-for-visualization', name: 'DataForVisualization', layer: 'visual', kind: L('контейнер модели', 'model container'), base: L('параллельные массивы', 'parallel arrays'), file: 'dataforvisualization.h', thread: L('Главный поток', 'Main thread'), x: 3070, y: 2600, w: 390, h: 88,
+          purpose: L('Хранит строки и соответствующие им декодированные свёртки для VisualizationTableModel.', 'Stores rows and their corresponding decoded convolutions for VisualizationTableModel.'), fields: [M('public', 'QVector<RowForVisualization> rows', 'Текстовые колонки.', 'Text columns.'), M('public', 'QVector<QVector<double>> convs', 'Данные sparkline по тому же индексу.', 'Sparkline data at matching indices.')], methods: []
+        }
+      ];
+
+      const nodes = legacyNodes
+        .map(node => ({ ...node, ...(nodeUpdates[node.id] || {}) }))
+        .concat(newNodes);
+
+      const PROJECT_TYPE_COUNT = nodes.filter(node => !['app-entry', 'qml-shell', 'postgresql-schema', 'packed-array'].includes(node.id)).length;
+
+      const E = (id, source, target, type, options = {}) => ({ id, source, target, type, ...options });
+      const edges = [
+        E('app-qml', 'app-entry', 'qml-shell', 'lifecycle', { from: 'bottom', to: 'top', label: L('загружает qrc:/main.qml', 'loads qrc:/main.qml'), labelAt: [1800, 126] }),
+        E('app-connection', 'app-entry', 'connection-backend', 'lifecycle', { crosslink: true, from: 'right', to: 'top', via: [[2140, 60], [2460, 60], [2460, 300]], label: L('создаёт первым', 'constructs first') }),
+        E('app-save', 'app-entry', 'save-backend', 'lifecycle', { crosslink: true, from: 'bottom', to: 'top', label: L('передаёт writer&', 'passes writer&') }),
+        E('app-generator', 'app-entry', 'generator-backend', 'lifecycle', { crosslink: true, from: 'left', to: 'top', via: [[1460, 60], [1070, 60], [1070, 300]], label: L('передаёт SaveBackend&', 'passes SaveBackend&') }),
+        E('app-visualize', 'app-entry', 'visualize-backend', 'lifecycle', { crosslink: true, from: 'right', to: 'top', via: [[2160, 85], [3070, 85], [3070, 300]], label: L('передаёт writer&', 'passes writer&') }),
+
+        E('qml-generator', 'qml-shell', 'generator-backend', 'signal', { from: 'bottom', to: 'top', via: [[1800, 280], [1070, 280]], label: L('generatorBackend', 'generatorBackend') }),
+        E('qml-save', 'qml-shell', 'save-backend', 'signal', { from: 'bottom', to: 'top', via: [[1800, 280], [1860, 280]], label: L('saveBackend', 'saveBackend') }),
+        E('qml-connection', 'qml-shell', 'connection-backend', 'signal', { from: 'bottom', to: 'top', via: [[1800, 270], [2460, 270]], label: L('connectionBackend', 'connectionBackend') }),
+        E('qml-visualize', 'qml-shell', 'visualize-backend', 'signal', { from: 'bottom', to: 'top', via: [[1800, 260], [3070, 260]], label: L('visualizeBackend', 'visualizeBackend') }),
+
+        E('connection-writer-manager', 'connection-backend', 'database-manager', 'composition', { from: 'bottom', to: 'top', via: [[2460, 800], [2560, 800]], label: L('writer · 1', 'writer · 1'), labelAt: [2505, 792] }),
+        E('save-writer-manager', 'save-backend', 'database-manager', 'reference', { from: 'bottom', to: 'top', via: [[1860, 790], [2560, 790]], label: L('writer-ссылка', 'writer reference'), labelAt: [2200, 782] }),
+        E('generator-post-model', 'generator-backend', 'post-list-model', 'composition', { from: 'bottom', to: 'top', label: '1' }),
+        E('post-model-peak-model', 'post-list-model', 'peak-list-model', 'composition', { from: 'right', to: 'left', label: '1' }),
+        E('post-model-noise-adapter', 'post-list-model', 'abstract-noise-backend', 'composition', { from: 'right', to: 'left', label: '0..1' }),
+        E('normal-adapter-base', 'normal-noise-backend', 'abstract-noise-backend', 'inheritance', { from: 'top', to: 'bottom' }),
+        E('uniform-adapter-base', 'uniform-noise-backend', 'abstract-noise-backend', 'inheritance', { from: 'top', to: 'right', via: [[1980, 615], [1900, 615], [1900, 544]] }),
+        E('generator-load', 'generator-backend', 'load-generator', 'lifecycle', { from: 'bottom', to: 'top', via: [[1070, 800], [800, 800]], label: L('создаёт · QThread', 'creates · QThread'), labelAt: [920, 792] }),
+        E('generator-load-signals', 'generator-backend', 'load-generator', 'signal', { crosslink: true, bidirectional: true, from: 'left', to: 'right', via: [[820, 356], [520, 356], [520, 924]], label: L('toggle/config ↔ DataPackage', 'toggle/config ↔ DataPackage') }),
+        E('generator-save', 'generator-backend', 'save-backend', 'signal', { from: 'right', to: 'left', label: 'DataPackage' }),
+        E('visualize-reader-manager', 'visualize-backend', 'database-manager', 'composition', { from: 'bottom', to: 'top', via: [[3070, 800], [2620, 800]], label: L('reader · 1', 'reader · 1'), labelAt: [2840, 792] }),
+        E('visualize-writer-config', 'visualize-backend', 'database-manager', 'reference', { crosslink: true, from: 'left', to: 'right', via: [[2740, 356], [2230, 356], [2230, 924]], label: L('копирует writer config', 'copies writer config') }),
+        E('visualize-table-model', 'visualize-backend', 'visualization-table-model', 'composition', { from: 'bottom', to: 'top', label: '1' }),
+
+        E('manager-worker', 'database-manager', 'database-worker', 'lifecycle', { from: 'right', to: 'left', label: L('×2 · свой QThread', '×2 · own QThread'), labelAt: [2805, 910] }),
+        E('worker-config', 'database-worker', 'database-configuration', 'composition', { from: 'left', to: 'right', via: [[2790, 924], [2790, 1114]], label: '1' }),
+        E('manager-config-signals', 'database-manager', 'database-configuration', 'signal', { crosslink: true, from: 'bottom', to: 'top', label: L('config snapshot', 'config snapshot') }),
+        E('worker-postgres', 'database-worker', 'postgresql-schema', 'signal', { bidirectional: true, from: 'bottom', to: 'top', label: L('INSERT / SELECT / DDL', 'INSERT / SELECT / DDL'), labelAt: [3060, 1025] }),
+        E('worker-manager-data', 'database-worker', 'database-manager', 'signal', { crosslink: true, from: 'left', to: 'right', bidirectional: true, label: L('status · rows/convs', 'status · rows/convs') }),
+        E('manager-visualize-data', 'database-manager', 'visualize-backend', 'signal', { crosslink: true, from: 'right', to: 'bottom', via: [[3370, 924], [3370, 450], [3070, 450]], label: L('reader rows/convs', 'reader rows/convs') }),
+
+        E('load-post-config', 'load-generator', 'post-config', 'composition', { from: 'bottom', to: 'top', via: [[800, 1020], [320, 1020]], label: '0..*' }),
+        E('load-post', 'load-generator', 'post', 'composition', { from: 'bottom', to: 'top', label: '0..*' }),
+        E('post-package', 'post', 'data-package', 'composition', { from: 'right', to: 'left', label: '1' }),
+        E('post-noise', 'post', 'abstract-noise', 'composition', { from: 'bottom', to: 'top', via: [[780, 1570], [280, 1570]], label: '1' }),
+        E('post-peaks', 'post', 'abstract-peak', 'composition', { from: 'bottom', to: 'top', via: [[780, 1580], [1290, 1580]], label: '0..*' }),
+        E('config-noise', 'post-config', 'noise-config', 'composition', { from: 'bottom', to: 'top', via: [[320, 1545], [750, 1545]], label: '1' }),
+        E('config-peaks', 'post-config', 'peak-config', 'composition', { crosslink: true, from: 'bottom', to: 'top', via: [[320, 1520], [2220, 1520]], label: '0..*' }),
+        E('postmodel-config', 'post-list-model', 'post-config', 'reference', { crosslink: true, from: 'left', to: 'top', via: [[560, 544], [560, 1020], [320, 1020]], label: L('live edit', 'live edit') }),
+        E('peakmodel-config', 'peak-list-model', 'peak-config', 'reference', { crosslink: true, from: 'bottom', to: 'top', via: [[1240, 1500], [2220, 1500]], label: L('редактирует', 'edits') }),
+
+        E('geometry-linear', 'geometry-utils', 'linear-coord-3d', 'composition', { from: 'bottom', to: 'top', label: L('nested', 'nested') }),
+        E('geometry-deg', 'geometry-utils', 'spherical-coord-deg', 'composition', { from: 'bottom', to: 'top', label: L('nested', 'nested') }),
+        E('geometry-rad', 'geometry-utils', 'spherical-coord-rad', 'composition', { from: 'bottom', to: 'top', label: L('nested', 'nested') }),
+        E('linear-deg-conversion', 'linear-coord-3d', 'spherical-coord-deg', 'reference', { crosslink: true, bidirectional: true, from: 'right', to: 'left', label: L('convert', 'convert') }),
+        E('linear-rad-conversion', 'linear-coord-3d', 'spherical-coord-rad', 'reference', { crosslink: true, bidirectional: true, from: 'bottom', to: 'left', label: L('convert', 'convert') }),
+        E('deg-rad-conversion', 'spherical-coord-deg', 'spherical-coord-rad', 'reference', { crosslink: true, bidirectional: true, from: 'bottom', to: 'right', label: L('convert', 'convert') }),
+        E('post-directions', 'post', 'linear-coord-3d', 'reference', { crosslink: true, from: 'right', to: 'left', label: L('countH × countV', 'countH × countV') }),
+        E('package-bearing', 'data-package', 'spherical-coord-deg', 'composition', { crosslink: true, from: 'right', to: 'left', label: L('bearing', 'bearing') }),
+        E('peakconfig-deg', 'peak-config', 'spherical-coord-deg', 'composition', { crosslink: true, from: 'top', to: 'bottom', label: L('center', 'center') }),
+        E('abstractpeak-linear', 'abstract-peak', 'linear-coord-3d', 'composition', { crosslink: true, from: 'top', to: 'bottom', label: L('m_center', 'm_center') }),
+
+        E('normal-noise-base', 'normal-noise', 'abstract-noise', 'inheritance', { from: 'top', to: 'bottom' }),
+        E('uniform-noise-base', 'uniform-noise', 'abstract-noise', 'inheritance', { from: 'left', to: 'left', via: [[70, 2224], [70, 1754]] }),
+        E('normal-config-base', 'normal-noise-config', 'noise-config', 'inheritance', { from: 'top', to: 'bottom' }),
+        E('uniform-config-base', 'uniform-noise-config', 'noise-config', 'inheritance', { from: 'right', to: 'right', via: [[960, 2224], [960, 1754]] }),
+        E('noise-config-factory', 'noise-config', 'abstract-noise', 'reference', { crosslink: true, from: 'left', to: 'right', label: L('factory', 'factory') }),
+        E('normal-config-runtime', 'normal-noise-config', 'normal-noise', 'reference', { crosslink: true, from: 'left', to: 'right', label: L('creates', 'creates') }),
+        E('uniform-config-runtime', 'uniform-noise-config', 'uniform-noise', 'reference', { crosslink: true, from: 'left', to: 'right', label: L('creates', 'creates') }),
+
+        E('gauss-peak-base', 'gauss-peak', 'abstract-peak', 'inheritance', { from: 'top', to: 'bottom' }),
+        E('triangle-peak-base', 'triangle-peak', 'abstract-peak', 'inheritance', { from: 'left', to: 'left', via: [[1070, 2224], [1070, 1754]] }),
+        E('rectangle-peak-base', 'rectangle-peak', 'abstract-peak', 'inheritance', { from: 'left', to: 'left', via: [[1050, 2464], [1050, 1754]] }),
+        E('gauss-config-base', 'gauss-peak-config', 'peak-config', 'inheritance', { from: 'top', to: 'bottom' }),
+        E('triangle-config-base', 'triangle-peak-config', 'peak-config', 'inheritance', { from: 'right', to: 'right', via: [[2470, 2224], [2470, 1754]] }),
+        E('rectangle-config-base', 'rectangle-peak-config', 'peak-config', 'inheritance', { from: 'right', to: 'right', via: [[2490, 2464], [2490, 1754]] }),
+        E('peak-config-factory', 'peak-config', 'abstract-peak', 'reference', { crosslink: true, from: 'left', to: 'right', label: L('factory', 'factory') }),
+        E('gauss-config-runtime', 'gauss-peak-config', 'gauss-peak', 'reference', { crosslink: true, from: 'left', to: 'right', label: L('creates', 'creates') }),
+        E('triangle-config-runtime', 'triangle-peak-config', 'triangle-peak', 'reference', { crosslink: true, from: 'left', to: 'right', label: L('creates', 'creates') }),
+        E('rectangle-config-runtime', 'rectangle-peak-config', 'rectangle-peak', 'reference', { crosslink: true, from: 'left', to: 'right', label: L('creates', 'creates') }),
+
+        E('double-coder-base', 'double-byte-array-coder', 'byte-array-coder', 'inheritance', { from: 'top', to: 'bottom' }),
+        E('real-coder-base', 'real-byte-array-coder', 'byte-array-coder', 'inheritance', { from: 'top', to: 'bottom' }),
+        E('smallint-coder-base', 'smallint-byte-array-coder', 'byte-array-coder', 'inheritance', { from: 'left', to: 'left', via: [[2590, 2154], [2590, 1744]] }),
+        E('packed-coder-base', 'packed-array-coder', 'byte-array-coder', 'inheritance', { from: 'right', to: 'right', via: [[3480, 2154], [3480, 1744]] }),
+        E('packed-coder-library', 'packed-array-coder', 'packed-array', 'reference', { from: 'bottom', to: 'top', label: L('C API', 'C API') }),
+        E('worker-coder', 'database-worker', 'byte-array-coder', 'reference', { crosslink: true, from: 'bottom', to: 'top', via: [[3400, 1000], [3400, 1650], [3010, 1650]], label: L('factory · encode/decode', 'factory · encode/decode') }),
+
+        E('worker-utils', 'database-worker', 'utils', 'reference', { crosslink: true, from: 'left', to: 'right', via: [[2700, 1000], [2700, 1510], [1380, 1510], [1380, 1424]], label: L('fileToString()', 'fileToString()') }),
+        E('postmodel-utils', 'post-list-model', 'utils', 'reference', { crosslink: true, from: 'bottom', to: 'top', label: L('format/parse', 'format/parse') }),
+        E('table-utils', 'visualization-table-model', 'utils', 'reference', { crosslink: true, from: 'bottom', to: 'right', via: [[3300, 700], [3300, 1530], [1380, 1530], [1380, 1424]], label: L('flatten + shrink', 'flatten + shrink') }),
+        E('worker-row', 'database-worker', 'row-for-visualization', 'reference', { crosslink: true, from: 'right', to: 'top', via: [[3530, 924], [3530, 2550], [2825, 2550]], label: L('создаёт rows', 'creates rows') }),
+        E('table-data', 'visualization-table-model', 'data-for-visualization', 'composition', { crosslink: true, from: 'bottom', to: 'top', via: [[3040, 2450], [3265, 2450]], label: '1' }),
+        E('data-row', 'data-for-visualization', 'row-for-visualization', 'composition', { from: 'left', to: 'right', label: '0..*' }),
+        E('table-qml', 'visualization-table-model', 'qml-shell', 'signal', { crosslink: true, from: 'top', to: 'right', via: [[3300, 460], [3300, 204]], label: L('DisplayRole / SparklineRole', 'DisplayRole / SparklineRole') })
+      ];
+
       const nodeById = new Map(nodes.map(node => [node.id, node]));
 
-      const scenarioThreadMeta = {
+      const legacyScenarioThreadMeta = {
         main: { label: L('QML / главный поток', 'QML / main thread') },
         db: { label: L('Поток БД', 'Database thread') },
         gen: { label: L('Поток генератора', 'Generator thread') },
         external: { label: L('Внешняя система', 'External system') }
       };
 
-      const scenarioTransferMeta = {
+      const legacyScenarioTransferMeta = {
         direct: { label: L('прямой вызов', 'direct call') },
         queued: { label: L('сигнал через очередь Qt', 'queued Qt signal') },
         data: { label: L('сигнал с данными', 'data signal') },
@@ -2028,7 +2504,7 @@
         branch: { label: L('параллельная ветка', 'parallel branch') }
       };
 
-      const scenarios = [
+      const legacyScenarios = [
         {
           id: 'startup',
           title: L('Запуск приложения', 'Application startup'),
@@ -2502,6 +2978,256 @@
         }
       ];
 
+      const scenarioThreadMeta = {
+        main: { label: L('QML / главный поток', 'QML / main thread') },
+        gen: { label: L('Поток генератора', 'Generator thread') },
+        'db-writer': { label: L('Поток записи БД', 'DB writer thread') },
+        'db-reader': { label: L('Поток чтения БД', 'DB reader thread') },
+        postgres: { label: L('PostgreSQL', 'PostgreSQL') },
+        external: { label: L('Внешний код', 'External code') }
+      };
+
+      const scenarioTransferMeta = {
+        direct: { label: L('прямой вызов', 'direct call') },
+        queued: { label: L('сигнал через очередь Qt', 'queued Qt signal') },
+        data: { label: L('сигнал с данными', 'data signal') },
+        timer: { label: L('событие таймера', 'timer event') },
+        driver: { label: L('Qt SQL / драйвер', 'Qt SQL / driver') },
+        branch: { label: L('параллельная ветка', 'parallel branch') }
+      };
+
+      const A = (label, nodeId, transfer = 'direct') => ({ label, nodeId, transfer });
+      const ST = (title, copy, actor, nodeId, thread, transfer, signature) => ({ title, copy, actor, nodeId, thread, transfer, signature });
+
+      const scenarios = [
+        {
+          id: 'startup',
+          title: L('Запуск приложения', 'Application startup'),
+          tabCopy: L('4 фасада · 3 worker-потока', '4 facades · 3 worker threads'),
+          summary: L('main() собирает зависимости в безопасном порядке: writer, шлюз сохранения, генератор и независимый reader; затем публикует четыре входа в QML.', 'main() assembles dependencies in order: writer, persistence gate, generator, and an independent reader, then exposes four entries to QML.'),
+          trigger: L('Запуск исполняемого файла myConvolution.', 'Starting the myConvolution executable.'),
+          outcome: L('Готовы главный поток, generator thread, DB writer thread и DB reader thread. SQL-соединения ещё физически не открыты, генерация выключена.', 'The main, generator, DB writer, and DB reader threads are ready. SQL connections are not physically open yet and generation is off.'),
+          boundary: L('Оба DatabaseWorker инициализируются асинхронно. Начальные Post и большие 2D-сетки направлений строятся до moveToThread(), то есть на старте блокируют главный поток.', 'Both DatabaseWorker instances initialize asynchronously. Initial Post objects and large 2D direction grids are built before moveToThread(), so startup work blocks the main thread.'),
+          route: [A('main()', 'app-entry'), A('ConnectionBackend', 'connection-backend'), A('DatabaseManager · writer', 'database-manager'), A('SaveBackend', 'save-backend', 'branch'), A('GeneratorBackend', 'generator-backend'), A('LoadGenerator', 'load-generator'), A('VisualizeBackend', 'visualize-backend', 'branch'), A('DatabaseManager · reader', 'database-manager'), A('main.qml', 'qml-shell')],
+          edgeIds: ['app-qml', 'app-connection', 'app-save', 'app-generator', 'app-visualize', 'connection-writer-manager', 'manager-worker', 'generator-load', 'visualize-reader-manager'],
+          steps: [
+            ST(L('Создаёт приложение и writer', 'Creates the app and writer'), L('ConnectionBackend конструирует первый DatabaseManager; тот создаёт DatabaseWorker, переносит его в свой QThread и ставит signalInitialize().', 'ConnectionBackend constructs the first DatabaseManager, which creates DatabaseWorker, moves it into its QThread, and queues signalInitialize().'), 'main() / ConnectionBackend', 'connection-backend', 'main', 'direct', 'ConnectionBackend connectionBackend'),
+            ST(L('Собирает persistence gate', 'Builds the persistence gate'), L('SaveBackend получает ссылку на connectionBackend.db(); собственного соединения он не создаёт.', 'SaveBackend receives a reference to connectionBackend.db(); it creates no connection of its own.'), 'SaveBackend', 'save-backend', 'main', 'direct', 'SaveBackend saveBackend(connectionBackend.db())'),
+            ST(L('Создаёт генератор и начальные Post', 'Creates generator and initial Post objects'), L('GeneratorBackend создаёт PostListModel и LoadGenerator. LoadGenerator::load() строит runtime noise/peaks и row-major сетки LinearCoord3D, после чего объект переносится в generator thread.', 'GeneratorBackend creates PostListModel and LoadGenerator. LoadGenerator::load() builds runtime noise/peaks and row-major LinearCoord3D grids before the object moves to the generator thread.'), 'GeneratorBackend', 'generator-backend', 'main', 'direct', 'new LoadGenerator(m_cfg) → moveToThread(...)'),
+            ST(L('Создаёт независимый reader', 'Creates the independent reader'), L('VisualizeBackend конструирует второй DatabaseManager с именем myConvolution_reader; он поднимает второй DB worker thread.', 'VisualizeBackend constructs a second DatabaseManager named myConvolution_reader, which starts the second DB worker thread.'), 'VisualizeBackend', 'visualize-backend', 'main', 'branch', 'm_readerDb(writerDb.connectionName() + "_reader")'),
+            ST(L('Регистрирует межпоточные типы', 'Registers cross-thread types'), L('DataPackage, PostConfig и QVector-типам выдаются имена для queued signal/slot.', 'DataPackage, PostConfig, and QVector types are registered for queued signal/slot delivery.'), 'main()', 'app-entry', 'main', 'direct', 'qRegisterMetaType<T>()'),
+            ST(L('Публикует четыре QML-входа', 'Exposes four QML entries'), L('Корневой контекст получает connectionBackend, generatorBackend, saveBackend и visualizeBackend.', 'The root context receives connectionBackend, generatorBackend, saveBackend, and visualizeBackend.'), 'main.qml', 'qml-shell', 'main', 'direct', 'rootContext()->setContextProperty(...) × 4'),
+            ST(L('Запускает интерфейс', 'Starts the UI'), L('Загружается qrc:/main.qml, затем exec() начинает обработку событий.', 'qrc:/main.qml is loaded and exec() starts event processing.'), 'main()', 'app-entry', 'main', 'direct', 'engine.load(url) → QGuiApplication::exec()')
+          ]
+        },
+        {
+          id: 'db-connect',
+          title: L('Подключение writer + reader', 'Connect writer + reader'),
+          tabCopy: L('2 независимых SQL-канала', '2 independent SQL channels'),
+          summary: L('Одна кнопка QML подряд запускает writer и reader. Они используют одинаковые параметры, но имеют разные имена соединений, очереди, потоки и статусы.', 'One QML button starts writer and reader sequentially. They share parameters but have separate connection names, queues, threads, and states.'),
+          trigger: L('Кнопка «Подключиться» во вкладке «Соединение».', 'The Connect button on the Connection tab.'),
+          outcome: L('Ожидаются два физических QPSQL-соединения: myConvolution для записи/DDL и myConvolution_reader для SELECT.', 'Two physical QPSQL connections are expected: myConvolution for writes/DDL and myConvolution_reader for SELECT.'),
+          boundary: L('Операция не атомарна: UI показывает только writer status/error. Reader может не подключиться, даже когда нижний индикатор уже говорит «БД готова».', 'The operation is not atomic: the UI exposes only writer status/error. Reader may fail even while the footer already says the database is ready.'),
+          route: [A('ConnectTab.qml', 'qml-shell'), A('ConnectionBackend', 'connection-backend'), A('DatabaseManager · writer', 'database-manager'), A('DatabaseWorker · writer', 'database-worker', 'queued'), A('PostgreSQL', 'postgresql-schema', 'driver'), A('VisualizeBackend', 'visualize-backend', 'branch'), A('DatabaseManager · reader', 'database-manager'), A('DatabaseWorker · reader', 'database-worker', 'queued'), A('PostgreSQL', 'postgresql-schema', 'driver')],
+          edgeIds: ['qml-connection', 'qml-visualize', 'connection-writer-manager', 'visualize-writer-config', 'visualize-reader-manager', 'manager-worker', 'worker-config', 'worker-postgres'],
+          steps: [
+            ST(L('Запускает обе ветки', 'Starts both branches'), L('onClicked сначала вызывает ConnectionBackend, затем VisualizeBackend.', 'onClicked calls ConnectionBackend first and VisualizeBackend second.'), 'ConnectTab.qml', 'qml-shell', 'main', 'direct', 'connectionBackend.onDbConnectionButtonClicked(...); visualizeBackend.onDbConnectionButtonClicked()'),
+            ST(L('Обновляет writer-конфигурацию', 'Updates writer configuration'), L('Сеттеры синхронно меняют поля manager-а и ставят DatabaseConfiguration в writer queue; signalOpenConnection идёт следом.', 'Setters synchronously update manager fields and queue DatabaseConfiguration; signalOpenConnection follows in the writer queue.'), 'DatabaseManager · writer', 'database-manager', 'main', 'queued', 'setHostName/... → signalConfigUpdate → signalOpenConnection'),
+            ST(L('Открывает writer', 'Opens writer'), L('Writer-worker применяет конфиг и вызывает QSqlDatabase::open() для myConvolution.', 'The writer worker applies config and calls QSqlDatabase::open() for myConvolution.'), 'DatabaseWorker · writer', 'database-worker', 'db-writer', 'driver', 'slotConfigUpdate() → slotOpenConnection()'),
+            ST(L('Копирует параметры в reader', 'Copies parameters into reader'), L('VisualizeBackend берёт актуальные поля writer-manager и задаёт их reader-manager с отдельным connectionName.', 'VisualizeBackend reads current writer-manager fields and applies them to reader-manager under a separate connectionName.'), 'VisualizeBackend', 'visualize-backend', 'main', 'branch', 'updateFromWriter()'),
+            ST(L('Открывает reader', 'Opens reader'), L('Второй worker независимо открывает myConvolution_reader.', 'The second worker independently opens myConvolution_reader.'), 'DatabaseWorker · reader', 'database-worker', 'db-reader', 'driver', 'm_readerDb.openConnection() → slotOpenConnection()'),
+            ST(L('Возвращает два статуса', 'Returns two states'), L('Writer status проходит через ConnectionBackend в QML; reader status остаётся в VisualizeBackend.', 'Writer status reaches QML through ConnectionBackend; reader status remains inside VisualizeBackend.'), 'ConnectionBackend / VisualizeBackend', 'connection-backend', 'main', 'data', 'slotSetDbStatus(int)')
+          ]
+        },
+        {
+          id: 'db-disconnect',
+          title: L('Отключение writer + reader', 'Disconnect writer + reader'),
+          tabCopy: L('Два независимых решения', 'Two independent decisions'),
+          summary: L('Та же QML-кнопка просит оба фасада переключить свой канал; каждый выбирает open или close по собственному статусу.', 'The same QML button asks both facades to toggle their channel; each independently chooses open or close from its own state.'),
+          trigger: L('Кнопка «Отключиться» при writer status = 2.', 'The Disconnect button while writer status = 2.'),
+          outcome: L('Writer закрывается; при согласованном состоянии reader тоже закрывается. SaveTab принудительно выключает saveEnabled, когда writer status становится 0.', 'Writer closes; reader closes too when states are aligned. SaveTab forces saveEnabled off when writer status becomes 0.'),
+          boundary: L('Если reader busy или ранее не подключился, второй вызов может выбрать ветку открытия вместо закрытия. Синхронного «закрыть оба» и общего acknowledgement нет.', 'If reader is busy or previously failed, the second call can choose open instead of close. There is no atomic “close both” operation or shared acknowledgement.'),
+          route: [A('ConnectTab.qml', 'qml-shell'), A('ConnectionBackend', 'connection-backend'), A('writer worker', 'database-worker', 'queued'), A('VisualizeBackend', 'visualize-backend', 'branch'), A('reader worker', 'database-worker', 'queued'), A('SaveBackend', 'save-backend', 'branch')],
+          edgeIds: ['qml-connection', 'qml-visualize', 'connection-writer-manager', 'visualize-reader-manager', 'manager-worker', 'qml-save'],
+          steps: [
+            ST(L('Переключает writer', 'Toggles writer'), L('ConnectionBackend видит dbStatus == 2 и вызывает closeConnection().', 'ConnectionBackend sees dbStatus == 2 and calls closeConnection().'), 'ConnectionBackend', 'connection-backend', 'main', 'direct', 'm_db.closeConnection()'),
+            ST(L('Закрывает физическое соединение', 'Closes the physical connection'), L('Writer-worker получает queued signal, вызывает db.close() и возвращает connected=false.', 'The writer worker receives the queued signal, calls db.close(), and returns connected=false.'), 'DatabaseWorker · writer', 'database-worker', 'db-writer', 'driver', 'slotCloseConnection()'),
+            ST(L('Независимо переключает reader', 'Independently toggles reader'), L('VisualizeBackend принимает решение по m_readerDbStatus, а не по writer status.', 'VisualizeBackend decides from m_readerDbStatus rather than writer status.'), 'VisualizeBackend', 'visualize-backend', 'main', 'branch', 'm_readerDbStatus == 2 ? closeConnection() : openConnection()'),
+            ST(L('Обновляет видимый статус', 'Updates visible state'), L('Только writer-сигналы обновляют ConnectionBackend и нижний индикатор QML.', 'Only writer signals update ConnectionBackend and the visible footer indicator.'), 'ConnectionBackend', 'connection-backend', 'main', 'data', 'signalSetDbStatus → slotSetDbStatus'),
+            ST(L('Закрывает persistence gate', 'Closes the persistence gate'), L('Когда кнопка сохранения становится disabled, QML устанавливает saveBackend.saveEnabled = false.', 'When the save button becomes disabled, QML sets saveBackend.saveEnabled = false.'), 'SaveTab.qml / SaveBackend', 'save-backend', 'main', 'direct', 'onEnabledChanged: saveBackend.saveEnabled = false')
+          ]
+        },
+        {
+          id: 'post-save',
+          title: L('Применение конфигурации постов', 'Apply station configuration'),
+          tabCopy: L('PostList + PeakList → worker', 'PostList + PeakList → worker'),
+          summary: L('Изменения формы живут в GeneratorBackend::m_cfg. Кнопка «Сохранить» отправляет полный глубокий снимок в generator thread и пересоздаёт runtime-посты.', 'Form edits live in GeneratorBackend::m_cfg. Apply sends a complete deep snapshot to the generator thread and rebuilds runtime stations.'),
+          trigger: L('Кнопка применения изменений во вкладке «Нагрузка».', 'The Apply changes button on the Load tab.'),
+          outcome: L('Следующий timer tick работает с новыми Post, Noise и Peak объектами и новой 2D-сеткой направлений.', 'The next timer tick uses rebuilt Post, Noise, and Peak objects and the new 2D direction grid.'),
+          boundary: L('UI обновляет fallback сразу после отправки — worker acknowledgement нет. Пересборка больших сеток блокирует event loop генератора; несколько пустых имён получают номер текущего выбранного поста.', 'The UI refreshes fallback immediately after sending—there is no worker acknowledgement. Rebuilding large grids blocks the generator event loop; multiple blank names receive the current selected station number.'),
+          route: [A('GenTab.qml', 'qml-shell'), A('PostListModel', 'post-list-model'), A('PeakListModel', 'peak-list-model', 'branch'), A('PostConfig', 'post-config'), A('GeneratorBackend', 'generator-backend'), A('LoadGenerator', 'load-generator', 'queued'), A('Post', 'post')],
+          edgeIds: ['qml-generator', 'generator-post-model', 'post-model-peak-model', 'postmodel-config', 'peakmodel-config', 'generator-load-signals', 'load-post-config', 'load-post'],
+          steps: [
+            ST(L('Редактирует выбранный PostConfig', 'Edits selected PostConfig'), L('Q_PROPERTY-сеттеры PostListModel меняют поля m_cfg напрямую; список постов остаётся Qt-моделью.', 'PostListModel Q_PROPERTY setters modify m_cfg directly while the station list remains a Qt model.'), 'PostListModel', 'post-list-model', 'main', 'direct', 'setCurrent...()'),
+            ST(L('Редактирует единый список пиков', 'Edits the single peak list'), L('PeakListModel добавляет/удаляет пики и заменяет concrete PeakConfig при смене типа или параметра.', 'PeakListModel adds/removes peaks and replaces the concrete PeakConfig when type or parameters change.'), 'PeakListModel', 'peak-list-model', 'main', 'direct', 'setPeakType()/setAzimuth()/addPeak()/removePeak()'),
+            ST(L('Формирует глубокий снимок', 'Builds a deep snapshot'), L('PostConfig копирует NoiseConfig через clone() и очищает/клонирует единый peakConfigs.', 'PostConfig clones NoiseConfig and clears/clones the single peakConfigs vector.'), 'LoadGenerator::PostConfig', 'post-config', 'main', 'data', 'PostConfig(const PostConfig&) / operator='),
+            ST(L('Отправляет конфигурацию', 'Sends configuration'), L('postUpdate() испускает signalPostConfigUpdate(m_config), затем обновляет fallback.', 'postUpdate() emits signalPostConfigUpdate(m_config) and then refreshes fallback.'), 'PostListModel', 'post-list-model', 'main', 'queued', 'postUpdate()'),
+            ST(L('Пересоздаёт runtime-посты', 'Rebuilds runtime stations'), L('LoadGenerator::slotPostConfigUpdate() заменяет конфиги и вызывает load(), который уничтожает старые Post и строит новые.', 'LoadGenerator::slotPostConfigUpdate() replaces configs and calls load(), destroying old Post objects and building new ones.'), 'LoadGenerator', 'load-generator', 'gen', 'queued', 'slotPostConfigUpdate() → setPostConfigs() → load()'),
+            ST(L('Создаёт noise, peaks и направления', 'Creates noise, peaks, and directions'), L('Каждый Post фабрично создаёт runtime-компоненты и countV × countH единичных LinearCoord3D.', 'Each Post factory-creates runtime components and countV × countH unit LinearCoord3D values.'), 'LoadGenerator::Post', 'post', 'gen', 'direct', 'Post(PostConfig, LoadGenerator*)')
+          ]
+        },
+        {
+          id: 'noise-switch',
+          title: L('Смена типа шума', 'Switch noise type'),
+          tabCopy: L('Config + QML adapter', 'Config + QML adapter'),
+          summary: L('Один ComboBox одновременно заменяет полиморфный NoiseConfig и QML-адаптер, чтобы Loader показал правильные поля параметров.', 'One ComboBox replaces both the polymorphic NoiseConfig and the QML adapter so Loader shows the correct parameter fields.'),
+          trigger: L('Выбор «Нормальный» или «Равномерный» в GenTab.qml.', 'Selecting Normal or Uniform in GenTab.qml.'),
+          outcome: L('Форма сразу переключается на нужный NoiseBackend; runtime-шум изменится только после общего применения конфигурации.', 'The form immediately switches to the matching NoiseBackend; runtime noise changes only after applying the full configuration.'),
+          boundary: L('При смене типа прежние параметры теряются и заменяются defaults. Текущая проверка NormalNoiseBackend допускает sigma <= 0.', 'Switching type discards previous parameters and installs defaults. Current NormalNoiseBackend validation permits sigma <= 0.'),
+          route: [A('GenTab.qml', 'qml-shell'), A('PostListModel', 'post-list-model'), A('NoiseConfig', 'noise-config'), A('AbstractNoiseBackend', 'abstract-noise-backend', 'branch'), A('Normal/Uniform backend', 'normal-noise-backend'), A('Loader', 'qml-shell')],
+          edgeIds: ['qml-generator', 'generator-post-model', 'post-model-noise-adapter', 'normal-adapter-base', 'uniform-adapter-base', 'postmodel-config', 'config-noise'],
+          steps: [
+            ST(L('Передаёт индекс типа', 'Passes the type index'), L('ComboBox вызывает setCurrentNoiseType(currentIndex).', 'ComboBox calls setCurrentNoiseType(currentIndex).'), 'GenTab.qml', 'qml-shell', 'main', 'direct', 'postListModel.currentNoiseType = currentIndex'),
+            ST(L('Заменяет NoiseConfig', 'Replaces NoiseConfig'), L('PostListModel проверяет concrete type и при необходимости создаёт NormalNoiseConfig(0,2) либо UniformNoiseConfig(-10,20).', 'PostListModel checks the concrete type and creates NormalNoiseConfig(0,2) or UniformNoiseConfig(-10,20) when needed.'), 'PostListModel', 'post-list-model', 'main', 'direct', 'setCurrentNoiseType(int)'),
+            ST(L('Заменяет QML-адаптер', 'Replaces the QML adapter'), L('m_noiseBackend получает NormalNoiseBackend или UniformNoiseBackend со ссылками на общий config и postIndex.', 'm_noiseBackend receives NormalNoiseBackend or UniformNoiseBackend referencing shared config and postIndex.'), 'AbstractNoiseBackend', 'abstract-noise-backend', 'main', 'branch', 'make_unique<NormalNoiseBackend/UniformNoiseBackend>()'),
+            ST(L('Перестраивает Loader', 'Rebuilds Loader'), L('currentNoiseTypeChanged и noiseBackendChanged перезапускают QML bindings и выбирают нужной набор полей.', 'currentNoiseTypeChanged and noiseBackendChanged refresh QML bindings and select the matching field set.'), 'GenTab.qml', 'qml-shell', 'main', 'data', 'noiseBackendChanged() → Loader.sourceComponent'),
+            ST(L('Применяет runtime позже', 'Applies runtime later'), L('Только postUpdate() отправит новый NoiseConfig в LoadGenerator, где NoiseConfig::createNoise() создаст runtime-объект.', 'Only postUpdate() sends the new NoiseConfig to LoadGenerator, where NoiseConfig::createNoise() builds the runtime object.'), 'AbstractNoise::NoiseConfig', 'noise-config', 'gen', 'queued', 'createNoise()')
+          ]
+        },
+        {
+          id: 'generator-toggle',
+          title: L('Запуск и остановка генератора', 'Start and stop generator'),
+          tabCopy: L('Queued command · QTimer 10 ms', 'Queued command · 10 ms QTimer'),
+          summary: L('QML меняет желаемый флаг в GeneratorBackend, а фактический QTimer запускается в generator thread и подтверждает состояние обратно.', 'QML changes the desired flag in GeneratorBackend while the actual QTimer starts in the generator thread and acknowledges state back.'),
+          trigger: L('Кнопка запуска/остановки во вкладке «Нагрузка».', 'The start/stop button on the Load tab.'),
+          outcome: L('PreciseTimer каждые 10 мс опрашивает все Post либо останавливается; QML получает подтверждённый generatorEnabled.', 'A PreciseTimer polls all Post objects every 10 ms or stops, and QML receives the acknowledged generatorEnabled state.'),
+          boundary: L('Каждый новый start повторяет connect(timeout, slotPostCall) без UniqueConnection; callbacks накапливаются. Stop не сбрасывает m_nextGenTime.', 'Every new start repeats connect(timeout, slotPostCall) without UniqueConnection, so callbacks accumulate. Stop does not reset m_nextGenTime.'),
+          route: [A('GenTab.qml', 'qml-shell'), A('GeneratorBackend', 'generator-backend'), A('LoadGenerator', 'load-generator', 'queued'), A('QTimer', 'load-generator', 'timer'), A('Post', 'post'), A('GeneratorBackend', 'generator-backend', 'data')],
+          edgeIds: ['qml-generator', 'generator-load', 'generator-load-signals', 'load-post'],
+          steps: [
+            ST(L('Меняет желаемое состояние', 'Changes desired state'), L('GeneratorBackend инвертирует m_generatorEnabled и уведомляет QML.', 'GeneratorBackend flips m_generatorEnabled and notifies QML.'), 'GeneratorBackend', 'generator-backend', 'main', 'direct', 'onGeneratorEnabledButtonClicked()'),
+            ST(L('Пересекает границу потока', 'Crosses the thread boundary'), L('signalPostCallToggle(bool) ставит вызов slotPostCallToggle() в очередь generator thread.', 'signalPostCallToggle(bool) queues slotPostCallToggle() in the generator thread.'), 'LoadGenerator', 'load-generator', 'gen', 'queued', 'signalPostCallToggle → slotPostCallToggle'),
+            ST(L('Запускает PreciseTimer', 'Starts the PreciseTimer'), L('Таймер создаётся при первом старте, получает interval=10 ms и запускается.', 'The timer is created on first start, configured for a 10 ms interval, and started.'), 'LoadGenerator', 'load-generator', 'gen', 'timer', 'QTimer::setTimerType(PreciseTimer); start()'),
+            ST(L('Опрашивает все Post', 'Polls every Post'), L('Каждый timeout вызывает slotPostCall(), который передаёт steady_clock::now() каждому runtime-посту.', 'Each timeout invokes slotPostCall(), which passes steady_clock::now() to every runtime station.'), 'LoadGenerator::Post', 'post', 'gen', 'timer', 'slotPostCall() → post.call(now)'),
+            ST(L('Подтверждает состояние', 'Acknowledges state'), L('LoadGenerator испускает signalPostCallToggle(m_callingEnabled), а GeneratorBackend синхронизирует Q_PROPERTY.', 'LoadGenerator emits signalPostCallToggle(m_callingEnabled), and GeneratorBackend synchronizes its Q_PROPERTY.'), 'GeneratorBackend', 'generator-backend', 'main', 'data', 'slotPostCallToggle(bool)')
+          ]
+        },
+        {
+          id: 'one-package',
+          title: L('Один цикл: 2D-геометрия и пакет', 'One cycle: 2D geometry and package'),
+          tabCopy: L('Noise + Peaks → bearing', 'Noise + Peaks → bearing'),
+          summary: L('Готовый Post проходит всю row-major сетку направлений, складывает шум и сферические пики, нормирует одну 2D-свёртку и формирует DataPackage.', 'A due Post traverses the row-major direction grid, adds noise and spherical peaks, normalizes one 2D convolution, and builds DataPackage.'),
+          trigger: L('QTimer::timeout, включённый Post и now >= m_nextGenTime.', 'QTimer::timeout with an enabled Post whose now >= m_nextGenTime.'),
+          outcome: L('DataPackage пересекает generator → main, приходит в GeneratorBackend и всегда доходит до SaveBackend; при saveEnabled=false там молча отбрасывается.', 'DataPackage crosses generator → main, reaches GeneratorBackend, and always arrives at SaveBackend; it is silently dropped there when saveEnabled=false.'),
+          boundary: L('Пустая сетка приводит к max_element(end), нулевой максимум — к делению на ноль. Верхние границы сетки исключены из-за floor(range/step).', 'An empty grid leads to max_element(end), while a zero maximum causes division by zero. Upper grid bounds are excluded by floor(range/step).'),
+          route: [A('QTimer', 'load-generator', 'timer'), A('Post', 'post'), A('LinearCoord3D grid', 'linear-coord-3d'), A('AbstractNoise', 'abstract-noise', 'branch'), A('AbstractPeak', 'abstract-peak', 'branch'), A('DataPackage', 'data-package'), A('GeneratorBackend', 'generator-backend', 'data'), A('SaveBackend', 'save-backend')],
+          edgeIds: ['load-post', 'post-directions', 'post-noise', 'post-peaks', 'abstractpeak-linear', 'post-package', 'package-bearing', 'generator-load-signals', 'generator-save'],
+          steps: [
+            ST(L('Проверяет срок поста', 'Checks station due time'), L('Post::call() выходит, если пост выключен или следующий срок ещё не наступил.', 'Post::call() exits when the station is disabled or not yet due.'), 'LoadGenerator::Post', 'post', 'gen', 'timer', 'enabled && now >= m_nextGenTime'),
+            ST(L('Обходит 2D-сетку направлений', 'Traverses the 2D direction grid'), L('Сетка заранее создана: внешний индекс — elevation, внутренний — azimuth; каждый элемент является единичным LinearCoord3D.', 'The precomputed grid uses elevation outside and azimuth inside; every element is a unit LinearCoord3D.'), 'GeometryUtils::LinearCoord3D', 'linear-coord-3d', 'gen', 'direct', 'for (direction : m_direction)'),
+            ST(L('Складывает шум и пики', 'Adds noise and peaks'), L('Для каждого направления значение начинается с noise->next(), затем получает сумму peak->valueAt(direction).', 'For every direction the value starts with noise->next() and then adds each peak->valueAt(direction).'), 'Post / AbstractNoise / AbstractPeak', 'post', 'gen', 'branch', 'value = noise->next() + Σ peak->valueAt(direction)'),
+            ST(L('Использует сферическое расстояние', 'Uses spherical distance'), L('Пики хранят центр как LinearCoord3D и вызывают GeometryUtils::degBetweenCoord3D() с normalize/clamp/acos.', 'Peaks store their center as LinearCoord3D and call GeometryUtils::degBetweenCoord3D() using normalize/clamp/acos.'), 'GeometryUtils', 'geometry-utils', 'gen', 'direct', 'degBetweenCoord3D(direction, m_center)'),
+            ST(L('Нормирует и находит bearing', 'Normalizes and finds bearing'), L('Берётся модуль, максимум сохраняется как quality, вся conv делится на максимум, а индекс максимума переводится в SphericalCoordDeg.', 'Absolute values are taken, the maximum becomes quality, conv is divided by it, and the maximum index converts to SphericalCoordDeg.'), 'LoadGenerator::DataPackage', 'data-package', 'gen', 'data', 'quality=maxValue; bearing=m_direction[maxIndex].toSphericalCoordDeg()'),
+            ST(L('Заполняет метаданные', 'Fills metadata'), L('Пакет получает UTC timestamp, level, frequency, coordinate, postName и полную форму min/max/step/count H,V.', 'The package receives UTC timestamp, level, frequency, coordinate, postName, and the complete min/max/step/count H,V shape.'), 'LoadGenerator::DataPackage', 'data-package', 'gen', 'direct', 'm_data.timestamp/.../countH/countV/conv'),
+            ST(L('Передаёт в persistence gate', 'Hands off to persistence gate'), L('signalSendData пересекает поток; GeneratorBackend::slotSendData() вызывает SaveBackend::processDataPackage().', 'signalSendData crosses the thread boundary; GeneratorBackend::slotSendData() calls SaveBackend::processDataPackage().'), 'SaveBackend', 'save-backend', 'main', 'data', 'signalSendData → slotSendData → processDataPackage')
+          ]
+        },
+        {
+          id: 'save-settings',
+          title: L('Настройка и включение сохранения', 'Configure and enable persistence'),
+          tabCopy: L('Формат · endian · gate', 'Format · endian · gate'),
+          summary: L('SaveTab управляет wire-форматом будущих BYTEA, порядком байтов и отдельным gate, не вмешиваясь в работу генератора.', 'SaveTab controls the future BYTEA wire format, byte order, and a separate gate without changing generator operation.'),
+          trigger: L('Выбор формата/byte order и кнопка «Включить сохранение в БД».', 'Choosing format/byte order and pressing Enable database persistence.'),
+          outcome: L('Следующие DataPackage разрешено ставить в writer queue с выбранными DataType и ByteOrder.', 'Subsequent DataPackage objects may enter the writer queue with the selected DataType and ByteOrder.'),
+          boundary: L('Начальные значения теперь детерминированы: double + LittleEndian. Но enum-сеттеры не проверяют индекс, а кнопка доступна и при dbStatus=1 (busy), не только при 2.', 'Defaults are now deterministic: double plus LittleEndian. However, enum setters do not validate their indices, and the button remains enabled at dbStatus=1 (busy), not only at 2.'),
+          route: [A('SaveTab.qml', 'qml-shell'), A('SaveBackend', 'save-backend'), A('DatabaseManager · writer', 'database-manager')],
+          edgeIds: ['qml-save', 'save-writer-manager'],
+          steps: [
+            ST(L('Выбирает DataType', 'Chooses DataType'), L('Первый ComboBox отображает 10 форматов: double, real, smallint и PackedArray 8…2 бит.', 'The first ComboBox exposes 10 formats: double, real, smallint, and PackedArray 8…2 bits.'), 'SaveTab.qml', 'qml-shell', 'main', 'direct', 'saveBackend.currentDataType = currentIndex'),
+            ST(L('Выбирает ByteOrder', 'Chooses ByteOrder'), L('Второй ComboBox задаёт LittleEndian или BigEndian.', 'The second ComboBox selects LittleEndian or BigEndian.'), 'SaveBackend', 'save-backend', 'main', 'direct', 'setCurrentByteOrder(currentIndex)'),
+            ST(L('Открывает или закрывает gate', 'Opens or closes the gate'), L('Кнопка инвертирует saveEnabled; QML status label отражает состояние независимо от generatorEnabled.', 'The button flips saveEnabled; the QML status label reflects it independently of generatorEnabled.'), 'SaveBackend', 'save-backend', 'main', 'direct', 'onSaveEnableButtonClicked()'),
+            ST(L('Пропускает только новые пакеты', 'Allows only future packages'), L('processDataPackage() ничего не буферизует: выключенные ранее пакеты не восстанавливаются.', 'processDataPackage() buffers nothing; packages dropped while disabled cannot be recovered.'), 'SaveBackend', 'save-backend', 'main', 'direct', 'if (m_saveEnabled) m_db.saveDataPackage(...)')
+          ]
+        },
+        {
+          id: 'persist-package',
+          title: L('Запись DataPackage в PostgreSQL', 'Persist DataPackage to PostgreSQL'),
+          tabCopy: L('Coder → BYTEA → 2 таблицы', 'Codec → BYTEA → 2 tables'),
+          summary: L('При открытом gate пакет проходит из главного потока в writer queue, кодируется выбранной стратегией и атомарно раскладывается между df_conv и df_result.', 'With the gate open, the package enters the writer queue, is encoded by the selected strategy, and is atomically split across df_conv and df_result.'),
+          trigger: L('Новый DataPackage при saveEnabled=true.', 'A new DataPackage while saveEnabled=true.'),
+          outcome: L('Одна транзакция создаёт общий id: тяжёлая свёртка хранится в df_conv, а результат и метаданные — в df_result.', 'One transaction creates a shared id: heavy convolution data lives in df_conv, while result and metadata live in df_result.'),
+          boundary: L('Coder вызывается до проверки connected, его исключения не ловятся; transaction()/commit() не проверяются. Большая conv копируется generator → main → writer без backpressure.', 'The codec runs before connected is checked and its exceptions are uncaught; transaction()/commit() results are ignored. Large conv data is copied generator → main → writer without backpressure.'),
+          route: [A('DataPackage', 'data-package'), A('GeneratorBackend', 'generator-backend', 'data'), A('SaveBackend', 'save-backend'), A('DatabaseManager · writer', 'database-manager'), A('DatabaseWorker · writer', 'database-worker', 'queued'), A('ByteArrayCoder', 'byte-array-coder'), A('PackedArray', 'packed-array', 'branch'), A('PostgreSQL', 'postgresql-schema', 'driver')],
+          edgeIds: ['generator-load-signals', 'generator-save', 'save-writer-manager', 'manager-worker', 'worker-coder', 'packed-coder-library', 'worker-postgres'],
+          steps: [
+            ST(L('Ставит insert в writer queue', 'Queues insert on writer'), L('SaveBackend вызывает DatabaseManager::saveDataPackage(), который испускает signalInsert(package,type,byteOrder).', 'SaveBackend calls DatabaseManager::saveDataPackage(), which emits signalInsert(package,type,byteOrder).'), 'DatabaseManager · writer', 'database-manager', 'main', 'queued', 'signalInsert(const DataPackage&, int, int)'),
+            ST(L('Выбирает стратегию кодирования', 'Selects codec strategy'), L('ByteArrayCoder::create() создаёт double/real/smallint coder либо PackedArrayCoder для 8…2 бит.', 'ByteArrayCoder::create() builds a double/real/smallint coder or PackedArrayCoder for 8…2 bits.'), 'ByteArrayCoder', 'byte-array-coder', 'db-writer', 'direct', 'ByteArrayCoder::create(dataType, byteOrder)'),
+            ST(L('Формирует wire payload', 'Builds wire payload'), L('Все форматы записывают uint32 elementCount. Простые кодеры добавляют 8/4/2 байта на значение; packed-ветка квантует [0,1] и уплотняет uint32-слова.', 'Every format writes uint32 elementCount. Simple codecs add 8/4/2 bytes per value; the packed path quantizes [0,1] and packs uint32 words.'), 'PackedArrayCoder / concrete coder', 'packed-array-coder', 'db-writer', 'branch', 'coder->serialize(package.conv)'),
+            ST(L('Вызывает внешнюю C-библиотеку', 'Calls the external C library'), L('PackedArrayCoder управляет PackedArray через unique_ptr с PackedArray_destroy и вызывает pack().', 'PackedArrayCoder manages PackedArray with a unique_ptr/PackedArray_destroy deleter and calls pack().'), 'PackedArray', 'packed-array', 'external', 'direct', 'PackedArray_create() → PackedArray_pack() → buffer'),
+            ST(L('Подготавливает транзакцию', 'Prepares the transaction'), L('Worker выбирает 20-значный data_type label, читает :sql/insert.sql и bind-ит сетку, quality, BYTEA, bearing и метаданные.', 'The worker selects one of 20 data_type labels, reads :sql/insert.sql, and binds grid, quality, BYTEA, bearing, and metadata.'), 'DatabaseWorker · writer', 'database-worker', 'db-writer', 'direct', 'db.transaction(); query.prepare(); bindValue(...)'),
+            ST(L('Вставляет две связанные строки', 'Inserts two linked rows'), L('CTE вставляет df_conv RETURNING id; затем тем же id создаёт df_result.', 'A CTE inserts df_conv RETURNING id and then creates df_result with the same id.'), 'PostgreSQL', 'postgresql-schema', 'postgres', 'driver', 'WITH inserted_conv AS (...) INSERT INTO df_result SELECT id,...'),
+            ST(L('Фиксирует и возвращает статус', 'Commits and returns status'), L('После exec() worker вызывает commit(), снимает busy и передаёт status/error обратно в ConnectionBackend.', 'After exec(), the worker calls commit(), clears busy, and returns status/error to ConnectionBackend.'), 'DatabaseWorker · writer', 'database-worker', 'db-writer', 'data', 'db.commit() → signalManagerUpdate(...)')
+          ]
+        },
+        {
+          id: 'schema-maintenance',
+          title: L('Обслуживание схемы БД', 'Maintain database schema'),
+          tabCopy: L('Clear · Recreate · Delete', 'Clear · Recreate · Delete'),
+          summary: L('Три подтверждённые диалогами команды идут через тот же writer queue и выполняют SQL-ресурсы внутри транзакций.', 'Three confirmation-gated commands travel through the same writer queue and execute SQL resources inside transactions.'),
+          trigger: L('«Очистить», «Пересоздать» или «Удалить таблицы» в SaveTab.qml.', 'Clear, Recreate, or Delete tables in SaveTab.qml.'),
+          outcome: L('Clear удаляет данные; Recreate заново создаёт enum и обе таблицы; Delete оставляет соединение открытым, но без схемы.', 'Clear removes data; Recreate rebuilds the enum and both tables; Delete leaves the connection open without the schema.'),
+          boundary: L('Кнопки доступны при busy; новые inserts могут уже стоять в очереди. Reader независим и может читать одновременно. VisualizationTableModel автоматически не очищается.', 'Buttons remain enabled while busy and new inserts may already be queued. Reader is independent and can read concurrently. VisualizationTableModel is not cleared automatically.'),
+          route: [A('SaveTab.qml', 'qml-shell'), A('SaveBackend', 'save-backend'), A('DatabaseManager · writer', 'database-manager'), A('DatabaseWorker · writer', 'database-worker', 'queued'), A('SQL resources', 'postgresql-schema'), A('PostgreSQL', 'postgresql-schema', 'driver')],
+          edgeIds: ['qml-save', 'save-writer-manager', 'manager-worker', 'worker-config', 'worker-postgres'],
+          steps: [
+            ST(L('Требует подтверждение', 'Requires confirmation'), L('Каждая потенциально опасная кнопка открывает modal Dialog; вызов backend происходит только в onAccepted.', 'Each dangerous button opens a modal Dialog; the backend call happens only in onAccepted.'), 'SaveTab.qml', 'qml-shell', 'main', 'direct', 'Dialog.onAccepted'),
+            ST(L('Ставит команду в writer queue', 'Queues a writer command'), L('SaveBackend испускает signalClearTable, signalRecreateTable или signalDeleteTable через DatabaseManager.', 'SaveBackend emits signalClearTable, signalRecreateTable, or signalDeleteTable through DatabaseManager.'), 'DatabaseManager · writer', 'database-manager', 'main', 'queued', 'signalClear/Recreate/DeleteTable()'),
+            ST(L('Clear: очищает данные', 'Clear: removes data'), L('slotClearTable() выполняет TRUNCATE df_conv CASCADE; df_result очищается по внешнему ключу.', 'slotClearTable() executes TRUNCATE df_conv CASCADE; df_result is cleared through the foreign key.'), 'DatabaseWorker · writer', 'database-worker', 'db-writer', 'driver', ':sql/cleanConv.sql'),
+            ST(L('Recreate: пересобирает схему', 'Recreate: rebuilds schema'), L('Последовательно удаляются df_result, df_conv и data_type, затем создаются enum с 20 labels и обе таблицы.', 'df_result, df_conv, and data_type are dropped in order, followed by the 20-label enum and both tables.'), 'PostgreSQL', 'postgresql-schema', 'postgres', 'driver', 'delete*.sql → createDataTypeEnum.sql → createConv.sql → createResult.sql'),
+            ST(L('Delete: оставляет предупреждение', 'Delete: leaves a warning'), L('Удаляются обе таблицы и enum; после commit worker намеренно записывает lastError о необходимости пересоздать схему.', 'Both tables and the enum are dropped; after commit the worker intentionally stores a warning that the schema must be recreated.'), 'DatabaseWorker · writer', 'database-worker', 'db-writer', 'data', 'slotDeleteTable()')
+          ]
+        },
+        {
+          id: 'read-visualization',
+          title: L('Чтение и визуализация', 'Read and visualize'),
+          tabCopy: L('JOIN → decode → TableView', 'JOIN → decode → TableView'),
+          summary: L('Reader выполняет JOIN всех записей, декодирует каждый BYTEA тем же семейством кодеров и передаёт параллельные rows/convs в QML-модель.', 'Reader joins all records, decodes every BYTEA with the same codec family, and sends parallel rows/convs into the QML model.'),
+          trigger: L('Кнопка «Прочитать» во вкладке «Отображение».', 'The Read button on the Display tab.'),
+          outcome: L('TableView получает 11 колонок; последняя рисует Canvas-sparkline из агрегированного и уменьшенного профиля.', 'TableView receives 11 columns; the last draws a Canvas sparkline from an aggregated and reduced profile.'),
+          boundary: L('Нет LIMIT/pagination: читаются и декодируются все blob. Reader status/error не видны в QML; неизвестный data_type продолжает путь как double_le. Lazy-кеш m_shrinkedConvs может сместить уже рассчитанные строки при непоследовательном доступе.', 'There is no LIMIT/pagination: every blob is read and decoded. Reader status/error are hidden from QML, and unknown data_type continues as double_le. The lazy m_shrinkedConvs cache can shift existing rows when access is out of order.'),
+          route: [A('VisualizeTab.qml', 'qml-shell'), A('VisualizeBackend', 'visualize-backend'), A('DatabaseManager · reader', 'database-manager'), A('DatabaseWorker · reader', 'database-worker', 'queued'), A('PostgreSQL', 'postgresql-schema', 'driver'), A('ByteArrayCoder', 'byte-array-coder'), A('RowForVisualization', 'row-for-visualization', 'data'), A('VisualizationTableModel', 'visualization-table-model'), A('Utils', 'utils'), A('Canvas', 'qml-shell')],
+          edgeIds: ['qml-visualize', 'visualize-reader-manager', 'manager-worker', 'worker-postgres', 'worker-coder', 'worker-row', 'worker-manager-data', 'manager-visualize-data', 'visualize-table-model', 'table-data', 'data-row', 'table-utils', 'table-qml'],
+          steps: [
+            ST(L('Ставит SELECT в reader queue', 'Queues SELECT on reader'), L('VisualizeBackend::readDb() вызывает m_readerDb.readDb(), который испускает signalReadDb().', 'VisualizeBackend::readDb() calls m_readerDb.readDb(), which emits signalReadDb().'), 'DatabaseManager · reader', 'database-manager', 'main', 'queued', 'readDb() → signalReadDb()'),
+            ST(L('JOIN-ит две таблицы', 'Joins two tables'), L('Reader-worker читает :sql/select.sql: JOIN USING(id), сортировка timestamp DESC, id DESC, без LIMIT.', 'The reader worker loads :sql/select.sql: JOIN USING(id), sorted by timestamp DESC and id DESC, without LIMIT.'), 'PostgreSQL', 'postgresql-schema', 'postgres', 'driver', 'SELECT ... FROM df_result JOIN df_conv USING(id)'),
+            ST(L('Строит строку и выбирает decoder', 'Builds row and selects decoder'), L('Для каждого результата создаётся RowForVisualization; строка data_type отображается обратно в DataType + ByteOrder.', 'For each result a RowForVisualization is built and data_type is mapped back to DataType plus ByteOrder.'), 'DatabaseWorker · reader', 'database-worker', 'db-reader', 'direct', 'while(query.next()) { RowForVisualization row; ... }'),
+            ST(L('Декодирует BYTEA', 'Decodes BYTEA'), L('ByteArrayCoder::create() читает elementCount и payload; PackedArrayCoder проверяет ожидаемое число uint32-слов и вызывает unpack().', 'ByteArrayCoder::create() reads elementCount and payload; PackedArrayCoder validates the uint32 word count and calls unpack().'), 'ByteArrayCoder', 'byte-array-coder', 'db-reader', 'direct', 'coder->deserialize(convBytes)'),
+            ST(L('Передаёт два параллельных массива', 'Sends two parallel arrays'), L('signalReadDb(rows,convs) пересекает reader → main, DatabaseManager ретранслирует signalSetData, VisualizeBackend вызывает replaceData().', 'signalReadDb(rows,convs) crosses reader → main; DatabaseManager relays signalSetData and VisualizeBackend calls replaceData().'), 'VisualizeBackend', 'visualize-backend', 'main', 'data', 'signalReadDb → slotReadDb → signalSetData → slotSetData'),
+            ST(L('Сбрасывает модель и кеш', 'Resets the model and cache'), L('VisualizationTableModel заменяет DataForVisualization между beginResetModel()/endResetModel(), очищает m_shrinkedConvs и reserve-ит rows.size().', 'VisualizationTableModel replaces DataForVisualization between beginResetModel()/endResetModel(), clears m_shrinkedConvs, and reserves rows.size().'), 'VisualizationTableModel', 'visualization-table-model', 'main', 'direct', 'replaceData(rows, convs) → m_shrinkedConvs.clear()/reserve()'),
+            ST(L('Лениво готовит азимутальный sparkline', 'Lazily prepares the azimuth sparkline'), L('При первом SparklineRole flattenVector(conv,countH) строит countH колонок, суммируя одинаковый H-индекс по уровням V; shrinkVector(...,100) берёт максимумы корзин, результат сохраняется в m_shrinkedConvs.', 'On the first SparklineRole read, flattenVector(conv,countH) builds countH columns by summing the same H index across V layers; shrinkVector(...,100) keeps bucket maxima and the result is stored in m_shrinkedConvs.'), 'Utils / VisualizationTableModel', 'visualization-table-model', 'main', 'direct', 'flattenVector() → shrinkVector() → m_shrinkedConvs.insert()'),
+            ST(L('Рисует Canvas', 'Draws Canvas'), L('QML delegate выбирает sparklineComponent; изменение points вызывает requestPaint(), а sparkline.js рисует линию.', 'The QML delegate selects sparklineComponent; points changes request a repaint and sparkline.js draws the line.'), 'VisualizeTab.qml', 'qml-shell', 'main', 'direct', 'onPointsChanged: requestPaint(); drawSparkline(...)')
+          ]
+        },
+        {
+          id: 'shutdown',
+          title: L('Завершение приложения', 'Application shutdown'),
+          tabCopy: L('QML → reader → gen → writer', 'QML → reader → gen → writer'),
+          summary: L('После выхода из exec() stack-объекты уничтожаются в обратном порядке; каждый владелец worker-потока вызывает quit() и wait().', 'After exec() returns, stack objects are destroyed in reverse order; every worker-thread owner calls quit() and wait().'),
+          trigger: L('Закрытие ApplicationWindow и выход из QGuiApplication::exec().', 'Closing ApplicationWindow and returning from QGuiApplication::exec().'),
+          outcome: L('Сначала исчезает QML, затем останавливаются reader DB thread, generator thread и writer DB thread.', 'QML disappears first, followed by reader DB thread, generator thread, and writer DB thread.'),
+          boundary: L('Нет явного протокола stop generator → disable save → drain writer queue → close SQL. Код не подтверждает flush всех queued inserts перед quit(); именованные QSqlDatabase явно не removeDatabase().', 'There is no explicit stop generator → disable save → drain writer queue → close SQL protocol. The code does not confirm all queued inserts are flushed before quit(), and named QSqlDatabase handles are not explicitly removed.'),
+          route: [A('QQmlApplicationEngine', 'qml-shell'), A('VisualizeBackend', 'visualize-backend'), A('DatabaseManager · reader', 'database-manager'), A('GeneratorBackend', 'generator-backend', 'branch'), A('LoadGenerator', 'load-generator'), A('ConnectionBackend', 'connection-backend', 'branch'), A('DatabaseManager · writer', 'database-manager')],
+          edgeIds: ['app-qml', 'app-visualize', 'visualize-reader-manager', 'manager-worker', 'app-generator', 'generator-load', 'app-connection', 'connection-writer-manager'],
+          steps: [
+            ST(L('Уничтожает QML-дерево', 'Destroys the QML tree'), L('QQmlApplicationEngine объявлен последним и уничтожается первым после выхода из exec().', 'QQmlApplicationEngine is declared last and is destroyed first after exec() returns.'), 'main.qml / QQmlApplicationEngine', 'qml-shell', 'main', 'direct', 'stack destruction: engine'),
+            ST(L('Останавливает reader thread', 'Stops reader thread'), L('VisualizeBackend уничтожает m_readerDb; DatabaseManager::~DatabaseManager() вызывает quit() и wait().', 'VisualizeBackend destroys m_readerDb; DatabaseManager::~DatabaseManager() calls quit() and wait().'), 'DatabaseManager · reader', 'database-manager', 'main', 'direct', 'm_workerThread.quit(); m_workerThread.wait()'),
+            ST(L('Останавливает generator thread', 'Stops generator thread'), L('GeneratorBackend::~GeneratorBackend() завершает m_loadGeneratorThread и ждёт его.', 'GeneratorBackend::~GeneratorBackend() quits and waits for m_loadGeneratorThread.'), 'GeneratorBackend', 'generator-backend', 'main', 'direct', '~GeneratorBackend()'),
+            ST(L('Уничтожает SaveBackend', 'Destroys SaveBackend'), L('SaveBackend не владеет DB; его ссылка на writer исчезает раньше ConnectionBackend.', 'SaveBackend does not own the DB; its writer reference disappears before ConnectionBackend.'), 'SaveBackend', 'save-backend', 'main', 'direct', 'stack destruction: saveBackend'),
+            ST(L('Останавливает writer thread', 'Stops writer thread'), L('ConnectionBackend уничтожает m_db последним из backend-цепочки; writer manager вызывает quit()/wait().', 'ConnectionBackend destroys m_db last in the backend chain; writer manager calls quit()/wait().'), 'DatabaseManager · writer', 'database-manager', 'main', 'direct', 'stack destruction: connectionBackend → m_db')
+          ]
+        }
+      ];
+
       function escapeXml(value) {
         return String(value)
           .replaceAll('&', '&amp;')
@@ -2541,9 +3267,13 @@
         const kind = t(node.kind, language);
         const hint = ui[language].nodeHint;
         const baseText = nodeBaseText(node, language);
+        const nameLength = Math.max(80, node.w - 66);
+        const nameFit = name.length * 9 > nameLength
+          ? ' textLength="' + nameLength + '" lengthAdjust="spacingAndGlyphs"'
+          : '';
         const text = node.compact
-          ? '<text x="18" y="24"><tspan class="node-kind">' + escapeXml(kind) + '</tspan><tspan class="node-name" x="18" dy="23">' + escapeXml(name) + '</tspan></text>'
-          : '<text x="18" y="27"><tspan class="node-kind">' + escapeXml(kind) + '</tspan><tspan class="node-name" x="18" dy="23">' + escapeXml(name) + '</tspan><tspan class="node-base" x="18" dy="20">' + escapeXml(baseText) + '</tspan></text>';
+          ? '<text x="18" y="24"><tspan class="node-kind">' + escapeXml(kind) + '</tspan><tspan class="node-name" x="18" dy="23"' + nameFit + '>' + escapeXml(name) + '</tspan></text>'
+          : '<text x="18" y="27"><tspan class="node-kind">' + escapeXml(kind) + '</tspan><tspan class="node-name" x="18" dy="23"' + nameFit + '>' + escapeXml(name) + '</tspan><tspan class="node-base" x="18" dy="20">' + escapeXml(baseText) + '</tspan></text>';
         return '<g class="node layer-' + node.layer + '" data-node-id="' + escapeXml(node.id) + '" transform="translate(' + node.x + ' ' + node.y + ')" role="button" tabindex="0" aria-label="' + escapeXml(name + '. ' + hint) + '">' +
           '<rect class="node-card" width="' + node.w + '" height="' + node.h + '" rx="14"></rect>' +
           '<rect class="node-accent" width="' + node.w + '" height="7" rx="4"></rect>' +
@@ -2576,7 +3306,7 @@
         const bridges = (edge.bridges || []).map(point =>
           '<circle class="edge-bridge" cx="' + point[0] + '" cy="' + point[1] + '" r="8"></circle>'
         ).join('');
-        return '<g class="' + classes + '" data-edge-index="' + index + '" data-source="' + escapeXml(edge.source) + '" data-target="' + escapeXml(edge.target) + '">' +
+        return '<g class="' + classes + '" data-edge-id="' + escapeXml(edge.id) + '" data-edge-index="' + index + '" data-source="' + escapeXml(edge.source) + '" data-target="' + escapeXml(edge.target) + '">' +
           '<path d="' + path + '"' + reverseMarker + '></path>' + bridges + label +
           '<title>' + escapeXml(source + ' → ' + target + ' · ' + edgeTypeLabel(edge.type, language) + (labelValue ? ' · ' + labelValue : '')) + '</title></g>';
       }
@@ -2585,7 +3315,7 @@
         const styles = '<style>' +
           '.diagram-svg{background:#f7f9fd;cursor:grab}.canvas-bg{fill:#f7f9fd}.diagram-svg.is-dragging{cursor:grabbing}' +
           '.cluster rect{stroke-width:1.5;vector-effect:non-scaling-stroke}.cluster text{fill:#293752;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:17px;font-weight:750;letter-spacing:.025em}' +
-          '.cluster-ui rect{fill:#f0f1ff;stroke:#b8bdf0}.cluster-db rect{fill:#edf8f4;stroke:#a7d8c8}.cluster-gen rect{fill:#fff6e9;stroke:#e9c79e}.cluster-noise rect{fill:#edf8fc;stroke:#a5d5e6}.cluster-peak rect{fill:#fbf0f7;stroke:#dfb5d2}' +
+          '.cluster-ui rect{fill:#f0f1ff;stroke:#b8bdf0}.cluster-db rect{fill:#edf8f4;stroke:#a7d8c8}.cluster-gen rect{fill:#fff6e9;stroke:#e9c79e}.cluster-geometry rect{fill:#eef9f8;stroke:#a5d6d3}.cluster-noise rect{fill:#edf8fc;stroke:#a5d5e6}.cluster-peak rect{fill:#fbf0f7;stroke:#dfb5d2}.cluster-codec rect{fill:#f5f0fc;stroke:#cdbbea}.cluster-visual rect{fill:#fdf1f3;stroke:#e8b9c2}' +
           '.edge{color:#8290a7;transition:opacity 140ms ease}.edge path{fill:none;stroke:currentColor;stroke-width:1.9;vector-effect:non-scaling-stroke;marker-end:url(#arrow)}' +
           '.edge.tree-edge{color:#68778f}.edge.crosslink{opacity:.6}.diagram-svg.hide-crosslinks .edge.crosslink:not(.is-active):not(.is-scenario-edge){opacity:0;pointer-events:none}.edge.inheritance{color:#52637e}.edge.inheritance path{marker-end:url(#triangle)}' +
           '.edge.composition{color:#34435f}.edge.composition path{stroke-width:2.45;marker-start:url(#diamond);marker-end:none}.edge.reference path{stroke-dasharray:10 7}.edge.signal path{stroke-dasharray:3 7}.edge.lifecycle path{stroke-dasharray:14 6 3 6}' +
@@ -2593,11 +3323,11 @@
           '.node{cursor:pointer;transition:opacity 140ms ease}.node:focus{outline:none}.node-card{fill:#fff;stroke:#d5deea;stroke-width:1.5;vector-effect:non-scaling-stroke;filter:url(#node-shadow);transition:stroke-width 140ms ease}' +
           '.node:hover .node-card,.node:focus .node-card{stroke:#4057d6;stroke-width:2.4}.node text{font-family:Inter,ui-sans-serif,system-ui,sans-serif;pointer-events:none}.node-kind{font-size:11.8px;font-weight:750;letter-spacing:.045em;text-transform:uppercase}.node-name{fill:#152037;font-size:16.8px;font-weight:750}.node-base{fill:#6a778e;font-size:11.8px}' +
           '.expand-icon circle{fill:#f5f7fc;stroke:#c9d3e3;stroke-width:1.3}.expand-icon path{fill:none;stroke:#65738a;stroke-width:1.7;stroke-linecap:round}.node.is-open .expand-v{opacity:0}' +
-          '.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#334155}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#4f5fd1}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#168167}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#c87016}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#087da8}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#a8498d}' +
+          '.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#334155}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#4f5fd1}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#168167}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#c87016}.node.layer-geometry .node-accent,.node.layer-geometry .node-kind{fill:#0f7c8d}.node.layer-codec .node-accent,.node.layer-codec .node-kind{fill:#7048b8}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#087da8}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#a8498d}.node.layer-visual .node-accent,.node.layer-visual .node-kind{fill:#b45367}.node.layer-external .node-accent,.node.layer-external .node-kind{fill:#64748b}' +
           '.node.is-scenario-node .node-card{stroke:#d97706;stroke-width:3;stroke-dasharray:8 4}.edge.is-scenario-edge{color:#d97706;opacity:1}.edge.is-scenario-edge path{stroke-width:3}' +
           '.node.is-selected .node-card{stroke:#4057d6;stroke-width:4;stroke-dasharray:none}.node.is-related .node-card{stroke:#6679df;stroke-width:2.5}.node.is-dimmed:not(.is-scenario-node),.edge.is-dimmed:not(.is-scenario-edge){opacity:.075}.edge.is-active{color:#4057d6;opacity:1}.edge.is-active path{stroke-width:3.35}' +
-          '@media(prefers-color-scheme:dark){.diagram-svg{background:#0d1422}.canvas-bg{fill:#0d1422}.cluster text{fill:#dce4f3}.cluster-ui rect{fill:#191b38;stroke:#4c5087}.cluster-db rect{fill:#102b28;stroke:#2d695c}.cluster-gen rect{fill:#302318;stroke:#785633}.cluster-noise rect{fill:#102630;stroke:#2d6072}.cluster-peak rect{fill:#2c192e;stroke:#704768}.edge{color:#65728b}.edge.tree-edge{color:#8492aa}.edge.inheritance{color:#8a99b2}.edge.composition{color:#abb7cb}.edge-bridge{fill:#0d1422}.edge-label{fill:#9ba8be;stroke:#0d1422}.node-card{fill:#151e31;stroke:#2b3852}.node-name{fill:#edf2fb}.node-base{fill:#9ba8be}.expand-icon circle{fill:#1c2740;stroke:#3a4965}.expand-icon path{stroke:#aab6ca}.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#cbd5e1}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#918aff}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#4bd3ad}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#ffad55}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#4bc4ea}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#ec88cc}.node.is-scenario-node .node-card{stroke:#fbbf24}.edge.is-scenario-edge{color:#fbbf24}.node.is-selected .node-card,.node.is-related .node-card{stroke:#a29cff}.edge.is-active{color:#a29cff}}' +
-          '@media print{.diagram-svg{background:#fff}.canvas-bg{fill:#fff}.cluster text{fill:#293752}.cluster-ui rect{fill:#f0f1ff;stroke:#b8bdf0}.cluster-db rect{fill:#edf8f4;stroke:#a7d8c8}.cluster-gen rect{fill:#fff6e9;stroke:#e9c79e}.cluster-noise rect{fill:#edf8fc;stroke:#a5d5e6}.cluster-peak rect{fill:#fbf0f7;stroke:#dfb5d2}.edge{color:#8290a7}.edge.tree-edge{color:#68778f}.edge.inheritance{color:#52637e}.edge.composition{color:#34435f}.edge-bridge{fill:#fff}.edge-label{fill:#65738a;stroke:#fff}.node-card{fill:#fff;stroke:#d5deea}.node-name{fill:#152037}.node-base{fill:#6a778e}.expand-icon circle{fill:#f5f7fc;stroke:#c9d3e3}.expand-icon path{stroke:#65738a}.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#334155}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#4f5fd1}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#168167}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#c87016}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#087da8}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#a8498d}.node.is-scenario-node .node-card{stroke:#d97706}.edge.is-scenario-edge{color:#d97706}.node.is-selected .node-card,.node.is-related .node-card{stroke:#4057d6}.edge.is-active{color:#4057d6}}' +
+          '@media(prefers-color-scheme:dark){.diagram-svg{background:#0d1422}.canvas-bg{fill:#0d1422}.cluster text{fill:#dce4f3}.cluster-ui rect{fill:#191b38;stroke:#4c5087}.cluster-db rect{fill:#102b28;stroke:#2d695c}.cluster-gen rect{fill:#302318;stroke:#785633}.cluster-geometry rect{fill:#102a2d;stroke:#327178}.cluster-noise rect{fill:#102630;stroke:#2d6072}.cluster-peak rect{fill:#2c192e;stroke:#704768}.cluster-codec rect{fill:#251c36;stroke:#665089}.cluster-visual rect{fill:#321c26;stroke:#7a4858}.edge{color:#65728b}.edge.tree-edge{color:#8492aa}.edge.inheritance{color:#8a99b2}.edge.composition{color:#abb7cb}.edge-bridge{fill:#0d1422}.edge-label{fill:#9ba8be;stroke:#0d1422}.node-card{fill:#151e31;stroke:#2b3852}.node-name{fill:#edf2fb}.node-base{fill:#9ba8be}.expand-icon circle{fill:#1c2740;stroke:#3a4965}.expand-icon path{stroke:#aab6ca}.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#cbd5e1}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#918aff}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#4bd3ad}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#ffad55}.node.layer-geometry .node-accent,.node.layer-geometry .node-kind{fill:#49c7d4}.node.layer-codec .node-accent,.node.layer-codec .node-kind{fill:#b294ee}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#4bc4ea}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#ec88cc}.node.layer-visual .node-accent,.node.layer-visual .node-kind{fill:#f091a4}.node.layer-external .node-accent,.node.layer-external .node-kind{fill:#aab4c3}.node.is-scenario-node .node-card{stroke:#fbbf24}.edge.is-scenario-edge{color:#fbbf24}.node.is-selected .node-card,.node.is-related .node-card{stroke:#a29cff}.edge.is-active{color:#a29cff}}' +
+          '@media print{.diagram-svg{background:#fff}.canvas-bg{fill:#fff}.cluster text{fill:#293752}.cluster-ui rect{fill:#f0f1ff;stroke:#b8bdf0}.cluster-db rect{fill:#edf8f4;stroke:#a7d8c8}.cluster-gen rect{fill:#fff6e9;stroke:#e9c79e}.cluster-geometry rect{fill:#eef9f8;stroke:#a5d6d3}.cluster-noise rect{fill:#edf8fc;stroke:#a5d5e6}.cluster-peak rect{fill:#fbf0f7;stroke:#dfb5d2}.cluster-codec rect{fill:#f5f0fc;stroke:#cdbbea}.cluster-visual rect{fill:#fdf1f3;stroke:#e8b9c2}.edge{color:#8290a7}.edge.tree-edge{color:#68778f}.edge.inheritance{color:#52637e}.edge.composition{color:#34435f}.edge-bridge{fill:#fff}.edge-label{fill:#65738a;stroke:#fff}.node-card{fill:#fff;stroke:#d5deea}.node-name{fill:#152037}.node-base{fill:#6a778e}.expand-icon circle{fill:#f5f7fc;stroke:#c9d3e3}.expand-icon path{stroke:#65738a}.node.layer-entry .node-accent,.node.layer-entry .node-kind{fill:#334155}.node.layer-ui .node-accent,.node.layer-ui .node-kind{fill:#4f5fd1}.node.layer-db .node-accent,.node.layer-db .node-kind{fill:#168167}.node.layer-gen .node-accent,.node.layer-gen .node-kind{fill:#c87016}.node.layer-geometry .node-accent,.node.layer-geometry .node-kind{fill:#0f7c8d}.node.layer-codec .node-accent,.node.layer-codec .node-kind{fill:#7048b8}.node.layer-noise .node-accent,.node.layer-noise .node-kind{fill:#087da8}.node.layer-peak .node-accent,.node.layer-peak .node-kind{fill:#a8498d}.node.layer-visual .node-accent,.node.layer-visual .node-kind{fill:#b45367}.node.layer-external .node-accent,.node.layer-external .node-kind{fill:#64748b}.node.is-scenario-node .node-card{stroke:#d97706}.edge.is-scenario-edge{color:#d97706}.node.is-selected .node-card,.node.is-related .node-card{stroke:#4057d6}.edge.is-active{color:#4057d6}}' +
           '</style>';
         const defs = '<defs>' +
           '<filter id="node-shadow" x="-15%" y="-20%" width="130%" height="150%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0b1020" flood-opacity=".12"></feDropShadow></filter>' +
@@ -2667,7 +3397,7 @@
       let detailsExpanded = false;
       let crosslinksVisible = false;
       let dragState = null;
-      let currentScenarioId = 'db-connect';
+      let currentScenarioId = 'persist-package';
       let scenarioHighlightActive = false;
 
       const accessMeta = {
@@ -2715,6 +3445,7 @@
       }
 
       function renderScenarioSwitcher() {
+        document.getElementById('scenario-count').textContent = String(scenarios.length);
         scenarioSwitcher.innerHTML = scenarios.map((scenario, index) =>
           '<button type="button" class="scenario-tab" data-scenario-id="' + escapeXml(scenario.id) + '" aria-pressed="' + String(scenario.id === currentScenarioId) + '">' +
             '<span class="scenario-tab-number">' + String(index + 1).padStart(2, '0') + '</span>' +
@@ -2802,15 +3533,17 @@
         const ids = new Set();
         scenario.route.forEach(item => { if (item.nodeId) ids.add(item.nodeId); });
         scenario.steps.forEach(step => { if (step.nodeId) ids.add(step.nodeId); });
-        scenario.edgePairs.forEach(pair => pair.forEach(id => ids.add(id)));
+        (scenario.edgeIds || []).forEach(edgeId => {
+          const edge = edges.find(candidate => candidate.id === edgeId);
+          if (!edge) return;
+          ids.add(edge.source);
+          ids.add(edge.target);
+        });
         return ids;
       }
 
       function scenarioEdgeMatches(edge, scenario) {
-        return scenario.edgePairs.some(pair =>
-          (edge.source === pair[0] && edge.target === pair[1]) ||
-          (edge.source === pair[1] && edge.target === pair[0])
-        );
+        return (scenario.edgeIds || []).includes(edge.id);
       }
 
       function scrollToElement(element) {
@@ -2891,16 +3624,16 @@
       function renderOverview() {
         const copy = currentLanguage === 'ru'
           ? [
-              ['Начните с main()', 'Верхний узел создаёт два QML-входа: ConnectionBackend и GeneratorBackend.'],
-              ['Идите по цветным веткам', 'Интерфейс редактирует настройки; ветки базы данных и генерации выполняют работу в отдельных потоках.'],
-              ['Смотрите на тип линии', 'Ромб — владение, треугольник — наследование. Дополнительный пунктир появляется по клику или общей кнопке.'],
-              ['Проверяйте границу системы', 'DataPackage возвращается в GeneratorBackend и сейчас не попадает в PostgreSQL.']
+              ['Начните с main()', 'Общий вход создаёт ConnectionBackend, SaveBackend, GeneratorBackend и VisualizeBackend, затем публикует все четыре фасада в QML.'],
+              ['Проследите запись слева направо', 'Post формирует DataPackage; GeneratorBackend передаёт его в SaveBackend, writer кодирует conv и одной транзакцией пишет две таблицы PostgreSQL.'],
+              ['Вернитесь по независимому reader-маршруту', 'VisualizeBackend читает JOIN в отдельном потоке, декодирует BYTEA и заменяет VisualizationTableModel; QML рисует sparkline.'],
+              ['Читайте жёлтые замечания придирчиво', 'Это не предположения: карточки отмечают подтверждённые границы и риски текущей реализации, которые важно видеть до изменения кода.']
             ]
           : [
-              ['Start with main()', 'The top node creates two QML entries: ConnectionBackend and GeneratorBackend.'],
-              ['Follow colored branches', 'UI edits settings; Database and Generation execute work in separate threads.'],
-              ['Read the line style', 'Diamond means ownership and triangle means inheritance. Additional dashed links appear on click or through the global toggle.'],
-              ['Check the system boundary', 'DataPackage returns to GeneratorBackend and currently does not reach PostgreSQL.']
+              ['Start with main()', 'The common entry constructs ConnectionBackend, SaveBackend, GeneratorBackend, and VisualizeBackend, then exposes all four facades to QML.'],
+              ['Follow persistence left to right', 'Post builds a DataPackage; GeneratorBackend hands it to SaveBackend, and the writer encodes conv and stores two PostgreSQL rows in one transaction.'],
+              ['Return through the independent reader path', 'VisualizeBackend runs a JOIN in its own thread, decodes BYTEA, replaces VisualizationTableModel, and QML paints the sparkline.'],
+              ['Treat the yellow notes as review findings', 'They mark source-verified boundaries and current implementation risks that matter before anyone changes the code.']
             ];
         overviewGuide.innerHTML = copy.map((step, index) =>
           '<div class="guide-step"><span class="guide-number">' + (index + 1) + '</span><strong>' + escapeXml(step[0]) + '</strong><span>' + escapeXml(step[1]) + '</span></div>'
@@ -3164,7 +3897,9 @@
         crosslinksVisible = !crosslinksVisible;
         svg.classList.toggle('hide-crosslinks', !crosslinksVisible);
         updateSecondaryButton();
-        status.textContent = crosslinksVisible ? ui[currentLanguage].secondaryShown : ui[currentLanguage].secondaryHidden;
+        status.textContent = crosslinksVisible
+          ? uiTemplate('secondaryShown', { edges: edges.length })
+          : ui[currentLanguage].secondaryHidden;
       });
 
       document.getElementById('download-svg').addEventListener('click', () => {
@@ -3178,10 +3913,11 @@
         const image = new Image();
         image.onload = () => {
           const canvas = document.createElement('canvas');
-          canvas.width = WIDTH * 2;
-          canvas.height = HEIGHT * 2;
+          const exportScale = Math.min(2, 6000 / WIDTH, 6000 / HEIGHT);
+          canvas.width = Math.round(WIDTH * exportScale);
+          canvas.height = Math.round(HEIGHT * exportScale);
           const context = canvas.getContext('2d');
-          context.scale(2, 2);
+          context.scale(exportScale, exportScale);
           context.drawImage(image, 0, 0, WIDTH, HEIGHT);
           URL.revokeObjectURL(url);
           canvas.toBlob(png => {

@@ -3,11 +3,11 @@
 #include <memory>
 #include "abstractnoisebackend.h"
 
-class NormalNoiseBackend : public AbstractNoiseBackend {
+class NormalNoiseBackend final : public AbstractNoiseBackend {
     Q_OBJECT
 
-    Q_PROPERTY(QString currentMean READ currentMean WRITE setCurrentMean NOTIFY currentMeanChanged);
-    Q_PROPERTY(QString currentSigma READ currentSigma WRITE setCurrentSigma NOTIFY currentSigmaChanged);
+    Q_PROPERTY(QString currentMean READ currentMean WRITE setCurrentMean NOTIFY currentMeanChanged)
+    Q_PROPERTY(QString currentSigma READ currentSigma WRITE setCurrentSigma NOTIFY currentSigmaChanged)
 
     [[nodiscard]] NormalNoise::NormalNoiseConfig* noiseConfigAcess() const;
 public:

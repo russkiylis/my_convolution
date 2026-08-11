@@ -23,7 +23,7 @@ void PostListModel::setPostIndex(const int postIndex)
         return;
 
     m_postIndex = postIndex;
-    m_peakListModel.setPeakConfig(m_config[m_postIndex].peakConfigs);
+    m_peakListModel.setPeakConfig(m_config[static_cast<size_t>(m_postIndex)].peakConfigs);
     qmlUpdate();
 }
 

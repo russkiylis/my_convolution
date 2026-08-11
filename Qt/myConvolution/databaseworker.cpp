@@ -5,6 +5,7 @@
 #include "databaseworker.h"
 #include "savebackend.h"
 #include "visualizebackend.h"
+#include "utils.h"
 
 DatabaseConfiguration::DatabaseConfiguration(const DatabaseConfiguration &other) = default;
 
@@ -824,7 +825,6 @@ void DatabaseWorker::slotDeleteTable() {
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 }
 
-// TODO: Чёрный передел чтения
 void DatabaseWorker::slotReadDb() {
     qDebug() << "Чтение базы данных...";
 
@@ -974,7 +974,7 @@ void DatabaseWorker::slotReadDb() {
             qWarning().noquote().nospace() << "[!] Прочитан неизвестный тип данных " << row.dataType;
         }
 
-        std::unique_ptr<ByteArrayCoder> coder = ByteArrayCoder::create(coderDataType, coderByteOrder);
+        const std::unique_ptr<ByteArrayCoder> coder = ByteArrayCoder::create(coderDataType, coderByteOrder);
         std::vector<double> convForVisualization = coder->deserialize(convBytes);
 
         if (row.dataType == "smallint_be" || row.dataType == "smallint_le") {
@@ -984,7 +984,7 @@ void DatabaseWorker::slotReadDb() {
             }
         }
 
-        convsForVisualization.push_back(QVector<double>(convForVisualization.begin(), convForVisualization.end()));
+        convsForVisualization.push_back(QVector(convForVisualization.begin(), convForVisualization.end()));
     }
     qDebug().noquote().nospace() << "Прочитано " << rowsForVisualization.size() << " строк.";
     db.commit();

@@ -1,7 +1,6 @@
 #pragma once
 #include <QObject>
 #include <memory>
-#include "third-party/PackedArray/packedarray.h"
 
 // Кодер из QVariantList в QByteArray
 class ByteArrayCoder {
@@ -33,7 +32,7 @@ public:
     virtual ~ByteArrayCoder() = default;
 
     // Приведение к массиву байтов
-    virtual QByteArray serialize(const std::vector<double> &data) const = 0;
+    [[nodiscard]] virtual QByteArray serialize(const std::vector<double> &data) const = 0;
 
     // Приведение из массива байтов
     virtual std::vector<double> deserialize(QByteArray &bytes) const = 0;
@@ -68,44 +67,44 @@ protected:
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем double по 8 байт
-class doubleByteArrayCoder : public ByteArrayCoder
+class doubleByteArrayCoder final : public ByteArrayCoder
 {
 public:
     explicit doubleByteArrayCoder(ByteOrder byteOrder);
 
-    QByteArray serialize(const std::vector<double> &data) const override;
+    [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
     std::vector<double> deserialize(QByteArray &bytes) const override;
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем real по 4 байта
-class realByteArrayCoder : public ByteArrayCoder
+class realByteArrayCoder final : public ByteArrayCoder
 {
 public:
     explicit realByteArrayCoder(ByteOrder byteOrder);
 
-    QByteArray serialize(const std::vector<double> &data) const override;
+    [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
     std::vector<double> deserialize(QByteArray &bytes) const override;
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем smallint по 2 байта
-class smallintByteArrayCoder : public ByteArrayCoder
+class smallintByteArrayCoder final : public ByteArrayCoder
 {
 public:
     explicit smallintByteArrayCoder(ByteOrder byteOrder);
 
-    QByteArray serialize(const std::vector<double> &data) const override;
+    [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
     std::vector<double> deserialize(QByteArray &bytes) const override;
 };
 
-class PackedArrayCoder : public ByteArrayCoder
+class PackedArrayCoder final : public ByteArrayCoder
 {
 public:
     explicit PackedArrayCoder(ByteOrder byteOrder, DataType type);
 
-    QByteArray serialize(const std::vector<double> &data) const override;
+    [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
     std::vector<double> deserialize(QByteArray &bytes) const override;
 };

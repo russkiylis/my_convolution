@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <QObject>
-#include <qpoint.h>
 
 #include "geometryutils.h"
 

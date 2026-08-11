@@ -18,7 +18,7 @@ void NormalNoiseBackend::qmlUpdate() {
 
 NormalNoise::NormalNoiseConfig* NormalNoiseBackend::noiseConfigAcess() const
 {
-    return dynamic_cast<NormalNoise::NormalNoiseConfig*>(m_config[m_postIndex].noiseConfig.get());
+    return dynamic_cast<NormalNoise::NormalNoiseConfig*>(m_config[static_cast<size_t>(m_postIndex)].noiseConfig.get());
 }
 
 void NormalNoiseBackend::setCurrentMean(const QString &currentMean) {

@@ -57,9 +57,6 @@ QVariant PeakListModel::data(const QModelIndex &index, const int role) const {
     }
 }
 
-// void PeakListModel::qmlUpdate() {
-// }
-
 std::vector<std::unique_ptr<AbstractPeak::PeakConfig>> &PeakListModel::peakConfig() const
 {
     return *m_peakConfig;

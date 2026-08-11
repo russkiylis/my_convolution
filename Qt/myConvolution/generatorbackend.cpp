@@ -2,7 +2,7 @@
 #include "loadgenerator.h"
 #include "noise.h"
 #include "peak.h"
-//#include <cstdio>
+
 std::vector<LoadGenerator::PostConfig> GeneratorBackend::createInitialConfig()
 {
     LoadGenerator::PostConfig cfg;

@@ -2,7 +2,6 @@
 #include <QString>
 #include "databasemanager.h"
 #include "databaseworker.h"
-#include "backend.h"
 #include "savebackend.h"
 #include "visualizebackend.h"
 
@@ -278,7 +277,7 @@ void DatabaseManager::closeConnection() {
 
 void DatabaseManager::saveDataPackage(const LoadGenerator::DataPackage &package, const ByteArrayCoder::DataType type, const ByteArrayCoder::ByteOrder byteOrder) {
     // qDebug().noquote().nospace() << "Пакет: " << package.postName;
-    emit signalInsert(package, static_cast<int>(type), static_cast<int>(byteOrder));
+    emit signalInsert(package, static_cast<int>(type), byteOrder);
 }
 
 void DatabaseManager::readDb() {
