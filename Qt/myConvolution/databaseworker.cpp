@@ -275,6 +275,76 @@ void DatabaseWorker::slotInsert(const LoadGenerator::DataPackage &package, const
             break;
         }
         break;
+    case ByteArrayCoder::pa_8b:
+        switch (static_cast<ByteArrayCoder::ByteOrder>(byteOrder)) {
+        case ByteArrayCoder::LittleEndian:
+            dataTypeStr = "pa_8b_le";
+            break;
+        case ByteArrayCoder::BigEndian:
+            dataTypeStr = "pa_8b_be";
+            break;
+        }
+        break;
+    case ByteArrayCoder::pa_7b:
+        switch (static_cast<ByteArrayCoder::ByteOrder>(byteOrder)) {
+        case ByteArrayCoder::LittleEndian:
+            dataTypeStr = "pa_7b_le";
+            break;
+        case ByteArrayCoder::BigEndian:
+            dataTypeStr = "pa_7b_be";
+            break;
+        }
+        break;
+    case ByteArrayCoder::pa_6b:
+        switch (static_cast<ByteArrayCoder::ByteOrder>(byteOrder)) {
+        case ByteArrayCoder::LittleEndian:
+            dataTypeStr = "pa_6b_le";
+            break;
+        case ByteArrayCoder::BigEndian:
+            dataTypeStr = "pa_6b_be";
+            break;
+        }
+        break;
+    case ByteArrayCoder::pa_5b:
+        switch (static_cast<ByteArrayCoder::ByteOrder>(byteOrder)) {
+        case ByteArrayCoder::LittleEndian:
+            dataTypeStr = "pa_5b_le";
+            break;
+        case ByteArrayCoder::BigEndian:
+            dataTypeStr = "pa_5b_be";
+            break;
+        }
+        break;
+    case ByteArrayCoder::pa_4b:
+        switch (static_cast<ByteArrayCoder::ByteOrder>(byteOrder)) {
+        case ByteArrayCoder::LittleEndian:
+            dataTypeStr = "pa_4b_le";
+            break;
+        case ByteArrayCoder::BigEndian:
+            dataTypeStr = "pa_4b_be";
+            break;
+        }
+        break;
+    case ByteArrayCoder::pa_3b:
+        switch (static_cast<ByteArrayCoder::ByteOrder>(byteOrder)) {
+        case ByteArrayCoder::LittleEndian:
+            dataTypeStr = "pa_3b_le";
+            break;
+        case ByteArrayCoder::BigEndian:
+            dataTypeStr = "pa_3b_be";
+            break;
+        }
+        break;
+    case ByteArrayCoder::pa_2b:
+        switch (static_cast<ByteArrayCoder::ByteOrder>(byteOrder)) {
+        case ByteArrayCoder::LittleEndian:
+            dataTypeStr = "pa_2b_le";
+            break;
+        case ByteArrayCoder::BigEndian:
+            dataTypeStr = "pa_2b_be";
+            break;
+        }
+        break;
     }
 
     // Получаем объект для работы с БД
@@ -857,6 +927,48 @@ void DatabaseWorker::slotReadDb() {
             coderByteOrder = ByteArrayCoder::LittleEndian;
         } else if (row.dataType == "smallint_be") {
             coderDataType = ByteArrayCoder::smallint;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "pa_8b_le") {
+            coderDataType = ByteArrayCoder::pa_8b;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "pa_8b_be") {
+            coderDataType = ByteArrayCoder::pa_8b;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "pa_7b_le") {
+            coderDataType = ByteArrayCoder::pa_7b;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "pa_7b_be") {
+            coderDataType = ByteArrayCoder::pa_7b;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "pa_6b_le") {
+            coderDataType = ByteArrayCoder::pa_6b;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "pa_6b_be") {
+            coderDataType = ByteArrayCoder::pa_6b;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "pa_5b_le") {
+            coderDataType = ByteArrayCoder::pa_5b;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "pa_5b_be") {
+            coderDataType = ByteArrayCoder::pa_5b;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "pa_4b_le") {
+            coderDataType = ByteArrayCoder::pa_4b;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "pa_4b_be") {
+            coderDataType = ByteArrayCoder::pa_4b;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "pa_3b_le") {
+            coderDataType = ByteArrayCoder::pa_3b;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "pa_3b_be") {
+            coderDataType = ByteArrayCoder::pa_3b;
+            coderByteOrder = ByteArrayCoder::BigEndian;
+        } else if (row.dataType == "pa_2b_le") {
+            coderDataType = ByteArrayCoder::pa_2b;
+            coderByteOrder = ByteArrayCoder::LittleEndian;
+        } else if (row.dataType == "pa_2b_be") {
+            coderDataType = ByteArrayCoder::pa_2b;
             coderByteOrder = ByteArrayCoder::BigEndian;
         } else {
             qWarning().noquote().nospace() << "[!] Прочитан неизвестный тип данных " << row.dataType;

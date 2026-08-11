@@ -11,7 +11,21 @@ CREATE TYPE public.data_type AS ENUM (
     'real_le',
     'real_be',
     'smallint_le',
-    'smallint_be'
+    'smallint_be',
+    'pa_8b_le',
+    'pa_8b_be',
+    'pa_7b_le',
+    'pa_7b_be',
+    'pa_6b_le',
+    'pa_6b_be',
+    'pa_5b_le',
+    'pa_5b_be',
+    'pa_4b_le',
+    'pa_4b_be',
+    'pa_3b_le',
+    'pa_3b_be',
+    'pa_2b_le',
+    'pa_2b_be'
     );
 
 -- Creating table df_conv

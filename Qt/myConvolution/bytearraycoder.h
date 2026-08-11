@@ -11,13 +11,13 @@ public:
         doublePrecision,
         real,
         smallint,
-        pa_2b,
-        pa_3b,
-        pa_4b,
-        pa_5b,
-        pa_6b,
+        pa_8b,
         pa_7b,
-        pa_8b
+        pa_6b,
+        pa_5b,
+        pa_4b,
+        pa_3b,
+        pa_2b
     };
 
     enum ByteOrder
