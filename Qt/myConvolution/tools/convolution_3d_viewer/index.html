@@ -1,0 +1,1229 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Атлас свёрток — PostgreSQL 3D</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #071019;
+      --page-2: #0b1724;
+      --panel: rgba(15, 28, 42, 0.86);
+      --panel-solid: #0f1c2a;
+      --panel-soft: rgba(23, 40, 57, 0.76);
+      --text: #edf7ff;
+      --muted: #8ea6ba;
+      --border: rgba(157, 190, 215, 0.18);
+      --border-strong: rgba(111, 217, 255, 0.42);
+      --cyan: #67ddff;
+      --cyan-strong: #22bfe9;
+      --violet: #9e8cff;
+      --green: #66e3b4;
+      --amber: #ffc76b;
+      --danger: #ff7c91;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+      --radius: 18px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        color-scheme: light;
+        --page: #edf5fb;
+        --page-2: #f8fbfe;
+        --panel: rgba(255, 255, 255, 0.9);
+        --panel-solid: #ffffff;
+        --panel-soft: rgba(239, 247, 252, 0.9);
+        --text: #102435;
+        --muted: #597084;
+        --border: rgba(24, 70, 102, 0.16);
+        --border-strong: rgba(0, 137, 184, 0.42);
+        --cyan: #007fa9;
+        --cyan-strong: #006f97;
+        --violet: #6753d6;
+        --green: #008765;
+        --amber: #a76500;
+        --danger: #c13e55;
+        --shadow: 0 24px 70px rgba(35, 76, 104, 0.15);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 12% -5%, color-mix(in srgb, var(--cyan) 18%, transparent) 0, transparent 31rem),
+        radial-gradient(circle at 88% 6%, color-mix(in srgb, var(--violet) 15%, transparent) 0, transparent 32rem),
+        linear-gradient(145deg, var(--page), var(--page-2));
+      background-attachment: fixed;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      min-height: 100vh;
+    }
+
+    button, input, select { font: inherit; }
+
+    .app {
+      width: min(1540px, 100%);
+      margin: 0 auto;
+      padding: 30px clamp(16px, 3vw, 42px) 52px;
+    }
+
+    .hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px color-mix(in srgb, var(--green) 16%, transparent), 0 0 18px var(--green);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 57px);
+      font-weight: 730;
+      letter-spacing: -0.045em;
+      line-height: 1;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 13px 0 0;
+      color: var(--muted);
+      font-size: clamp(14px, 2vw, 17px);
+      line-height: 1.55;
+    }
+
+    .sql-mark {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 88px;
+      height: 88px;
+      border: 1px solid var(--border-strong);
+      border-radius: 25px;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--cyan) 17%, var(--panel-solid)), var(--panel-solid));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.1), var(--shadow);
+      color: var(--cyan);
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: -.05em;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    details.connection { margin-bottom: 18px; }
+    details.connection[open] summary { border-bottom: 1px solid var(--border); }
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 17px 20px;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    .summary-note { color: var(--muted); font-size: 13px; font-weight: 500; }
+    .summary-chevron { color: var(--cyan); transition: transform .2s ease; }
+    details[open] .summary-chevron { transform: rotate(180deg); }
+
+    .connection-body { padding: 20px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(150px, 1.3fr) minmax(95px, .55fr) minmax(180px, 1.2fr) minmax(160px, 1fr) minmax(170px, 1fr) minmax(120px, .7fr);
+      gap: 14px;
+    }
+
+    label.field { display: grid; gap: 7px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 10px 12px;
+      background: var(--panel-soft);
+      color: var(--text);
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+    input:focus, select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--cyan) 18%, transparent);
+    }
+
+    .connection-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .connection-hint { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .button-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 10px 15px;
+      background: var(--panel-soft);
+      color: var(--text);
+      font-weight: 720;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+    button:hover:not(:disabled) { transform: translateY(-1px); border-color: var(--border-strong); }
+    button:focus-visible { outline: 3px solid color-mix(in srgb, var(--cyan) 38%, transparent); outline-offset: 2px; }
+    button:disabled { opacity: .52; cursor: wait; }
+    button.primary {
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--cyan-strong), color-mix(in srgb, var(--violet) 82%, var(--cyan)));
+      color: #fff;
+      box-shadow: 0 10px 30px color-mix(in srgb, var(--cyan-strong) 23%, transparent);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 44px;
+      margin-bottom: 18px;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      color: var(--muted);
+      background: color-mix(in srgb, var(--panel) 76%, transparent);
+    }
+    .status.good { color: var(--green); border-color: color-mix(in srgb, var(--green) 35%, var(--border)); }
+    .status.error { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--border)); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: 0 0 auto; }
+
+    .workspace[hidden], .empty[hidden], .error-box[hidden] { display: none !important; }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(185px, 1fr) auto minmax(185px, 1fr);
+      gap: 14px;
+      align-items: end;
+      padding: 17px;
+      margin-bottom: 16px;
+    }
+    .toolbar .field { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; }
+
+    .switch-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 42px;
+      padding: 0 5px;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .switch-wrap input { width: 18px; height: 18px; accent-color: var(--cyan-strong); }
+
+    details.post-catalog { margin-bottom: 16px; overflow: hidden; }
+    details.post-catalog[open] summary { border-bottom: 1px solid var(--border); }
+    .post-catalog-title { display: flex; align-items: center; gap: 10px; }
+    .post-catalog-title::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 72%, transparent);
+    }
+    .post-table-scroll { max-height: min(58vh, 680px); overflow: auto; scrollbar-width: thin; }
+    .post-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 13px;
+    }
+    .post-table th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      padding: 11px 14px;
+      background: color-mix(in srgb, var(--panel-solid) 94%, transparent);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 780;
+      letter-spacing: .075em;
+      text-align: left;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .post-table th:first-child { width: 205px; }
+    .post-table th:nth-child(2) { width: 96px; }
+    .post-table th:nth-child(3) { width: 160px; }
+    .post-table th:nth-child(4) { width: 125px; }
+    .post-table th:nth-child(5) { width: 125px; }
+    .post-table th:last-child { width: 112px; text-align: right; }
+    .post-table td {
+      padding: 13px 14px;
+      border-top: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .post-table tbody tr:first-child td { border-top: 0; }
+    .post-table tbody tr {
+      cursor: pointer;
+      transition: background .16s ease, box-shadow .16s ease;
+    }
+    .post-table tbody tr:hover { background: color-mix(in srgb, var(--cyan) 7%, transparent); }
+    .post-table tbody tr:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--cyan) 48%, transparent);
+      outline-offset: -3px;
+    }
+    .post-table tbody tr.active {
+      background: color-mix(in srgb, var(--cyan) 12%, var(--panel-soft));
+      box-shadow: inset 3px 0 var(--cyan);
+    }
+    .post-name { color: var(--text); font-size: 14px; font-weight: 780; overflow-wrap: anywhere; }
+    .post-name-meta { margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .record-id { color: var(--cyan); font-variant-numeric: tabular-nums; font-weight: 760; }
+    .record-value { color: var(--text); font-variant-numeric: tabular-nums; }
+    .record-muted { color: var(--muted); }
+    .post-action { text-align: right; }
+    button.post-select-button { min-width: 88px; padding: 8px 11px; font-size: 11px; }
+    button.post-select-button.active {
+      border-color: color-mix(in srgb, var(--green) 55%, var(--border));
+      background: color-mix(in srgb, var(--green) 13%, var(--panel-soft));
+      color: var(--green);
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(130px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat { padding: 14px 15px; min-height: 88px; }
+    .stat-label { color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
+    .stat-value { margin-top: 8px; font-size: clamp(18px, 2vw, 25px); font-weight: 760; letter-spacing: -.03em; }
+    .stat-value.accent { color: var(--cyan); }
+    .stat-context { margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+    .plots {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .plots.compare { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .plot-card { overflow: hidden; min-width: 0; }
+    .plot-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 17px 2px;
+    }
+    .plot-title { min-width: 0; font-size: 16px; font-weight: 760; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .plot-subtitle { color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .plot { width: 100%; height: min(64vh, 660px); min-height: 510px; }
+    .secondary-card[hidden] { display: none; }
+
+    .metadata { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr); gap: 16px; }
+    .metadata-section { padding: 18px; }
+    .section-title { margin: 0 0 14px; font-size: 14px; font-weight: 760; }
+    .meta-grid { display: grid; grid-template-columns: repeat(4, minmax(120px, 1fr)); gap: 12px 18px; }
+    .meta-item { min-width: 0; }
+    .meta-key { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .055em; }
+    .meta-value { margin-top: 5px; overflow-wrap: anywhere; font-weight: 670; }
+    .help-list { margin: 0; padding-left: 18px; color: var(--muted); line-height: 1.6; font-size: 13px; }
+    .help-list strong { color: var(--text); }
+
+    .error-box { margin-top: 16px; }
+    .error-box summary { color: var(--amber); }
+    .error-list { margin: 0; padding: 0 20px 18px 42px; color: var(--muted); }
+
+    .empty { padding: 58px 25px; text-align: center; color: var(--muted); }
+    .empty-mark { width: 62px; height: 62px; margin: 0 auto 15px; display: grid; place-items: center; border-radius: 19px; border: 1px solid var(--border); color: var(--cyan); font-size: 28px; }
+    .empty h2 { margin: 0 0 8px; color: var(--text); font-size: 21px; }
+    .empty p { margin: 0 auto; max-width: 580px; line-height: 1.55; }
+
+    .busy-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      background: color-mix(in srgb, var(--page) 72%, transparent);
+      backdrop-filter: blur(8px);
+    }
+    .busy-overlay.visible { display: grid; }
+    .busy-card { display: flex; align-items: center; gap: 13px; padding: 17px 20px; }
+    .spinner { width: 25px; height: 25px; border: 3px solid var(--border); border-top-color: var(--cyan); border-radius: 50%; animation: spin .75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 1150px) {
+      .form-grid { grid-template-columns: repeat(3, minmax(150px, 1fr)); }
+      .stats { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
+      .meta-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+    }
+
+    @media (max-width: 850px) {
+      .sql-mark { display: none; }
+      .toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .plots.compare { grid-template-columns: 1fr; }
+      .metadata { grid-template-columns: 1fr; }
+      .plot { height: 540px; min-height: 480px; }
+    }
+
+    @media (max-width: 620px) {
+      .app { padding-top: 20px; }
+      .hero { margin-bottom: 17px; }
+      .form-grid, .toolbar { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat { min-height: 82px; }
+      .meta-grid { grid-template-columns: 1fr 1fr; }
+      .plot { height: 470px; min-height: 430px; }
+      .plot-subtitle { display: none; }
+      .connection-actions { align-items: stretch; }
+      .button-row, .button-row button { width: 100%; }
+      .post-table-scroll { max-height: none; overflow: visible; padding: 11px; }
+      .post-table, .post-table tbody, .post-table tr, .post-table td { display: block; width: 100%; }
+      .post-table thead { display: none; }
+      .post-table tbody { display: grid; gap: 10px; }
+      .post-table tbody tr {
+        padding: 11px;
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        background: color-mix(in srgb, var(--panel-soft) 72%, transparent);
+      }
+      .post-table tbody tr.active { border-color: var(--border-strong); box-shadow: inset 3px 0 var(--cyan); }
+      .post-table td { padding: 6px 7px; border: 0; }
+      .post-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 5px;
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 780;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+      }
+      .post-action { text-align: left; }
+      button.post-select-button { width: 100%; margin-top: 3px; }
+    }
+  </style>
+  <script src="/plotly.min.js?token=__APP_TOKEN__"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="hero">
+      <div>
+        <div class="eyebrow"><span class="pulse"></span> PostgreSQL · интерактивная поверхность</div>
+        <h1>Атлас свёрток</h1>
+        <p>Поворачивайте поверхность мышью, приближайте пик и сопоставляйте свёртки, сохранённые в разных форматах данных.</p>
+      </div>
+      <div class="sql-mark" aria-hidden="true">3D</div>
+    </header>
+
+    <details class="connection panel" open>
+      <summary>
+        <span>Подключение к базе</span>
+        <span class="summary-note"><span id="query-name">query.sql</span> · только чтение</span>
+        <span class="summary-chevron" aria-hidden="true">⌄</span>
+      </summary>
+      <div class="connection-body">
+        <form id="connection-form">
+          <div class="form-grid">
+            <label class="field">Хост<input id="db-host" name="host" autocomplete="off" required></label>
+            <label class="field">Порт<input id="db-port" name="port" type="number" min="1" max="65535" required></label>
+            <label class="field">База данных<input id="db-name" name="database" autocomplete="off" required></label>
+            <label class="field">Пользователь<input id="db-user" name="user" autocomplete="username" required></label>
+            <label class="field">Пароль<input id="db-password" name="password" type="password" autocomplete="current-password" placeholder="если требуется"></label>
+            <label class="field">SSL
+              <select id="db-ssl" name="sslmode">
+                <option value="prefer">prefer</option>
+                <option value="disable">disable</option>
+                <option value="require">require</option>
+                <option value="verify-ca">verify-ca</option>
+                <option value="verify-full">verify-full</option>
+              </select>
+            </label>
+          </div>
+          <div class="connection-actions">
+            <div class="connection-hint" id="password-hint">Пароль по умолчанию задан локально; изменения в форме не сохраняются.</div>
+            <div class="button-row">
+              <button type="button" id="demo-button">Демо без БД</button>
+              <button type="submit" class="primary" id="load-button">Загрузить из PostgreSQL</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </details>
+
+    <div class="status" id="status" role="status" aria-live="polite">
+      <span class="status-dot"></span><span id="status-text">Укажите подключение или откройте демо.</span>
+    </div>
+
+    <section class="empty panel" id="empty-state">
+      <div class="empty-mark" aria-hidden="true">⌁</div>
+      <h2>Поверхности ещё не загружены</h2>
+      <p>SQL-режим покажет всю историю сохранённых свёрток. Выберите пост, формат и конкретную запись, которую нужно открыть в 3D.</p>
+    </section>
+
+    <main class="workspace" id="workspace" hidden>
+      <section class="toolbar panel" aria-label="Выбор поверхности">
+        <label class="field">Пост<select id="post-select"></select></label>
+        <label class="field">Тип данных<select id="type-select"></select></label>
+        <label class="switch-wrap"><input type="checkbox" id="compare-toggle"> Сравнить типы</label>
+        <label class="field" id="compare-field">Второй тип<select id="compare-select"></select></label>
+      </section>
+
+      <details class="post-catalog panel" id="post-catalog" open>
+        <summary>
+          <span class="post-catalog-title">Сохранённые свёртки</span>
+          <span class="summary-note" id="post-table-summary">Выберите конкретную запись</span>
+          <span class="summary-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="post-table-scroll">
+          <table class="post-table">
+            <caption class="sr-only">Все сохранённые свёртки выбранного поста и типа данных</caption>
+            <thead>
+              <tr><th>Время сохранения</th><th>ID</th><th>Результат H / V</th><th>Качество</th><th>Сетка</th><th>Выбор</th></tr>
+            </thead>
+            <tbody id="post-table-body"></tbody>
+          </table>
+        </div>
+      </details>
+
+      <section class="stats" aria-label="Ключевые параметры">
+        <div class="stat panel"><div class="stat-label">Максимум</div><div class="stat-value accent" id="stat-max">—</div><div class="stat-context">нормированная свёртка</div></div>
+        <div class="stat panel"><div class="stat-label">Пик H</div><div class="stat-value" id="stat-peak-h">—</div><div class="stat-context">горизонтальный угол</div></div>
+        <div class="stat panel"><div class="stat-label">Пик V</div><div class="stat-value" id="stat-peak-v">—</div><div class="stat-context">вертикальный угол</div></div>
+        <div class="stat panel"><div class="stat-label">Качество</div><div class="stat-value" id="stat-quality">—</div><div class="stat-context">до нормировки</div></div>
+        <div class="stat panel"><div class="stat-label">Сетка</div><div class="stat-value" id="stat-grid">—</div><div class="stat-context" id="stat-grid-shown">—</div></div>
+        <div class="stat panel"><div class="stat-label">Формат</div><div class="stat-value" id="stat-type">—</div><div class="stat-context" id="stat-timestamp">—</div></div>
+      </section>
+
+      <section class="plots" id="plots">
+        <article class="plot-card panel">
+          <div class="plot-heading"><div class="plot-title" id="primary-title">—</div><div class="plot-subtitle" id="primary-subtitle">drag · rotate · zoom</div></div>
+          <div class="plot" id="primary-plot" role="img" aria-label="Трёхмерная поверхность свёртки"></div>
+        </article>
+        <article class="plot-card panel secondary-card" id="secondary-card" hidden>
+          <div class="plot-heading"><div class="plot-title" id="secondary-title">—</div><div class="plot-subtitle" id="secondary-subtitle">камера синхронизирована</div></div>
+          <div class="plot" id="secondary-plot" role="img" aria-label="Сравниваемая трёхмерная поверхность свёртки"></div>
+        </article>
+      </section>
+
+      <section class="metadata">
+        <article class="metadata-section panel">
+          <h2 class="section-title">Метаданные результата</h2>
+          <div class="meta-grid" id="metadata-grid"></div>
+        </article>
+        <article class="metadata-section panel">
+          <h2 class="section-title">Управление</h2>
+          <ul class="help-list">
+            <li><strong>Левая кнопка</strong> — вращение.</li>
+            <li><strong>Колесо</strong> — приближение.</li>
+            <li><strong>Shift + drag</strong> — сдвиг.</li>
+            <li><strong>Масштаб H/V</strong> — один градус имеет одинаковый размер по обеим осям.</li>
+            <li>Кнопка камеры сохраняет график в PNG.</li>
+          </ul>
+        </article>
+      </section>
+
+      <details class="error-box panel" id="error-box" hidden>
+        <summary><span id="error-summary">Некоторые записи пропущены</span><span class="summary-chevron" aria-hidden="true">⌄</span></summary>
+        <ul class="error-list" id="error-list"></ul>
+      </details>
+    </main>
+  </div>
+
+  <div class="busy-overlay" id="busy-overlay" aria-hidden="true">
+    <div class="busy-card panel"><div class="spinner"></div><strong id="busy-text">Загружаю свёртки…</strong></div>
+  </div>
+
+  <script>
+    "use strict";
+
+    const TOKEN = "__APP_TOKEN__";
+    const TYPE_ORDER = [
+      "double_le", "double_be", "real_le", "real_be", "smallint_le", "smallint_be",
+      "pa_8b_le", "pa_8b_be", "pa_7b_le", "pa_7b_be", "pa_6b_le", "pa_6b_be",
+      "pa_5b_le", "pa_5b_be", "pa_4b_le", "pa_4b_be", "pa_3b_le", "pa_3b_be",
+      "pa_2b_le", "pa_2b_be"
+    ];
+    const TYPE_LABELS = {
+      double_le: "double · LE", double_be: "double · BE",
+      real_le: "float · LE", real_be: "float · BE",
+      smallint_le: "int16 · LE", smallint_be: "int16 · BE",
+      pa_8b_le: "Packed 8 bit · LE", pa_8b_be: "Packed 8 bit · BE",
+      pa_7b_le: "Packed 7 bit · LE", pa_7b_be: "Packed 7 bit · BE",
+      pa_6b_le: "Packed 6 bit · LE", pa_6b_be: "Packed 6 bit · BE",
+      pa_5b_le: "Packed 5 bit · LE", pa_5b_be: "Packed 5 bit · BE",
+      pa_4b_le: "Packed 4 bit · LE", pa_4b_be: "Packed 4 bit · BE",
+      pa_3b_le: "Packed 3 bit · LE", pa_3b_be: "Packed 3 bit · BE",
+      pa_2b_le: "Packed 2 bit · LE", pa_2b_be: "Packed 2 bit · BE"
+    };
+
+    const state = {
+      records: [],
+      surfaceCache: new Map(),
+      selectedRecordId: null,
+      renderGeneration: 0,
+      loadGeneration: 0,
+      plotQueue: Promise.resolve(),
+      sessionId: null,
+      source: null,
+      camera: { eye: { x: 1.55, y: -1.72, z: 1.18 }, up: { x: 0, y: 0, z: 1 }, center: { x: 0, y: 0, z: 0 } },
+      syncingCamera: false
+    };
+
+    const el = Object.fromEntries([
+      "connection-form", "db-host", "db-port", "db-name", "db-user", "db-password", "db-ssl",
+      "password-hint", "demo-button", "load-button", "query-name", "status", "status-text",
+      "empty-state", "workspace", "post-select", "type-select", "compare-toggle", "compare-select",
+      "compare-field", "post-catalog", "post-table-body", "post-table-summary", "plots", "primary-plot", "secondary-plot", "secondary-card",
+      "primary-title", "secondary-title", "primary-subtitle", "secondary-subtitle", "stat-max", "stat-peak-h", "stat-peak-v", "stat-quality",
+      "stat-grid", "stat-grid-shown", "stat-type", "stat-timestamp", "metadata-grid", "error-box",
+      "error-summary", "error-list", "busy-overlay", "busy-text"
+    ].map(id => [id, document.getElementById(id)]));
+
+    function apiUrl(path) {
+      return `${path}?token=${encodeURIComponent(TOKEN)}`;
+    }
+
+    function setStatus(message, kind = "") {
+      el.status.className = `status ${kind}`.trim();
+      el["status-text"].textContent = message;
+    }
+
+    function setBusy(active, message = "Загружаю свёртки…") {
+      el["busy-text"].textContent = message;
+      el["busy-overlay"].classList.toggle("visible", active);
+      el["busy-overlay"].setAttribute("aria-hidden", active ? "false" : "true");
+      el["load-button"].disabled = active;
+      el["demo-button"].disabled = active;
+    }
+
+    function typeRank(value) {
+      const index = TYPE_ORDER.indexOf(value);
+      return index < 0 ? 999 : index;
+    }
+
+    function typeLabel(value) {
+      return TYPE_LABELS[value] || value;
+    }
+
+    function pluralRu(value, one, few, many) {
+      const number = Math.abs(Number(value)) % 100;
+      const last = number % 10;
+      if (number > 10 && number < 20) return many;
+      if (last === 1) return one;
+      if (last >= 2 && last <= 4) return few;
+      return many;
+    }
+
+    function prettyNumber(value, digits = 4) {
+      if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+      const numeric = Number(value);
+      if (numeric !== 0 && (Math.abs(numeric) >= 1e6 || Math.abs(numeric) < 1e-4)) {
+        return numeric.toExponential(3);
+      }
+      return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: digits }).format(numeric);
+    }
+
+    function prettyDate(value) {
+      if (!value) return "—";
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.valueOf())) return String(value);
+      return new Intl.DateTimeFormat("ru-RU", { dateStyle: "short", timeStyle: "medium" }).format(parsed);
+    }
+
+    function timestampValue(record) {
+      const parsed = Date.parse(record.timestamp || "");
+      return Number.isFinite(parsed) ? parsed : -Infinity;
+    }
+
+    function newestFirst(a, b) {
+      const timeOrder = timestampValue(b) - timestampValue(a);
+      if (timeOrder) return timeOrder;
+      const leftId = BigInt(String(a.id));
+      const rightId = BigInt(String(b.id));
+      return leftId === rightId ? 0 : leftId > rightId ? -1 : 1;
+    }
+
+    function currentPostRecords() {
+      return state.records.filter(item => item.post === el["post-select"].value);
+    }
+
+    function pairRecords(dataType = el["type-select"].value) {
+      return currentPostRecords()
+        .filter(item => item.dataType === dataType)
+        .sort(newestFirst);
+    }
+
+    function currentRecordMeta() {
+      const records = pairRecords();
+      return records.find(item => String(item.id) === String(state.selectedRecordId)) || records[0] || null;
+    }
+
+    function compareRecordMeta() {
+      const candidates = pairRecords(el["compare-select"].value);
+      const primary = currentRecordMeta();
+      if (!primary || candidates.length < 2) return candidates[0] || null;
+      const targetTime = timestampValue(primary);
+      return [...candidates].sort((a, b) =>
+        Math.abs(timestampValue(a) - targetTime) - Math.abs(timestampValue(b) - targetTime) || newestFirst(a, b)
+      )[0] || null;
+    }
+
+    function fillSelect(select, entries, preferredValue) {
+      select.replaceChildren();
+      for (const [value, label] of entries) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        select.append(option);
+      }
+      if (entries.some(([value]) => value === preferredValue)) select.value = preferredValue;
+    }
+
+    function refreshTypeSelectors(preferredPrimary, preferredCompare) {
+      const types = [...new Set(currentPostRecords().map(item => item.dataType))]
+        .sort((a, b) => typeRank(a) - typeRank(b) || a.localeCompare(b));
+      const entries = types.map(dataType => [dataType, typeLabel(dataType)]);
+      fillSelect(el["type-select"], entries, preferredPrimary);
+
+      const primary = el["type-select"].value;
+      const alternatives = entries.filter(([value]) => value !== primary);
+      const fallback = alternatives.find(([value]) => value.startsWith("double_"))?.[0] || alternatives[0]?.[0];
+      fillSelect(el["compare-select"], alternatives, preferredCompare || fallback);
+      el["compare-toggle"].disabled = alternatives.length === 0;
+      if (alternatives.length === 0) el["compare-toggle"].checked = false;
+      el["compare-field"].style.opacity = el["compare-toggle"].checked ? "1" : ".48";
+      el["compare-select"].disabled = !el["compare-toggle"].checked;
+    }
+
+    async function selectPost(post, preferredType = null) {
+      const currentType = el["type-select"].value;
+      const currentCompare = el["compare-select"].value;
+      el["post-select"].value = post;
+      refreshTypeSelectors(preferredType || currentType, currentCompare);
+      state.selectedRecordId = pairRecords()[0]?.id ?? null;
+      renderPostTable();
+      await renderSelection();
+    }
+
+    function renderPostTable() {
+      el["post-table-body"].replaceChildren();
+      const selectedPost = el["post-select"].value;
+      const selectedType = el["type-select"].value;
+      const records = pairRecords();
+      el["post-table-summary"].textContent =
+        `${selectedPost} · ${typeLabel(selectedType)} · ${records.length} ` +
+        pluralRu(records.length, "свёртка", "свёртки", "свёрток");
+
+      for (const record of records) {
+        const active = String(record.id) === String(state.selectedRecordId);
+        const row = document.createElement("tr");
+        row.classList.toggle("active", active);
+        row.tabIndex = 0;
+        row.setAttribute("aria-selected", active ? "true" : "false");
+        row.setAttribute("aria-label", `Открыть свёртку ID ${record.id} от ${prettyDate(record.timestamp)}`);
+        row.title = `Открыть свёртку ID ${record.id}`;
+
+        const timeCell = document.createElement("td");
+        timeCell.dataset.label = "Время сохранения";
+        timeCell.className = "record-value";
+        timeCell.textContent = prettyDate(record.timestamp);
+
+        const idCell = document.createElement("td");
+        idCell.dataset.label = "ID";
+        idCell.className = "record-id";
+        idCell.textContent = `#${record.id}`;
+
+        const resultCell = document.createElement("td");
+        resultCell.dataset.label = "Результат H / V";
+        resultCell.className = "record-value";
+        resultCell.textContent = `${prettyNumber(record.azimuth, 3)}° / ${prettyNumber(record.elevation, 3)}°`;
+
+        const qualityCell = document.createElement("td");
+        qualityCell.dataset.label = "Качество";
+        qualityCell.className = "record-value";
+        qualityCell.textContent = prettyNumber(record.quality, 5);
+
+        const gridCell = document.createElement("td");
+        gridCell.dataset.label = "Сетка";
+        gridCell.className = "record-muted";
+        gridCell.textContent = `${record.grid.countH}×${record.grid.countV}`;
+
+        const actionCell = document.createElement("td");
+        actionCell.dataset.label = "Выбор";
+        actionCell.className = "post-action";
+        const selectButton = document.createElement("button");
+        selectButton.type = "button";
+        selectButton.tabIndex = -1;
+        selectButton.className = "post-select-button";
+        selectButton.classList.toggle("active", active);
+        selectButton.textContent = active ? "Открыта" : "Открыть";
+        if (active) selectButton.setAttribute("aria-current", "true");
+        selectButton.addEventListener("click", event => {
+          event.stopPropagation();
+          void selectRecord(record.id);
+        });
+        actionCell.append(selectButton);
+
+        row.addEventListener("click", () => { void selectRecord(record.id); });
+        row.addEventListener("keydown", event => {
+          if (event.target !== row || !["Enter", " "].includes(event.key)) return;
+          event.preventDefault();
+          void selectRecord(record.id);
+        });
+        row.append(timeCell, idCell, resultCell, qualityCell, gridCell, actionCell);
+        el["post-table-body"].append(row);
+      }
+    }
+
+    async function selectRecord(recordId) {
+      state.selectedRecordId = String(recordId);
+      renderPostTable();
+      await renderSelection();
+      const activeRow = [...el["post-table-body"].rows]
+        .find(row => row.getAttribute("aria-selected") === "true");
+      activeRow?.focus({ preventScroll: true });
+    }
+
+    function setMetaItem(key, value) {
+      const item = document.createElement("div");
+      item.className = "meta-item";
+      const keyNode = document.createElement("div");
+      keyNode.className = "meta-key";
+      keyNode.textContent = key;
+      const valueNode = document.createElement("div");
+      valueNode.className = "meta-value";
+      valueNode.textContent = value;
+      item.append(keyNode, valueNode);
+      el["metadata-grid"].append(item);
+    }
+
+    function renderMetadata(record) {
+      el["metadata-grid"].replaceChildren();
+      setMetaItem("ID записи", String(record.id));
+      setMetaItem("Время", prettyDate(record.timestamp));
+      setMetaItem("Азимут результата", `${prettyNumber(record.azimuth, 3)}°`);
+      setMetaItem("Угол места", `${prettyNumber(record.elevation, 3)}°`);
+      setMetaItem("Мощность", prettyNumber(record.power, 3));
+      setMetaItem("Частота", record.frequency == null ? "—" : `${prettyNumber(record.frequency / 1e6, 4)} МГц`);
+      setMetaItem("Координаты", record.latitude == null || record.longitude == null ? "—" : `${prettyNumber(record.latitude, 6)}, ${prettyNumber(record.longitude, 6)}`);
+      setMetaItem("Среднее Z", prettyNumber(record.stats.mean, 5));
+      setMetaItem("Диапазон H", `${prettyNumber(record.grid.minH, 3)}…${prettyNumber(record.grid.maxH, 3)}° · шаг ${prettyNumber(record.grid.stepH, 4)}°`);
+      setMetaItem("Диапазон V", `${prettyNumber(record.grid.minV, 3)}…${prettyNumber(record.grid.maxV, 3)}° · шаг ${prettyNumber(record.grid.stepV, 4)}°`);
+      setMetaItem("Минимум Z", prettyNumber(record.stats.min, 6));
+      setMetaItem("Источник", state.source === "demo" ? "демонстрационные данные" : "PostgreSQL · read-only");
+    }
+
+    function plotPalette() {
+      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      return dark
+        ? { text: "#dcecf7", muted: "#8299ad", grid: "rgba(132,166,190,.24)", axis: "rgba(8,20,31,.78)" }
+        : { text: "#173246", muted: "#60798c", grid: "rgba(45,91,121,.20)", axis: "rgba(239,247,252,.88)" };
+    }
+
+    function makeTrace(record, range) {
+      return {
+        type: "surface",
+        x: record.x,
+        y: record.y,
+        z: record.z,
+        cmin: range.min,
+        cmax: range.max,
+        colorscale: "Turbo",
+        reversescale: false,
+        showscale: true,
+        colorbar: { title: { text: "Z", side: "top" }, thickness: 12, len: .62, x: .96, outlinewidth: 0 },
+        contours: { z: { show: true, usecolormap: true, highlightcolor: "#ffffff", project: { z: true } } },
+        lighting: { ambient: .66, diffuse: .78, specular: .34, roughness: .72, fresnel: .18 },
+        lightposition: { x: 120, y: -160, z: 220 },
+        hovertemplate: "H: %{x:.2f}°<br>V: %{y:.2f}°<br>Z: %{z:.6f}<extra></extra>"
+      };
+    }
+
+    function equalAngularAspect(record) {
+      const spanH = Math.abs(Number(record.grid.maxH) - Number(record.grid.minH));
+      const spanV = Math.abs(Number(record.grid.maxV) - Number(record.grid.minV));
+      if (!(spanH > 0) || !(spanV > 0) || !Number.isFinite(spanH) || !Number.isFinite(spanV)) {
+        return { x: 1, y: 1, z: .78 };
+      }
+
+      // H and V use the same angular unit: one degree must occupy the same
+      // physical length on both axes. Z stays independent so the relief remains visible.
+      const longestSceneSide = 2.2;
+      const sceneUnitsPerDegree = longestSceneSide / Math.max(spanH, spanV);
+      return {
+        x: spanH * sceneUnitsPerDegree,
+        y: spanV * sceneUnitsPerDegree,
+        z: .78
+      };
+    }
+
+    function plotLayout(record) {
+      const colors = plotPalette();
+      const axisBase = {
+        color: colors.text,
+        gridcolor: colors.grid,
+        zerolinecolor: colors.grid,
+        backgroundcolor: colors.axis,
+        showbackground: true,
+        showspikes: false,
+        tickfont: { color: colors.muted, size: 11 },
+        titlefont: { color: colors.text, size: 12 }
+      };
+      return {
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { family: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif", color: colors.text, size: 12 },
+        margin: { l: 0, r: 0, t: 4, b: 0 },
+        scene: {
+          xaxis: { ...axisBase, title: "H · градусы", range: [record.grid.minH, record.grid.maxH] },
+          yaxis: { ...axisBase, title: "V · градусы", range: [record.grid.minV, record.grid.maxV] },
+          zaxis: { ...axisBase, title: "Свёртка", rangemode: "tozero" },
+          camera: state.camera,
+          dragmode: "turntable",
+          aspectmode: "manual",
+          aspectratio: equalAngularAspect(record)
+        },
+        hoverlabel: { bgcolor: colors.axis, bordercolor: colors.grid, font: { color: colors.text } },
+        uirevision: `camera-${record.post}`
+      };
+    }
+
+    const plotConfig = {
+      responsive: true,
+      displaylogo: false,
+      scrollZoom: true,
+      toImageButtonOptions: { format: "png", filename: "convolution-3d", scale: 2 },
+      modeBarButtonsToRemove: ["select2d", "lasso2d", "autoScale2d", "hoverClosestCartesian", "hoverCompareCartesian", "toggleSpikelines"]
+    };
+
+    function attachCameraSync(plotNode, otherNode) {
+      if (typeof plotNode.removeAllListeners === "function") plotNode.removeAllListeners("plotly_relayout");
+      plotNode.on("plotly_relayout", event => {
+        const camera = event["scene.camera"];
+        if (!camera || state.syncingCamera) return;
+        state.camera = camera;
+        if (!el["compare-toggle"].checked || !otherNode || !otherNode.data) return;
+        state.syncingCamera = true;
+        Plotly.relayout(otherNode, { "scene.camera": camera }).finally(() => { state.syncingCamera = false; });
+      });
+    }
+
+    async function renderPlots(primary, secondary) {
+      const range = {
+        min: Math.min(primary.stats.min, secondary?.stats.min ?? primary.stats.min),
+        max: Math.max(primary.stats.max, secondary?.stats.max ?? primary.stats.max)
+      };
+      if (range.max <= range.min) range.max = range.min + 1;
+
+      if (secondary) {
+        el["secondary-card"].hidden = false;
+        el.plots.classList.add("compare");
+      } else {
+        el["secondary-card"].hidden = true;
+        el.plots.classList.remove("compare");
+        if (el["secondary-plot"].data) Plotly.purge(el["secondary-plot"]);
+      }
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
+      el["primary-title"].textContent = `${primary.post} · ${typeLabel(primary.dataType)}`;
+      el["primary-subtitle"].textContent = `${prettyDate(primary.timestamp)} · rotate · zoom`;
+      await Plotly.react(el["primary-plot"], [makeTrace(primary, range)], plotLayout(primary), plotConfig);
+
+      if (secondary) {
+        el["secondary-title"].textContent = `${secondary.post} · ${typeLabel(secondary.dataType)}`;
+        el["secondary-subtitle"].textContent = `${prettyDate(secondary.timestamp)} · синхронная камера`;
+        await Plotly.react(el["secondary-plot"], [makeTrace(secondary, range)], plotLayout(secondary), plotConfig);
+        Plotly.Plots.resize(el["primary-plot"]);
+        Plotly.Plots.resize(el["secondary-plot"]);
+        attachCameraSync(el["primary-plot"], el["secondary-plot"]);
+        attachCameraSync(el["secondary-plot"], el["primary-plot"]);
+      } else {
+        Plotly.Plots.resize(el["primary-plot"]);
+        attachCameraSync(el["primary-plot"], null);
+      }
+    }
+
+    async function fetchSurface(record) {
+      const requestSessionId = state.sessionId;
+      const cacheKey = `${requestSessionId}:${record.id}`;
+      if (state.surfaceCache.has(cacheKey)) {
+        const cached = state.surfaceCache.get(cacheKey);
+        state.surfaceCache.delete(cacheKey);
+        state.surfaceCache.set(cacheKey, cached);
+        return await cached;
+      }
+
+      const request = fetchJson(apiUrl("/api/surface"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: String(record.id), sessionId: requestSessionId })
+      }).then(payload => {
+        if (payload.sessionId !== requestSessionId) {
+          throw new Error("Ответ относится к устаревшему каталогу свёрток");
+        }
+        return payload.surface;
+      });
+      state.surfaceCache.set(cacheKey, request);
+      try {
+        const surface = await request;
+        if (state.sessionId !== requestSessionId) {
+          state.surfaceCache.delete(cacheKey);
+          return surface;
+        }
+        state.surfaceCache.set(cacheKey, surface);
+        while (state.surfaceCache.size > 4) {
+          state.surfaceCache.delete(state.surfaceCache.keys().next().value);
+        }
+        return surface;
+      } catch (error) {
+        state.surfaceCache.delete(cacheKey);
+        throw error;
+      }
+    }
+
+    async function renderSelection() {
+      const primaryMeta = currentRecordMeta();
+      if (!primaryMeta) return;
+      state.selectedRecordId = String(primaryMeta.id);
+      const secondaryMeta = el["compare-toggle"].checked ? compareRecordMeta() : null;
+      const generation = ++state.renderGeneration;
+
+      el["compare-field"].style.opacity = el["compare-toggle"].checked ? "1" : ".48";
+      el["compare-select"].disabled = !el["compare-toggle"].checked;
+      setBusy(true, secondaryMeta ? "Загружаю выбранные свёртки…" : `Загружаю свёртку #${primaryMeta.id}…`);
+      try {
+        const [primary, secondary] = await Promise.all([
+          fetchSurface(primaryMeta),
+          secondaryMeta ? fetchSurface(secondaryMeta) : Promise.resolve(null)
+        ]);
+        if (generation !== state.renderGeneration) return;
+
+        el["stat-max"].textContent = prettyNumber(primary.stats.max, 6);
+        el["stat-peak-h"].textContent = `${prettyNumber(primary.stats.peakH, 3)}°`;
+        el["stat-peak-v"].textContent = `${prettyNumber(primary.stats.peakV, 3)}°`;
+        el["stat-quality"].textContent = prettyNumber(primary.quality, 5);
+        el["stat-grid"].textContent = `${primary.grid.countH}×${primary.grid.countV}`;
+        el["stat-grid-shown"].textContent = `показано ${primary.grid.shownH}×${primary.grid.shownV}`;
+        el["stat-type"].textContent = typeLabel(primary.dataType);
+        el["stat-timestamp"].textContent = prettyDate(primary.timestamp);
+        renderMetadata(primary);
+        const plotJob = state.plotQueue.catch(() => {}).then(async () => {
+          if (generation !== state.renderGeneration) return;
+          await renderPlots(primary, secondary);
+        });
+        state.plotQueue = plotJob;
+        await plotJob;
+      } catch (error) {
+        if (generation === state.renderGeneration) setStatus(error.message, "error");
+      } finally {
+        if (generation === state.renderGeneration) setBusy(false);
+      }
+    }
+
+    function renderErrors(errors) {
+      el["error-list"].replaceChildren();
+      if (!errors?.length) {
+        el["error-box"].hidden = true;
+        return;
+      }
+      el["error-box"].hidden = false;
+      el["error-summary"].textContent = `Пропущено записей: ${errors.length}`;
+      for (const error of errors) {
+        const item = document.createElement("li");
+        item.textContent = `ID ${error.id}: ${error.message}`;
+        el["error-list"].append(item);
+      }
+    }
+
+    async function applyPayload(payload) {
+      if (!payload.ok) throw new Error(payload.error || "Не удалось загрузить данные");
+      if (!Array.isArray(payload.records) || payload.records.length === 0) {
+        throw new Error(payload.errors?.length ? `Все записи пропущены: ${payload.errors[0].message}` : "SQL-запрос не вернул свёрток");
+      }
+      if (typeof payload.sessionId !== "string" || !payload.sessionId) {
+        throw new Error("Сервер не вернул идентификатор сессии каталога");
+      }
+
+      state.renderGeneration += 1;
+      state.records = payload.records.map(record => ({ ...record, id: String(record.id) }));
+      state.surfaceCache.clear();
+      state.selectedRecordId = null;
+      state.sessionId = payload.sessionId;
+      state.source = payload.source;
+      const posts = [...new Set(state.records.map(item => item.post))].sort((a, b) => a.localeCompare(b, "ru"));
+      fillSelect(el["post-select"], posts.map(post => [post, post]), posts[0]);
+      refreshTypeSelectors(null, null);
+      state.selectedRecordId = pairRecords()[0]?.id ?? null;
+      renderPostTable();
+      renderErrors(payload.errors || []);
+
+      el["empty-state"].hidden = true;
+      el.workspace.hidden = false;
+      const sourceText = payload.source === "demo" ? "Демо" : "PostgreSQL";
+      const postCount = payload.summary.posts;
+      const types = payload.summary.types;
+      const records = payload.summary.records;
+      setStatus(
+        `${sourceText}: ${postCount} ${pluralRu(postCount, "пост", "поста", "постов")}, ` +
+        `${types} ${pluralRu(types, "тип", "типа", "типов")}, ` +
+        `${records} ${pluralRu(records, "свёртка", "свёртки", "свёрток")}.`,
+        "good"
+      );
+      await renderSelection();
+    }
+
+    async function fetchJson(url, options) {
+      const response = await fetch(url, options);
+      let payload;
+      try {
+        payload = await response.json();
+      } catch (_) {
+        throw new Error(`Сервер вернул HTTP ${response.status}`);
+      }
+      if (!response.ok || payload.ok === false) throw new Error(payload.error || `HTTP ${response.status}`);
+      return payload;
+    }
+
+    async function loadDemo() {
+      const loadGeneration = ++state.loadGeneration;
+      setBusy(true, "Готовлю демонстрационные поверхности…");
+      try {
+        const payload = await fetchJson(apiUrl("/api/demo"));
+        if (loadGeneration !== state.loadGeneration) return;
+        await applyPayload(payload);
+      } catch (error) {
+        if (loadGeneration === state.loadGeneration) setStatus(error.message, "error");
+      } finally {
+        if (loadGeneration === state.loadGeneration) setBusy(false);
+      }
+    }
+
+    async function loadDatabase(event) {
+      event.preventDefault();
+      const loadGeneration = ++state.loadGeneration;
+      const payload = {
+        host: el["db-host"].value,
+        port: Number(el["db-port"].value),
+        database: el["db-name"].value,
+        user: el["db-user"].value,
+        password: el["db-password"].value,
+        sslmode: el["db-ssl"].value
+      };
+      setBusy(true, "Читаю каталог сохранённых свёрток…");
+      try {
+        const result = await fetchJson(apiUrl("/api/load"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (loadGeneration !== state.loadGeneration) return;
+        await applyPayload(result);
+        document.querySelector("details.connection").open = false;
+      } catch (error) {
+        if (loadGeneration === state.loadGeneration) setStatus(error.message, "error");
+      } finally {
+        if (loadGeneration === state.loadGeneration) setBusy(false);
+      }
+    }
+
+    async function initialize() {
+      if (typeof Plotly === "undefined") {
+        setStatus("Не удалось загрузить локальный Plotly.", "error");
+        return;
+      }
+      try {
+        const payload = await fetchJson(apiUrl("/api/defaults"));
+        const defaults = payload.defaults;
+        el["db-host"].value = defaults.host;
+        el["db-port"].value = defaults.port;
+        el["db-name"].value = defaults.database;
+        el["db-user"].value = defaults.user;
+        el["db-password"].value = defaults.password;
+        el["db-ssl"].value = defaults.sslmode;
+        el["query-name"].textContent = payload.queryName;
+        if (defaults.passwordFromEnvironment) {
+          el["password-hint"].textContent = "Будет использован PGPASSWORD из окружения; в браузер он не передаётся.";
+        }
+        if (payload.demoOnStart) await loadDemo();
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
+    }
+
+    el["connection-form"].addEventListener("submit", loadDatabase);
+    el["demo-button"].addEventListener("click", loadDemo);
+    el["post-select"].addEventListener("change", async () => {
+      await selectPost(el["post-select"].value);
+    });
+    el["type-select"].addEventListener("change", async () => {
+      const previousCompare = el["compare-select"].value;
+      refreshTypeSelectors(el["type-select"].value, previousCompare);
+      state.selectedRecordId = pairRecords()[0]?.id ?? null;
+      renderPostTable();
+      await renderSelection();
+    });
+    el["compare-toggle"].addEventListener("change", renderSelection);
+    el["compare-select"].addEventListener("change", renderSelection);
+
+    const themeMedia = window.matchMedia("(prefers-color-scheme: dark)");
+    themeMedia.addEventListener?.("change", () => { if (!el.workspace.hidden) renderSelection(); });
+    window.addEventListener("resize", () => {
+      if (el["primary-plot"].data) Plotly.Plots.resize(el["primary-plot"]);
+      if (!el["secondary-card"].hidden && el["secondary-plot"].data) Plotly.Plots.resize(el["secondary-plot"]);
+    });
+
+    initialize();
+  </script>
+</body>
+</html>
