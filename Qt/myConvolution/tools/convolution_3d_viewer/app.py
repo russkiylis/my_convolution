@@ -219,8 +219,8 @@ def _record_payload(
             history_count = _positive_int(row["history_count"], "history_count")
         except KeyError as error:
             raise ViewerError(f"В строке отсутствует поле {error.args[0]}") from error
-        if conv_bytes < 4:
-            raise ViewerError("conv_bytes меньше четырёхбайтового заголовка")
+        if conv_bytes == 0:
+            raise ViewerError("conv_bytes равен нулю")
         if history_position > history_count:
             raise ViewerError(
                 "history_position не может быть больше history_count"
@@ -277,8 +277,6 @@ def decode_convolution(
         blob = bytes(blob_value)
     except (TypeError, ValueError) as error:
         raise ViewerError("Поле conv не является BYTEA") from error
-    if len(blob) < 4:
-        raise ViewerError("BYTEA короче четырёхбайтового заголовка")
 
     element_count = count_h * count_v
     if element_count > MAX_ELEMENTS_PER_RECORD:
@@ -289,14 +287,8 @@ def decode_convolution(
 
     family, bit_group, byte_order = match.groups()
     endian = "<" if byte_order == "le" else ">"
-    encoded_count = struct.unpack_from(f"{endian}I", blob, 0)[0]
-    if encoded_count != element_count:
-        raise ViewerError(
-            f"В BYTEA записано {encoded_count} элементов, "
-            f"а count_h×count_v = {element_count}"
-        )
 
-    payload = memoryview(blob)[4:]
+    payload = memoryview(blob)
     if family == "double":
         expected_bytes = element_count * 8
         dtype = np.dtype(f"{endian}f8")
@@ -316,7 +308,7 @@ def decode_convolution(
         if len(payload) != expected_bytes:
             raise ViewerError(
                 f"Размер BYTEA для {data_type} равен {len(blob)}, "
-                f"ожидалось {expected_bytes + 4}"
+                f"ожидалось {expected_bytes}"
             )
 
         words = np.frombuffer(payload, dtype=np.dtype(f"{endian}u4"))
@@ -343,7 +335,7 @@ def decode_convolution(
     if len(payload) != expected_bytes:
         raise ViewerError(
             f"Размер BYTEA для {data_type} равен {len(blob)}, "
-            f"ожидалось {expected_bytes + 4}"
+            f"ожидалось {expected_bytes}"
         )
 
     values = np.frombuffer(payload, dtype=dtype, count=element_count)
@@ -539,9 +531,8 @@ def _demo_rows() -> list[dict[str, object]]:
                 if data_type.startswith("pa_4b"):
                     display = np.trunc(np.clip(display, 0.0, 1.0) * 15.0) / 15.0
                 endian = "<"
-                header = struct.pack(f"{endian}I", display.size)
                 if data_type == "double_le":
-                    blob = header + display.astype("<f8").tobytes(order="C")
+                    blob = display.astype("<f8").tobytes(order="C")
                 else:
                     flat_codes = np.trunc(display.ravel(order="C") * 15.0).astype(np.uint32)
                     word_count = (flat_codes.size * 4 + 31) // 32
@@ -549,7 +540,7 @@ def _demo_rows() -> list[dict[str, object]]:
                     for index, code in enumerate(flat_codes):
                         bit_position = index * 4
                         words[bit_position // 32] |= code << (bit_position % 32)
-                    blob = header + words.astype("<u4").tobytes()
+                    blob = words.astype("<u4").tobytes()
 
                 rows.append(
                     {

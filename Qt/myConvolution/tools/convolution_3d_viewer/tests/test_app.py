@@ -24,17 +24,15 @@ import app  # noqa: E402
 def encode_regular(values: np.ndarray, family: str, byte_order: str) -> bytes:
     endian = "<" if byte_order == "le" else ">"
     flat = np.asarray(values, dtype=np.float64).ravel(order="C")
-    header = struct.pack(f"{endian}I", flat.size)
     if family == "double":
         payload = flat.astype(f"{endian}f8").tobytes()
     elif family == "real":
         payload = flat.astype(f"{endian}f4").tobytes()
     elif family == "smallint":
-        raw = np.array([int(value * 30_000.0) for value in flat], dtype=np.int16)
-        payload = raw.astype(f"{endian}i2").tobytes()
+        payload = (flat * 30_000.0).astype(f"{endian}i2").tobytes()
     else:
-        raise AssertionError(family)
-    return header + payload
+        raise ValueError()
+    return payload
 
 
 def encode_packed(values: np.ndarray, bits: int, byte_order: str) -> bytes:
@@ -48,7 +46,7 @@ def encode_packed(values: np.ndarray, bits: int, byte_order: str) -> bytes:
         stream |= code << (index * bits)
     word_count = (len(codes) * bits + 31) // 32
     words = [(stream >> (word_index * 32)) & 0xFFFFFFFF for word_index in range(word_count)]
-    return struct.pack(f"{endian}I", len(codes)) + b"".join(
+    return b"".join(
         struct.pack(f"{endian}I", word) for word in words
     )
 
@@ -91,9 +89,9 @@ class DecoderTests(unittest.TestCase):
                     decoded = app.decode_convolution(blob, f"pa_{bits}b_{byte_order}", 7, 3)
                     np.testing.assert_allclose(decoded, expected, rtol=0, atol=1e-14)
 
-    def test_rejects_header_shape_mismatch(self) -> None:
+    def test_rejects_shape_mismatch(self) -> None:
         blob = encode_regular(self.source, "double", "le")
-        with self.assertRaisesRegex(app.ViewerError, "count_h×count_v"):
+        with self.assertRaisesRegex(app.ViewerError, "Размер BYTEA"):
             app.decode_convolution(blob, "double_le", 8, 3)
 
     def test_rejects_truncated_payload(self) -> None:
