@@ -58,7 +58,7 @@ public:
     [[nodiscard]] int postIndex() const;
 
     // Установить индекс поста
-    Q_INVOKABLE void setPostIndex(int postIndex);
+    Q_INVOKABLE void setPostIndex(int postIndex, bool force = false);
 
     // Выдать имя поста по текущему индексу
     [[nodiscard]] QString currentPostName() const;

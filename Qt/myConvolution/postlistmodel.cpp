@@ -15,11 +15,11 @@ int PostListModel::postIndex() const
     return m_postIndex;
 }
 
-void PostListModel::setPostIndex(const int postIndex)
+void PostListModel::setPostIndex(const int postIndex, const bool force)
 {
     if (postIndex < 0 || postIndex >= static_cast<int>(m_config.size()))
         throw std::runtime_error("Сломанный postIndex");
-    if (postIndex == m_postIndex)
+    if (postIndex == m_postIndex && !force)
         return;
 
     m_postIndex = postIndex;
@@ -829,22 +829,13 @@ int PostListModel::removePost(const int index) {
     m_config.erase(m_config.begin() + index);
     endRemoveRows();
 
-    const int newSize = static_cast<int>(m_config.size());
-
-    // Список стал пустым, значит выбранного элемента больше нет
-    if (newSize == 0) {
-        // FIXME: Сейчас интерфейс не даёт удалить все посты, но если это сделать, программа упадёт
-        constexpr int i = -1;
-        setPostIndex(i);
-        return i;
-    }
     // Если удалили последний элемент
-    if (index >= newSize) {
+    if (const int newSize = static_cast<int>(m_config.size()); index >= newSize) {
         const int i = newSize - 1;
-        setPostIndex(i);
+        setPostIndex(i, true);
         return i;
     }
-    setPostIndex(index);
+    setPostIndex(index, true);
     qmlUpdate();
     return index;
 

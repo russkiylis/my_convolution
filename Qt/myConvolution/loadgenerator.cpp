@@ -206,7 +206,6 @@ void LoadGenerator::setPostConfigs(const std::vector<PostConfig> &postConfigs)
 }
 
 void LoadGenerator::load() {
-    // FIXME: тут бы тоже почекать что мы в конфигах натворили
     m_posts.clear();
     for (const auto & postConfig : m_postConfigs) {
         m_posts.emplace_back(postConfig, this);    // Закидываем в вектор Posts, инициализованные postConfig

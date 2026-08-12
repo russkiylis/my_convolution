@@ -164,10 +164,6 @@ QByteArray doubleByteArrayCoder::serialize(const std::vector<double> &data) cons
     serializer.setFloatingPointPrecision(QDataStream::DoublePrecision);     // Установка точности (количества битов)
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Запись количества элементов
-    const uint32_t elementCount = data.size();
-    serializer << elementCount;
-
     for (double const & value : data) {
         if (!std::isfinite(value))
             throw std::logic_error("Ошибка преобразования при сериализации!");
@@ -181,9 +177,10 @@ QByteArray doubleByteArrayCoder::serialize(const std::vector<double> &data) cons
     return bytes;
 }
 
-std::vector<double> doubleByteArrayCoder::deserialize(QByteArray &bytes) const {
+std::vector<double> doubleByteArrayCoder::deserialize(QByteArray &bytes, const uint32_t count) const {
     std::vector<double> data;  // Данные из байтов
-    if ((bytes.size() - 4) % 8 != 0) {
+    data.reserve(count);
+    if (bytes.size() % 8 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
     }
 
@@ -192,12 +189,7 @@ std::vector<double> doubleByteArrayCoder::deserialize(QByteArray &bytes) const {
     serializer.setFloatingPointPrecision(QDataStream::DoublePrecision);     // Установка точности (количества битов)
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Определение количества элементов
-    uint32_t elementCount;
-    serializer >> elementCount;
-    data.reserve(elementCount);
-
-    for (uint32_t i = 0; i < elementCount; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         double x;
         serializer >> x;
 
@@ -224,10 +216,6 @@ QByteArray realByteArrayCoder::serialize(const std::vector<double> &data) const 
     serializer.setFloatingPointPrecision(QDataStream::SinglePrecision);     // Установка точности (количества битов)
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Запись количества элементов
-    const uint32_t elementCount = data.size();
-    serializer << elementCount;
-
     for (double const & value : data) {
         if (!std::isfinite(value))
             throw std::logic_error("Ошибка преобразования при сериализации!");
@@ -241,9 +229,10 @@ QByteArray realByteArrayCoder::serialize(const std::vector<double> &data) const 
     return bytes;
 }
 
-std::vector<double> realByteArrayCoder::deserialize(QByteArray &bytes) const {
+std::vector<double> realByteArrayCoder::deserialize(QByteArray &bytes, const uint32_t count) const {
     std::vector<double> data;  // Данные из байтов
-    if ((bytes.size() - 4) % 4 != 0) {
+    data.reserve(count);
+    if (bytes.size() % 4 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
     }
 
@@ -252,12 +241,7 @@ std::vector<double> realByteArrayCoder::deserialize(QByteArray &bytes) const {
     serializer.setFloatingPointPrecision(QDataStream::SinglePrecision);     // Установка точности (количества битов)
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Определение количества элементов
-    uint32_t elementCount;
-    serializer >> elementCount;
-    data.reserve(elementCount);
-
-    for (uint32_t i = 0; i < elementCount; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         float x;
         serializer >> x;
 
@@ -283,10 +267,6 @@ QByteArray smallintByteArrayCoder::serialize(const std::vector<double> &data) co
     setSerializerByteOrder(serializer); // Установка порядка байтов
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Запись количества элементов
-    const uint32_t elementCount = data.size();
-    serializer << elementCount;
-
     for (double const & value : data) {
         if (!std::isfinite(value))
             throw std::logic_error("Ошибка преобразования при сериализации!");
@@ -306,9 +286,10 @@ QByteArray smallintByteArrayCoder::serialize(const std::vector<double> &data) co
     return bytes;
 }
 
-std::vector<double> smallintByteArrayCoder::deserialize(QByteArray &bytes) const {
+std::vector<double> smallintByteArrayCoder::deserialize(QByteArray &bytes, const uint32_t count) const {
     std::vector<double> data;  // Данные из байтов
-    if ((bytes.size() - 4) % 2 != 0) {
+    data.reserve(count);
+    if (bytes.size() % 2 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
     }
 
@@ -316,12 +297,7 @@ std::vector<double> smallintByteArrayCoder::deserialize(QByteArray &bytes) const
     setSerializerByteOrder(serializer); // Установка порядка байтов
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Определение количества элементов
-    uint32_t elementCount;
-    serializer >> elementCount;
-    data.reserve(elementCount);
-
-    for (uint32_t i = 0; i < elementCount; i++) {
+    for (uint32_t i = 0; i < count; i++) {
         qint16 x;
         serializer >> x;
 
@@ -372,10 +348,6 @@ QByteArray PackedArrayCoder::serialize(const std::vector<double> &data) const {
     setSerializerByteOrder(serializer); // Установка порядка байтов
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Запись количества элементов
-    const uint32_t elementCount = data.size();
-    serializer << elementCount;
-
     // Получение запакованного массива
     const std::vector<uint32_t> packedArray = packValues(data);
 
@@ -389,26 +361,19 @@ QByteArray PackedArrayCoder::serialize(const std::vector<double> &data) const {
     return bytes;
 }
 
-std::vector<double> PackedArrayCoder::deserialize(QByteArray &bytes) const {
-    if (bytes.size() < 4 || (bytes.size() - 4) % 4 != 0) {
+std::vector<double> PackedArrayCoder::deserialize(QByteArray &bytes, const uint32_t count) const {
+    if (bytes.size() < 0 || bytes.size() % 4 != 0) {
         throw std::logic_error("Некорректный размер массива байтов");
     }
 
-    const int packedDataSize = (bytes.size() - 4) / 4;
+    const int packedDataSize = bytes.size() / 4;
 
     QDataStream serializer(&bytes, QIODevice::ReadOnly);   // Сериализатор в виде QDataStream
     setSerializerByteOrder(serializer); // Установка порядка байтов
     serializer.setVersion(QDataStream::Qt_5_15);
 
-    // Определение количества элементов
-    uint32_t elementCount;
-    serializer >> elementCount;
-    if (serializer.status() != QDataStream::Ok) {
-        throw std::logic_error("Ошибка десериализации");
-    }
-
     const uint64_t expectedWordCount =
-        (static_cast<uint64_t>(m_bits) * elementCount + 31u) / 32u;
+        static_cast<uint64_t>(m_bits) * count / 32u;
     if (expectedWordCount != static_cast<uint64_t>(packedDataSize)) {
         throw std::logic_error("Некорректный размер упакованных данных");
     }
@@ -429,5 +394,5 @@ std::vector<double> PackedArrayCoder::deserialize(QByteArray &bytes) const {
     }
 
     // Распаковываем значения
-    return unpackValues(packedData, elementCount);
+    return unpackValues(packedData, count);
 }

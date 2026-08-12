@@ -35,7 +35,7 @@ public:
     [[nodiscard]] virtual QByteArray serialize(const std::vector<double> &data) const = 0;
 
     // Приведение из массива байтов
-    virtual std::vector<double> deserialize(QByteArray &bytes) const = 0;
+    virtual std::vector<double> deserialize(QByteArray &bytes, uint32_t count) const = 0;
 
     // Статический метод-фабрика для создания нужного кодера
     static std::unique_ptr<ByteArrayCoder> create(DataType type, ByteOrder byteOrder);
@@ -74,7 +74,7 @@ public:
 
     [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
-    std::vector<double> deserialize(QByteArray &bytes) const override;
+    std::vector<double> deserialize(QByteArray &bytes, uint32_t count) const override;
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем real по 4 байта
@@ -85,7 +85,7 @@ public:
 
     [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
-    std::vector<double> deserialize(QByteArray &bytes) const override;
+    std::vector<double> deserialize(QByteArray &bytes, uint32_t count) const override;
 };
 
 // Кодер из QVariantList в QByteArray, подразумевая, что кодируем smallint по 2 байта
@@ -96,7 +96,7 @@ public:
 
     [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
-    std::vector<double> deserialize(QByteArray &bytes) const override;
+    std::vector<double> deserialize(QByteArray &bytes, uint32_t count) const override;
 };
 
 class PackedArrayCoder final : public ByteArrayCoder
@@ -106,5 +106,5 @@ public:
 
     [[nodiscard]] QByteArray serialize(const std::vector<double> &data) const override;
 
-    std::vector<double> deserialize(QByteArray &bytes) const override;
+    std::vector<double> deserialize(QByteArray &bytes, uint32_t count) const override;
 };

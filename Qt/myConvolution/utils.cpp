@@ -53,7 +53,7 @@ QString Utils::vectorToPgArray(const std::vector<double> &values)
         if (i != 0) {
             result += ", ";
         }
-        result += doubleToString(values[i], 17);    // TODO: Уточнить точность дабла
+        result += doubleToString(values[i], 17);
     }
 
     result += "}";
@@ -67,7 +67,7 @@ QString Utils::vectorToPgArray(const std::vector<float> &values) {
         if (i != 0) {
             result += ", ";
         }
-        result += doubleToString(values[i], 9);     // TODO: Уточнить точность флоата
+        result += doubleToString(values[i], 9);
     }
 
     result += "}";

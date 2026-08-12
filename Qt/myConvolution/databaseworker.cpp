@@ -198,7 +198,6 @@ void DatabaseWorker::slotCloseConnection() {
 
 void DatabaseWorker::slotConfigUpdate(const DatabaseConfiguration & new_config)
 {
-    // FIXME: Мб тут тоже что то нужно попроверять
     _busy = true;
     emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
 
@@ -975,7 +974,7 @@ void DatabaseWorker::slotReadDb() {
         }
 
         const std::unique_ptr<ByteArrayCoder> coder = ByteArrayCoder::create(coderDataType, coderByteOrder);
-        std::vector<double> convForVisualization = coder->deserialize(convBytes);
+        std::vector<double> convForVisualization = coder->deserialize(convBytes, row.countH * row.countV);
 
         if (row.dataType == "smallint_be" || row.dataType == "smallint_le") {
             const double max = *std::max_element(convForVisualization.begin(), convForVisualization.end());

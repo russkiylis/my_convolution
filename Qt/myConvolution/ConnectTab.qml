@@ -157,7 +157,7 @@ Item {
             if (connectionBackend.dbStatus === 2) return "Отключиться"
             return "Подключиться"
         }
-        // FIXME: Очень некрасивая передача значений
+
         onClicked: {
             connectionBackend.onDbConnectionButtonClicked(
                 dbHostName.text,

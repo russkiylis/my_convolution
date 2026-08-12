@@ -84,7 +84,7 @@ QVariant VisualizationTableModel::data(const QModelIndex &index, const int role)
                 if (index.row() > m_shrinkedConvs.size()) {
                     m_shrinkedConvs.resize(index.row());
                 }
-                m_shrinkedConvs.insert(index.row(), Utils::shrinkVector(Utils::flattenVector(conv, row.countH), 100));
+                m_shrinkedConvs.insert(index.row(), Utils::shrinkVector(Utils::flattenVector(conv, row.countH), 150));
             }
             result.reserve(m_shrinkedConvs.at(index.row()).size());
             for (const double i : m_shrinkedConvs.at(index.row())) {
