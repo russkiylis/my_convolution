@@ -1,0 +1,1 @@
+drop function if exists get_conv_metadata(bigint);

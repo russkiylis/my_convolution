@@ -555,6 +555,30 @@ void DatabaseWorker::slotRecreateTable() {
         return;
     }
 
+    // Уничтожаем функцию получения метаданных свёртки
+    if (!Utils::fileToString(":sql/deleteGetConvMetadata.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
     // Уничтожаем таблицу с результатами
     if (!Utils::fileToString(":sql/deleteResult.sql", command, &fileError)) {
         _lastError = "[!] "
@@ -627,8 +651,56 @@ void DatabaseWorker::slotRecreateTable() {
         return;
     }
 
+    // Уничтожаем тип данных "byte_order"
+    if (!Utils::fileToString(":sql/deleteByteOrderEnum.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
     // Создаём тип данных "data_type" (на прошлом шаге мы его удалили чтобы его точно не было, а то вылезет ошибка)
     if (!Utils::fileToString(":sql/createDataTypeEnum.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Создаём тип данных "byte_order"
+    if (!Utils::fileToString(":sql/createByteOrderEnum.sql", command, &fileError)) {
         _lastError = "[!] "
             + _config.fullConnectionName
             + ": Операция не удалась: "
@@ -699,6 +771,30 @@ void DatabaseWorker::slotRecreateTable() {
         return;
     }
 
+    // Создаём функцию получения метаданных свёртки
+    if (!Utils::fileToString(":sql/createGetConvMetadata.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
     db.commit();
     _busy = false;
     qDebug().noquote().nospace() << "Успешное пересоздание таблиц.";
@@ -738,6 +834,30 @@ void DatabaseWorker::slotDeleteTable() {
                      + _config.fullConnectionName
                      + ": невозможно выполнить операцию "
                      + "при закрытом соединении.";
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем функцию получения метаданных свёртки
+    if (!Utils::fileToString(":sql/deleteGetConvMetadata.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
         qDebug().noquote().nospace() << _lastError;
         db.rollback();
         _busy = false;
@@ -795,6 +915,30 @@ void DatabaseWorker::slotDeleteTable() {
 
     // Уничтожаем тип данных "data_type"
     if (!Utils::fileToString(":sql/deleteDataTypeEnum.sql", command, &fileError)) {
+        _lastError = "[!] "
+            + _config.fullConnectionName
+            + ": Операция не удалась: "
+            + fileError;
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+    if (!query.exec(command)) {
+        _lastError = "[!] "
+        + _config.fullConnectionName
+        + ": Операция не удалась: "
+        + query.lastError().text();
+        qDebug().noquote().nospace() << _lastError;
+        db.rollback();
+        _busy = false;
+        emit signalManagerUpdate(_connected, _valid, _busy, _lastError);
+        return;
+    }
+
+    // Уничтожаем тип данных "byte_order"
+    if (!Utils::fileToString(":sql/deleteByteOrderEnum.sql", command, &fileError)) {
         _lastError = "[!] "
             + _config.fullConnectionName
             + ": Операция не удалась: "
