@@ -41,6 +41,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 # Опция о том, собирать ли тесты
 option(ENABLE_GTEST "Включить юнит-тестирование в сборку" OFF)
+option(ENABLE_GENERATOR_VIEWER "Собрать отдельный 3D-визуализатор generator на Qt 5.15" OFF)
 
 if(ENABLE_GTEST)
     enable_testing()
