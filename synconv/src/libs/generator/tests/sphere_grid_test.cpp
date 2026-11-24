@@ -6,7 +6,7 @@
 #include <cstddef>
 #include <span>
 
-namespace synconv::generator
+namespace synconv::Generator
 {
 namespace
 {

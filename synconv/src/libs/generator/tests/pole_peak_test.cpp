@@ -6,7 +6,7 @@
 #include <cmath>
 #include <cstddef>
 
-namespace synconv::generator
+namespace synconv::Generator
 {
 namespace
 {

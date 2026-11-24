@@ -5,7 +5,7 @@
 #include <variant>
 #include <vector>
 
-namespace synconv::generator
+namespace synconv::Generator
 {
 
 struct Axis

@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 using namespace QtDataVisualization;
-namespace gen = synconv::generator;
+namespace gen = synconv::Generator;
 
 namespace
 {

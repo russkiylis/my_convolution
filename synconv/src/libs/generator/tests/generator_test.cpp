@@ -7,7 +7,7 @@
 #include <limits>
 #include <stdexcept>
 
-namespace synconv::generator
+namespace synconv::Generator
 {
 namespace
 {

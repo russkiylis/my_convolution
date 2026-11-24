@@ -48,7 +48,7 @@ private:
         quint64 revision = 0; // Ноль означает, что этот обработчик свободен.
     };
 
-    static Result makeSurface(const synconv::generator::Config& config, bool preview);
+    static Result makeSurface(const synconv::Generator::Config& config, bool preview);
     void startPending();
     void finish(Worker& worker);
     void publish(const Result& result);
@@ -61,7 +61,7 @@ private:
     quint64 m_displayedRevision = 0;
     bool m_previewRequested = false;
     QPointer<QObject> m_series;
-    std::optional<synconv::generator::Config> m_pending;
+    std::optional<synconv::Generator::Config> m_pending;
     bool m_busy = false;
     QString m_summary;
     QString m_error;

@@ -16,6 +16,11 @@ add_executable(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     subcommands
+    generator
+)
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC
+    APP_VERSION="${PROJECT_VERSION}"
 )
 
 # Добавление флагов компиляции
@@ -40,8 +45,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Опция о том, собирать ли тесты
-option(ENABLE_GTEST "Включить юнит-тестирование в сборку" OFF)
-option(ENABLE_GENERATOR_VIEWER "Собрать отдельный 3D-визуализатор generator на Qt 5.15" OFF)
+option(ENABLE_GTEST "Включить юнит-тестирование в сборку" ON)
+option(ENABLE_GENERATOR_VIEWER "Собрать отдельный 3D-визуализатор generator на Qt 5.15" ON)
 
 if(ENABLE_GTEST)
     enable_testing()
