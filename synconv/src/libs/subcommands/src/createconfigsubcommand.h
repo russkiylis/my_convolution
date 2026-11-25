@@ -11,6 +11,8 @@ class CreateConfigSubcommand : public Subcommand
 public:
     explicit CreateConfigSubcommand(CLI::App* app);
 
+    SynconvConfig config();
+
 private:
     SynconvConfig m_config;
 };

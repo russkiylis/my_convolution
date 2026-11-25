@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} PUBLIC
     subcommands
     generator
+    global
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC

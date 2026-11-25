@@ -11,6 +11,7 @@ target_include_directories(subcommands PUBLIC
 target_link_libraries(subcommands PUBLIC
     CLI11
     generator
+    global
 )
 
 #if(ENABLE_GTEST)
