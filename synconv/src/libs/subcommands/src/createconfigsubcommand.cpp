@@ -14,14 +14,14 @@ CreateConfigSubcommand::CreateConfigSubcommand(CLI::App* app)
     m_subApp->fallthrough(true);
 
     // Добавление опции выбора куда сохранить конфиг
-    m_subApp->add_option("-o,--out", m_config.configPath, "Куда сохранить файл")->capture_default_str()->configurable(false);
+    m_subApp->add_option("-o,--out", g_synconvConfig.configPath, "Куда сохранить файл")->capture_default_str()->configurable(false);
 
     // Добавление опции для создания пика
     m_subApp->add_option_function<std::vector<PeakTuple>>("-p,--peak",
-        [this](std::vector<PeakTuple> const &peaks) // <--- Принимаем вектор
+        [](std::vector<PeakTuple> const &peaks) // <--- Принимаем вектор
         {
             for (const auto &peak : peaks) {        // <--- Перебираем все переданные пики
-                m_config.peaks.push_back(peak);
+                g_synconvConfig.peaks.push_back(peak);
 
                 if (g_verbosity > 1) {
                     std::cerr << "Добавлен пик [тип:азимут:угол места:амплитуда:СКО/полуширина]:["
@@ -48,10 +48,10 @@ CreateConfigSubcommand::CreateConfigSubcommand(CLI::App* app)
 
     // Добавление опции для создания шума
     m_subApp->add_option_function<std::vector<NoiseTuple>>("-n,--noise",
-        [this](std::vector<NoiseTuple> const &noises)
+        [](std::vector<NoiseTuple> const &noises)
         {
             for (const auto &noise : noises) {
-                m_config.noises.push_back(noise);
+                g_synconvConfig.noises.push_back(noise);
 
                 if (g_verbosity > 1) {
                     std::cerr << "Добавлен шум [тип:матожидание/минимум:СКО/максимум]:["
@@ -71,9 +71,9 @@ CreateConfigSubcommand::CreateConfigSubcommand(CLI::App* app)
 
     // Добавление границ
     m_subApp->add_option_function<std::tuple<int, int, int, int>>("--bounds",
-        [this](std::tuple<int, int, int, int> const &bounds)
+        [](std::tuple<int, int, int, int> const &bounds)
         {
-            m_config.bounds = bounds;
+            g_synconvConfig.bounds = bounds;
             if (g_verbosity > 1) {
                 std::cerr << "Добавлены границы [minАзимут:maxАзимут:minУМ:maxУМ]:["
                 << std::get<0>(bounds) << ":"
@@ -91,16 +91,9 @@ CreateConfigSubcommand::CreateConfigSubcommand(CLI::App* app)
     ->check(CLI::Range(0,360).application_index(0).description("maxАзимут в пределах [0 360]"))
     ->check(CLI::Range(-90,90).application_index(0).description("minУМ в пределах [-90 90]"))
     ->check(CLI::Range(-90,90).application_index(0).description("minУМ в пределах [-90 90]"))
-    ->description("Границы по азимуту и углу места");
+    ->description("Границы по азимуту и углу места")
+    ->default_val(g_synconvConfig.bounds);
 
 }
 
-SynconvConfig CreateConfigSubcommand::config()
-{
-    if (g_verbosity > 3) {
-        std::cerr << "CreateConfigSubcommand::config()" << std::endl;
-    }
-
-    return m_config;
-}
 } // synconv

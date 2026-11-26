@@ -29,5 +29,5 @@ struct SynconvConfig
     // - максимум азимута (int) [0-360]
     // - минимум угла места (int) [-90-90]
     // - максимум угла места (int) [-90-90]
-    std::tuple<int, int, int, int> bounds;
+    std::tuple<int, int, int, int> bounds {0, 360, -90, 90};
 };

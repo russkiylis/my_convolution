@@ -35,7 +35,7 @@ int main(const int argc, char** argv) {
     CLI11_PARSE(app, argc, argv);
 
     // Дополнительные проверки шума
-    for (auto &noise : createConfigSubcommand->config().noises) {
+    for (auto &noise : g_synconvConfig.noises) {
 
         if (g_verbosity > 2) {
             std::cerr << "Проверка шума [тип:матожидание/минимум:СКО/максимум]:["
@@ -57,7 +57,7 @@ int main(const int argc, char** argv) {
     }
 
     // Дополнительные проверки границ
-    const auto& bounds = createConfigSubcommand->config().bounds;
+    const auto& bounds = g_synconvConfig.bounds;
     if (g_verbosity > 2) {
         std::cerr << "Проверка границ [minАзимут:maxАзимут:minУМ:maxУМ]:["
         << std::get<0>(bounds) << ":"
@@ -74,8 +74,7 @@ int main(const int argc, char** argv) {
         throw CLI::ValidationError("--bounds", "Минимальный угол места не может быть больше максимального!");
 
     if (createConfigSubcommand->subApp()->parsed()) {
-        std::ofstream out("file.toml");
-        // Вызываем config_to_str именно у init_cmd, чтобы не было секции [init]
+        std::ofstream out(g_synconvConfig.configPath);
         out << createConfigSubcommand->subApp()->config_to_str(true, true);
 
         if (g_verbosity > 1) {
