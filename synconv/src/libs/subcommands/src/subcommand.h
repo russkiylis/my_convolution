@@ -16,6 +16,8 @@ public:
     CLI::App* subApp() const;
 
 protected:
+    static void registerConfigOptions(CLI::App& options);
+
     CLI::App* m_app;
     CLI::App* m_subApp;
 };

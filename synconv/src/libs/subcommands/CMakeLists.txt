@@ -14,6 +14,6 @@ target_link_libraries(subcommands PUBLIC
     global
 )
 
-#if(ENABLE_GTEST)
-#    add_subdirectory(tests)
-#endif()
+if(ENABLE_GTEST)
+    add_subdirectory(tests)
+endif()

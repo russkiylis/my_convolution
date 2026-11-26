@@ -1,7 +1,5 @@
 #pragma once
-#include "generator.h"
 #include "subcommand.h"
-#include "../../global/src/synconvconfig.h"
 
 namespace synconv
 {
